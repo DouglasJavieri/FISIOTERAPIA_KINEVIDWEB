@@ -1,0 +1,36 @@
+# ========================
+# Java / Maven
+# ========================
+target/
+*.class
+*.jar
+*.war
+*.log
+
+# Maven wrapper jar (se regenera solo)
+.mvn/wrapper/maven-wrapper.jar
+
+# ========================
+# IntelliJ IDEA
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ========================
+# Angular / Node
+# ========================
+back-office-web/node_modules/
+back-office-web/dist/
+back-office-web/.angular/
+back-office-web/.env
+back-office-web/.env.*
+
+# ========================
+# Sistema
+# ========================
+.DS_Store
+Thumbs.db
+
