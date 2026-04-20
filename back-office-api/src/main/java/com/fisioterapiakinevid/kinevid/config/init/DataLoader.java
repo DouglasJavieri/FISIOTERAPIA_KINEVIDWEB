@@ -1,0 +1,290 @@
+package com.fisioterapiakinevid.kinevid.config.init;
+
+import com.fisioterapiakinevid.kinevid.rest.model.entity.auth.User;
+import com.fisioterapiakinevid.kinevid.rest.model.entity.p.Permission;
+import com.fisioterapiakinevid.kinevid.rest.model.entity.role.Role;
+import com.fisioterapiakinevid.kinevid.rest.model.entity.rp.RolePermission;
+import com.fisioterapiakinevid.kinevid.rest.model.entity.ur.UserRole;
+import com.fisioterapiakinevid.kinevid.rest.model.enums.auth.UserStatus;
+import com.fisioterapiakinevid.kinevid.rest.model.enums.p.PermissionStatus;
+import com.fisioterapiakinevid.kinevid.rest.model.enums.role.RoleStatus;
+import com.fisioterapiakinevid.kinevid.rest.repository.p.PermissionRepository;
+import com.fisioterapiakinevid.kinevid.rest.repository.role.RoleRepository;
+import com.fisioterapiakinevid.kinevid.rest.repository.rp.RolePermissionRepository;
+import com.fisioterapiakinevid.kinevid.rest.repository.u.UserRepository;
+import com.fisioterapiakinevid.kinevid.rest.repository.ur.UserRoleRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class DataLoader implements CommandLineRunner {
+    private static final String ROLE_ROOT           = "ROLE_ROOT";
+    private static final String ROLE_FISIOTERAPEUTA = "ROLE_FISIOTERAPEUTA";
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
+    private final RolePermissionRepository rolePermissionRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${kinevid.app.admin.username}")
+    private String adminUsername;
+
+    @Value("${kinevid.app.admin.email}")
+    private String adminEmail;
+
+    @Value("${kinevid.app.admin.password}")
+    private String adminPassword;
+
+    @Value("${kinevid.app.admin.role}")
+    private String adminRoleName;
+
+    @Override
+    @Transactional
+    public void run(String... args) throws Exception {
+        log.info("Iniciando DataLoader");
+
+        try {
+            List<Permission> permissions = createDefaultPermissions();
+
+            Role adminRole = createAdminRole(permissions);
+            createRootRole(permissions);
+            createFisioterapeutaRole();
+
+            syncPermissionsToExistingFullAccessRoles(permissions);
+
+            User adminUser = createAdminUser();
+            assignAdminRoleToUser(adminUser, adminRole);
+
+            log.info("DataLoader completado exitosamente");
+
+        } catch (Exception e) {
+            log.error("Error en DataLoader", e);
+            throw new RuntimeException("Error al cargar datos iniciales", e);
+        }
+    }
+
+    private List<Permission> createDefaultPermissions() {
+        log.info("Creando permisos por defecto");
+
+        String[][] permissionsData = {
+                {"CREATE_USER", "Crear usuario"},
+                {"VIEW_USER", "Ver usuario"},
+                {"UPDATE_USER", "Actualizar usuario"},
+                {"DELETE_USER", "Eliminar usuario"},
+                {"LIST_USER", "Listar usuarios"},
+                {"CHANGE_USER_STATUS",  "Cambiar estado de usuario"},
+                {"CREATE_ROLE", "Crear rol"},
+                {"READ_ROLE", "Ver rol"},
+                {"UPDATE_ROLE", "Actualizar rol"},
+                {"DELETE_ROLE", "Eliminar rol"},
+                {"LIST_ROLE", "Listar roles"},
+                {"CHANGE_ROLE_STATUS", "Cambiar estado de rol"},
+                {"CREATE_PERMISSION", "Crear permiso"},
+                {"READ_PERMISSION", "Ver permiso"},
+                {"UPDATE_PERMISSION", "Actualizar permiso"},
+                {"DELETE_PERMISSION", "Eliminar permiso"},
+                {"LIST_PERMISSION", "Listar permisos"},
+                {"CHANGE_PERMISSION_STATUS", "Cambiar estado de permiso"},
+                {"ASSIGN_PERMISSION_TO_ROLE", "Asignar permisos a rol"},
+                {"REMOVE_PERMISSION_FROM_ROLE", "Remover permisos de rol"},
+                {"CREATE_EMPLOYEE", "Crear empleado"},
+                {"VIEW_EMPLOYEE", "Ver empleado"},
+                {"UPDATE_EMPLOYEE", "Actualizar empleado"},
+                {"DELETE_EMPLOYEE", "Eliminar empleado"},
+                {"LIST_EMPLOYEE", "Listar empleados"},
+                {"CHANGE_EMPLOYEE_STATUS", "Cambiar estado de empleado"},
+                {"ASSIGN_USER_TO_EMPLOYEE", "Asignar usuario a empleado"},
+                {"REMOVE_USER_FROM_EMPLOYEE", "Desvincular usuario de empleado"},
+                // â”€â”€ Pacientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                {"CREATE_PATIENT", "Crear paciente"},
+                {"VIEW_PATIENT", "Ver paciente"},
+                {"UPDATE_PATIENT", "Actualizar paciente"},
+                {"DELETE_PATIENT", "Eliminar paciente"},
+                {"LIST_PATIENT", "Listar pacientes"},
+                {"CHANGE_PATIENT_STATUS", "Cambiar estado de paciente"},
+                // â”€â”€ Servicios del consultorio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                {"CREATE_SERVICE", "Crear servicio"},
+                {"VIEW_SERVICE", "Ver servicio"},
+                {"UPDATE_SERVICE", "Actualizar servicio"},
+                {"DELETE_SERVICE", "Eliminar servicio"},
+                {"LIST_SERVICE", "Listar servicios"},
+                {"CHANGE_SERVICE_STATUS", "Cambiar estado de servicio"},
+        };
+
+        for (String[] permData : permissionsData) {
+            if (!permissionRepository.existsPermissionByName(permData[0])) {
+                Permission permission = Permission.builder()
+                        .name(permData[0])
+                        .description(permData[1])
+                        .status(PermissionStatus.ACTIVE)
+                        .build();
+                permissionRepository.save(permission);
+                log.debug("Permiso creado: {}", permData[0]);
+            }
+        }
+
+        return permissionRepository.findAll();
+    }
+
+    private Role createAdminRole(List<Permission> allPermissions) {
+        log.info("Creando rol ADMIN");
+
+        Role adminRole = roleRepository.findByName(adminRoleName)
+                .orElseGet(() -> {
+                    Role newRole = Role.builder()
+                            .name(adminRoleName)
+                            .description("Rol de administrador con acceso total")
+                            .status(RoleStatus.ACTIVE)
+                            .build();
+
+                    Role savedRole = roleRepository.save(newRole);
+
+                    for (Permission permission : allPermissions) {
+                        if (!rolePermissionRepository.existsByRoleIdAndPermissionId(
+                                savedRole.getId(), permission.getId())) {
+                            RolePermission rolePermission = RolePermission.builder()
+                                    .role(savedRole)
+                                    .permission(permission)
+                                    .build();
+                            rolePermissionRepository.save(rolePermission);
+                        }
+                    }
+
+                    log.info("Rol ADMIN creado con {} permisos", allPermissions.size());
+                    return savedRole;
+                });
+
+        return adminRole;
+    }
+
+    private User createAdminUser() {
+        log.info("Creando usuario admin");
+
+        User adminUser = userRepository.findByUsernameAuthentication(adminUsername)
+                .orElseGet(() -> {
+                    String hashedPassword = passwordEncoder.encode(adminPassword);
+
+                    User newUser = User.builder()
+                            .username(adminUsername)
+                            .email(adminEmail)
+                            .password(hashedPassword)
+                            .status(UserStatus.ACTIVE)
+                            .build();
+
+                    User savedUser = userRepository.save(newUser);
+                    log.info("Usuario admin creado exitosamente");
+                    return savedUser;
+                });
+
+        return adminUser;
+    }
+
+    private void assignAdminRoleToUser(User adminUser, Role adminRole) {
+        log.info("Asignando rol ADMIN al usuario admin");
+
+        if (!userRoleRepository.existsByUserIdAndRoleId(adminUser.getId(), adminRole.getId())) {
+            UserRole userRole = UserRole.builder()
+                    .user(adminUser)
+                    .role(adminRole)
+                    .build();
+            userRoleRepository.save(userRole);
+            log.info("Rol ADMIN asignado");
+        }
+    }
+
+    private void createRootRole(List<Permission> allPermissions) {
+        log.info("Verificando rol ROOT");
+
+        roleRepository.findByName(ROLE_ROOT).orElseGet(() -> {
+            Role newRole = Role.builder()
+                    .name(ROLE_ROOT)
+                    .description("Rol raÃ­z con acceso total al sistema")
+                    .status(RoleStatus.ACTIVE)
+                    .build();
+
+            Role savedRole = roleRepository.save(newRole);
+
+            for (Permission permission : allPermissions) {
+                if (!rolePermissionRepository.existsByRoleIdAndPermissionId(
+                        savedRole.getId(), permission.getId())) {
+                    rolePermissionRepository.save(RolePermission.builder()
+                            .role(savedRole)
+                            .permission(permission)
+                            .build());
+                }
+            }
+
+            log.info("Rol ROOT creado con {} permisos", allPermissions.size());
+            return savedRole;
+        });
+    }
+
+    private void createFisioterapeutaRole() {
+        log.info("Verificando rol FISIOTERAPEUTA");
+
+        roleRepository.findByName(ROLE_FISIOTERAPEUTA).orElseGet(() -> {
+            Role fisioRole = Role.builder()
+                    .name(ROLE_FISIOTERAPEUTA)
+                    .description("Rol para fisioterapeutas: acceso a pacientes, historial clÃ­nico y anÃ¡lisis de imÃ¡genes")
+                    .status(RoleStatus.ACTIVE)
+                    .build();
+
+            Role savedRole = roleRepository.save(fisioRole);
+
+            // Permisos base para el fisioterapeuta
+            String[] fisioPerms = {
+                    "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT", "UPDATE_PATIENT",
+                    "CHANGE_PATIENT_STATUS",
+                    "LIST_SERVICE", "VIEW_SERVICE",
+            };
+            for (String permName : fisioPerms) {
+                permissionRepository.findByName(permName).ifPresent(permission -> {
+                    if (!rolePermissionRepository.existsByRoleIdAndPermissionId(
+                            savedRole.getId(), permission.getId())) {
+                        rolePermissionRepository.save(RolePermission.builder()
+                                .role(savedRole)
+                                .permission(permission)
+                                .build());
+                    }
+                });
+            }
+
+            log.info("Rol FISIOTERAPEUTA creado con permisos de pacientes y servicios.");
+            return savedRole;
+        });
+    }
+
+    private void syncPermissionsToExistingFullAccessRoles(List<Permission> allPermissions) {
+        List<String> fullAccessRoles = List.of(adminRoleName, ROLE_ROOT);
+
+        for (String roleName : fullAccessRoles) {
+            roleRepository.findByName(roleName).ifPresent(role -> {
+                int assigned = 0;
+                for (Permission permission : allPermissions) {
+                    if (!rolePermissionRepository.existsByRoleIdAndPermissionId(
+                            role.getId(), permission.getId())) {
+                        rolePermissionRepository.save(RolePermission.builder()
+                                .role(role)
+                                .permission(permission)
+                                .build());
+                        assigned++;
+                    }
+                }
+                if (assigned > 0) {
+                    log.info("Sincronizados {} permisos nuevos al rol {}", assigned, roleName);
+                }
+            });
+        }
+    }
+}
