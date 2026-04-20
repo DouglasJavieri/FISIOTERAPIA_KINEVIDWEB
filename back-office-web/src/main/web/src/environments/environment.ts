@@ -3,14 +3,23 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  apiUrl: 'http://localhost:8080/api',
+  /**
+   * Rutas de los recursos del backend.
+   * Uso: environment.apiUrl + environment.endpoints.permission + '/list'
+   *   → http://localhost:8080/api/permission/list
+   */
+  endpoints: {
+    auth: '/auth',
+    user: '/user',
+    role: '/role',
+    permission: '/permission',
+    userRole: '/user-role',
+    rolePermission: '/role-permission',
+    employee: '/employee',
+    patient: '/patient',
+    medicalService: '/medical-service',
+  }
 };
 
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

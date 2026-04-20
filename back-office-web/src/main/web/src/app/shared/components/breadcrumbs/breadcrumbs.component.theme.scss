@@ -1,0 +1,25 @@
+// Colores basados en tema KINEVID
+
+knv-breadcrumbs {
+
+  .crumb-link,
+  .crumb-text {
+    color: #718096; // text-secondary
+    font-weight: 500;
+
+    &:hover {
+      color: #2d3748; // text-primary
+    }
+  }
+
+  .crumb.current {
+    .crumb-text {
+      color: #2d3748; // text-primary
+      font-weight: 700;
+    }
+  }
+
+  .chevron {
+    color: #cbd5e0; // border-dark
+  }
+}

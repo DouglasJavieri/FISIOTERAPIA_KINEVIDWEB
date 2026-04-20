@@ -1,0 +1,140 @@
+<div fxLayout="row wrap">
+
+
+  <div fxFlex="100" *ngIf="hasFilters">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header> Más filtros </mat-expansion-panel-header>
+      <ng-content></ng-content>
+    </mat-expansion-panel>
+    <mat-divider></mat-divider>
+  </div>
+  <div fxFlex="100" style="overflow-x: auto">
+    <table mat-table matSort [dataSource]="dataSource">
+      <ng-container *ngFor="let column of columns">
+        <ng-container
+          *ngIf="column.isModelProperty"
+          [matColumnDef]="column.property"
+        >
+          <!--Columna NO ordenable (column.isSort)-->
+          <ng-container *ngIf="!column.isSort">
+            <th
+              *matHeaderCellDef
+              [style]="{ width: column.width ? column.width : '' }"
+              mat-header-cell
+            >
+              {{ column.name }}
+            </th>
+          </ng-container>
+          <!--Columna ordenable (column.isSort)-->
+          <ng-container *ngIf="column.isSort">
+            <th
+              *matHeaderCellDef
+              mat-header-cell
+              [style]="{ width: column.width ? column.width : '' }"
+              [mat-sort-header]="
+                column.sortProperty ? column.sortProperty : column.property
+              "
+            >
+              {{ column.name }}
+            </th>
+          </ng-container>
+          <td
+            *matCellDef="let row"
+            [style]="{ width: column.width ? column.width : '' }"
+            mat-cell
+          >
+            <div fxLayout="row wrap" fxLayoutAlign="space-between center">
+              <div *ngIf="column.showLoadinCell" fxFlex="10">
+                <mat-progress-spinner
+                  *ngIf="column.showLoadinCell(row)"
+                  [diameter]="15"
+                  [mode]="'indeterminate'"
+                ></mat-progress-spinner>
+              </div>
+              <div [fxFlex]="column.showLoadinCell ? 87 : 100">
+                <span
+                  *ngIf="!column.largeText"
+                  [ngStyle]="
+                    column.textContainerCellStyle
+                      ? column.textContainerCellStyle(row)
+                      : {}
+                  "
+                >
+                  {{ row[column.property] }}
+                </span>
+                <ng-container *ngIf="column.largeText">
+                  <ng-container *ngIf="row[column.property]">
+                    <span
+                      *ngIf="row[column.property].length > 200"
+                      class="large-text-btn"
+                      (click)="rowOptionClick(row, column.largeText.actionCode)"
+                    >
+                      {{ column.largeText.text }}
+                    </span>
+                    <span
+                      *ngIf="row[column.property].length <= 200"
+                      [ngStyle]="
+                        column.textContainerCellStyle
+                          ? column.textContainerCellStyle(row)
+                          : {}
+                      "
+                    >
+                      {{ row[column.property] }}
+                    </span>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="rowActions" [matColumnDef]="'actions'" sticky>
+        <th *matHeaderCellDef [style]="{ width: actionsColumnWidth }" mat-header-cell></th>
+        <td *matCellDef="let row" [style]="{ width: actionsColumnWidth }" mat-cell>
+          <button
+            type="button"
+            color="accent"
+            mat-icon-button
+            matTooltip="Opciones"
+            [matMenuTriggerFor]="actionsMenu"
+            (click)="$event.stopPropagation()"
+          >
+            <mat-icon color="primary">{{ actionsTriggerIcon }}</mat-icon>
+          </button>
+          <mat-menu #actionsMenu="matMenu" yPosition="below" xPosition="before">
+            <button
+              *ngFor="let action of rowActions"
+              mat-menu-item
+              (click)="rowOptionClick(row, action.actionCode)"
+            >
+              <mat-icon color="accent" *ngIf="action.icon">{{
+                action.icon
+              }}</mat-icon>
+              {{ action.action }}
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
+      <tr
+        *matRowDef="let row; columns: visibleColumns"
+        class="clickable route-animations-elements"
+        mat-row
+      ></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="visibleColumns.length">
+          <p style="text-align: center">Sin resultados para mostrar</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <mat-paginator
+    [length]="totalElements"
+    [pageSizeOptions]="pageSizeOptions"
+    [pageSize]="paginator.pageSize"
+    [style]="{ 'background-color': 'transparent' }"
+  ></mat-paginator>
+</div>

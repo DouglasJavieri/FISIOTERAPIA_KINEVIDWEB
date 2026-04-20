@@ -1,0 +1,473 @@
+// ── Paleta del sistema (referencia: breadcrumbs) ───────────────────
+$sidebar-from:      #faf0ff;   // Lavanda casi blanco
+$sidebar-mid:       #ede7f6;   // Violeta muy claro
+$sidebar-to:        #e1d5f5;   // Lila suave
+
+$accent-start:      #9c27b0;   // Purple 600
+$accent-end:        #6a1b9a;   // Purple 900
+$accent-bright:     #7b1fa2;   // Purple 800
+$accent-glow:       rgba(156, 39, 176, 0.25);
+
+$text-primary:      #2e0a4a;   // Casi negro violáceo
+$text-secondary:    rgba(74, 20, 140, 0.65);   // #4a148c con opacidad
+$hover-bg:          rgba(156, 39, 176, 0.08);
+$active-bg:         rgba(156, 39, 176, 0.13);
+$active-border:     #9c27b0;
+
+$sidebar-width:    250px;
+$sidebar-collapsed: 72px;
+
+// ── Sidebar contenedor ─────────────────────────────────────────────
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: $sidebar-width;
+  background: linear-gradient(160deg, $sidebar-from 0%, $sidebar-mid 55%, $sidebar-to 100%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  // Borde derecho degradado púrpura
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg,
+      #ce93d8  0%,
+      #9c27b0  40%,
+      #6a1b9a  100%
+    );
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  box-shadow:
+    3px 0 16px rgba(156, 39, 176, 0.12),
+    1px 0  4px rgba(0, 0, 0, 0.06);
+}
+
+// ── Sección de logo / branding ─────────────────────────────────────
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 16px;
+  margin-top: 60px;   // offset del navbar
+  flex-shrink: 0;
+  overflow: hidden;
+
+  .sidebar__logo-wrap {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(156, 39, 176, 0.08);
+    border: 1.5px solid rgba(156, 39, 176, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 12px rgba(156, 39, 176, 0.2);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 0 18px rgba(156, 39, 176, 0.35);
+    }
+  }
+
+  .sidebar__logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 5px;
+  }
+
+  .sidebar__logo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $accent-bright;
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  .sidebar__brand-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .sidebar__brand-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: $text-primary;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .sidebar__brand-sub {
+    font-size: 0.7rem;
+    color: $text-secondary;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+}
+
+// ── Divisor ────────────────────────────────────────────────────────
+.sidebar__divider {
+  height: 1px;
+  margin: 0 16px 8px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(156, 39, 176, 0.25) 30%,
+    rgba(156, 39, 176, 0.25) 70%,
+    transparent 100%
+  );
+  flex-shrink: 0;
+}
+
+// ── Navegación ─────────────────────────────────────────────────────
+.sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0 80px;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 39, 176, 0.2) transparent;
+
+  &::-webkit-scrollbar       { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(156, 39, 176, 0.2);
+    border-radius: 2px;
+    &:hover { background: rgba(156, 39, 176, 0.4); }
+  }
+}
+
+// ── Menú principal ─────────────────────────────────────────────────
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  &__item {
+    margin: 2px 10px;
+  }
+
+  // Estilos compartidos entre header y link
+  %menu-item-base {
+    display: flex;
+    align-items: center;
+    padding: 0.78rem 0.9rem;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    transition:
+      background 0.25s ease,
+      transform  0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.25s ease;
+    color: $text-secondary;
+
+    // Destello de hover (ripple suave)
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      background: $hover-bg;
+      color: $text-primary;
+      transform: translateX(3px);
+
+      &::after { opacity: 1; }
+
+      .menu__icon { color: $accent-bright; }
+    }
+  }
+
+  // Header expandible
+  &__header {
+    @extend %menu-item-base;
+
+    &--active {
+      background: $active-bg;
+      color: $text-primary;
+      box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.2),
+                  0 2px 12px rgba(102, 126, 234, 0.15);
+
+      .menu__icon { color: $active-border; }
+    }
+  }
+
+  // Link navegable
+  &__link {
+    @extend %menu-item-base;
+    text-decoration: none;
+
+    &--active {
+      background: $active-bg;
+      color: $text-primary;
+      box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.2),
+                  0 2px 12px rgba(102, 126, 234, 0.15);
+
+      .menu__icon { color: $active-border; }
+
+      // Indicador izquierdo luminoso
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 20%;
+        height: 60%;
+        width: 3px;
+        background: linear-gradient(180deg, $accent-start, $accent-end);
+        border-radius: 0 3px 3px 0;
+        box-shadow: 0 0 8px $accent-glow;
+      }
+    }
+  }
+
+  // Envoltorio del icono (facilita alineación en modo colapsado)
+  &__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    margin-right: 12px;
+    transition: margin 0.35s ease;
+  }
+
+  &__icon {
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: $text-secondary;
+    transition: color 0.25s ease, transform 0.25s ease;
+  }
+
+  &__label {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.2px;
+  }
+
+  &__expand-icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: $text-secondary;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+
+    &--rotated {
+      transform: rotate(180deg);
+      color: $accent-bright;
+    }
+  }
+}
+
+// ── Submenu ────────────────────────────────────────────────────────
+.submenu {
+  list-style: none;
+  padding: 4px 0 4px 16px;
+  margin: 2px 0 0;
+  overflow: hidden;
+
+  border-left: 1.5px solid rgba(156, 39, 176, 0.25);
+  margin-left: 22px;
+
+  &__item {
+    margin: 2px 4px;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: $text-secondary;
+    font-size: 0.84rem;
+    font-weight: 400;
+    transition:
+      background 0.22s ease,
+      color      0.22s ease,
+      transform  0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    position: relative;
+
+    &:hover {
+      background: $hover-bg;
+      color: $accent-end;
+      transform: translateX(3px);
+
+      .submenu__icon { color: $accent-start; }
+    }
+
+    &--active {
+      background: rgba(156, 39, 176, 0.12);
+      color: $accent-end;
+      font-weight: 600;
+
+      .submenu__icon { color: $accent-start; }
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -17.5px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: $accent-start;
+        box-shadow: 0 0 6px rgba(156, 39, 176, 0.5);
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 10px;
+    color: rgba(156, 39, 176, 0.5);
+    flex-shrink: 0;
+    transition: color 0.25s ease;
+  }
+
+  &__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── Botón toggle ───────────────────────────────────────────────────
+.sidebar__toggle {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 0.85rem;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  color: $accent-end;
+  border: 1.5px solid rgba(156, 39, 176, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow:
+    0 3px 10px rgba(156, 39, 176, 0.18),
+    0 1px 4px  rgba(0, 0, 0, 0.08);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $accent-end;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+    border-color: $accent-start;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow:
+      0 6px 18px rgba(156, 39, 176, 0.28),
+      0 2px 6px  rgba(0, 0, 0, 0.1);
+
+    mat-icon { color: $accent-start; }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 2px 6px rgba(156, 39, 176, 0.18);
+  }
+}
+
+// ── Estado colapsado ───────────────────────────────────────────────
+.sidebar--collapsed {
+  width: $sidebar-collapsed;
+
+  .sidebar__brand-text { display: none; }
+
+  .sidebar__brand {
+    justify-content: center;
+    padding: 20px 0 16px;
+  }
+
+  .menu__label,
+  .submenu__label,
+  .menu__expand-icon {
+    display: none;
+  }
+
+  .menu__icon-wrap {
+    margin-right: 0;
+    width: auto;
+  }
+
+  .menu__header,
+  .menu__link {
+    justify-content: center;
+    padding: 0.78rem;
+  }
+
+  .submenu {
+    margin-left: 4px;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .submenu__link {
+    justify-content: center;
+    padding: 0.6rem;
+
+    &::before { display: none; }
+  }
+
+  .submenu__icon {
+    margin-right: 0;
+  }
+
+  .sidebar__toggle {
+    left: 16px;
+  }
+}
+
+// ── Animación fadeIn para el texto del brand ───────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

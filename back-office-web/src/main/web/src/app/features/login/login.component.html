@@ -1,0 +1,73 @@
+<div class="background-container"></div>
+<div class="login-wrapper">
+  <div class="login-container">
+    <!-- LEFT -->
+    <div class="left-side">
+      <div class="left-content">
+        <h2>KINEVID</h2>
+        <h3>Sistema de gestión de fisioterapia</h3>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-side">
+      <div class="form-container">
+        <h1>Bienvenido a KINEVID</h1>
+
+        <!-- Sesión expirada (forzada por el interceptor) -->
+        <div class="warning-banner" *ngIf="sessionExpiredMsg">
+          <mat-icon>timer_off</mat-icon>
+          <span>Tu sesión ha expirado. Por favor, inicia sesión nuevamente.</span>
+        </div>
+
+        <!-- Mensaje de error de credenciales -->
+        <div class="error-banner" *ngIf="errorMsg">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMsg }}</span>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Usuario</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="username"
+              placeholder="nombre_usuario"
+              autocomplete="username">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="username.hasError('required')">El usuario es requerido</mat-error>
+            <mat-error *ngIf="username.hasError('minlength')">Mínimo 3 caracteres</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña</mat-label>
+            <input
+              matInput
+              [type]="hidePass ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password">
+            <mat-icon matSuffix style="cursor:pointer" (click)="hidePass = !hidePass">
+              {{ hidePass ? 'visibility_off' : 'visibility' }}
+            </mat-icon>
+            <mat-error *ngIf="password.hasError('required')">La contraseña es requerida</mat-error>
+            <mat-error *ngIf="password.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+          </mat-form-field>
+
+          <button
+            mat-raised-button
+            color="primary"
+            class="login-button"
+            type="submit"
+            [disabled]="isLoading">
+            <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
+            <span *ngIf="!isLoading">Iniciar sesión</span>
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

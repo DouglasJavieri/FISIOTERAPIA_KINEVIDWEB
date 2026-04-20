@@ -1,0 +1,89 @@
+<knv-card-header>
+  <knv-card-header-heading>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <div fxFlex="90">
+        <h3 class="text-primary"
+            style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1); font-weight: bold; cursor: default;">
+          Actualizar Usuario
+        </h3>
+      </div>
+      <div fxFlex="10" fxLayoutAlign="end center">
+        <button mat-icon-button color="warn" matTooltip="Cancelar" type="button" (click)="close()">
+          <mat-icon style="color: #ff0000; background-color: #fff; border-radius: 50%">cancel</mat-icon>
+        </button>
+      </div>
+    </div>
+  </knv-card-header-heading>
+</knv-card-header>
+<mat-divider></mat-divider>
+<knv-card-content fxLayout="column">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+
+    <!-- Usuario -->
+    <mat-form-field appearance="outline" class="full-width mt-16">
+      <mat-label>Nombre de usuario</mat-label>
+      <input matInput formControlName="username"
+             placeholder="Ej: jperez" maxlength="30"/>
+      <mat-hint align="end">{{ form.get('username')?.value?.length ?? 0 }}/30</mat-hint>
+      <mat-error *ngIf="form.get('username')?.hasError('required')">El usuario es requerido.</mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('minlength')">Mínimo 3 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('maxlength')">Máximo 30 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('pattern')">Solo letras, números y guiones bajos.</mat-error>
+      <mat-error *ngIf="form.get('username')?.hasError('onlyWhitespace') || form.get('username')?.hasError('leadingWhitespace')">
+        No se permiten espacios en blanco.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Email -->
+    <mat-form-field appearance="outline" class="full-width mt-8">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput formControlName="email"
+             placeholder="Ej: jperez@kinevid.com" maxlength="50" type="email"/>
+      <mat-hint align="end">{{ form.get('email')?.value?.length ?? 0 }}/50</mat-hint>
+      <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es requerido.</mat-error>
+      <mat-error *ngIf="form.get('email')?.hasError('email')">Formato de correo inválido.</mat-error>
+      <mat-error *ngIf="form.get('email')?.hasError('maxlength')">Máximo 50 caracteres.</mat-error>
+    </mat-form-field>
+
+    <!-- Contraseña (opcional) -->
+    <mat-form-field appearance="outline" class="full-width mt-8">
+      <mat-label>Nueva contraseña (opcional)</mat-label>
+      <input matInput formControlName="password"
+             placeholder="Dejar vacío para no cambiar" maxlength="100" type="password"/>
+      <mat-hint>Si no deseas cambiar la contraseña, deja este campo vacío.</mat-hint>
+      <mat-error *ngIf="form.get('password')?.hasError('minlength')">Mínimo 8 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('maxlength')">Máximo 100 caracteres.</mat-error>
+    </mat-form-field>
+
+    <!-- Rol -->
+    <div class="mt-16">
+      <knv-selects
+        formControlName="role"
+        [data]="roleList"
+        [keyAttr]="'id'"
+        [displayAttr]="'name'"
+        [name]="'Rol'"
+        [placeholder]="rolesLoading ? 'Cargando roles...' : 'Seleccionar rol...'"
+        [multiple]="false"
+        [isRequired]="true"
+        [readonly]="rolesLoading"
+        [showAllOption]="false">
+      </knv-selects>
+      <p *ngIf="rolesLoading" style="font-size: 12px; color: #9e9e9e; margin: -12px 0 8px 2px;">
+        <em>Cargando roles...</em>
+      </p>
+      <mat-error *ngIf="form.get('role')?.invalid && form.get('role')?.touched"
+                 style="font-size: 11px; margin: -8px 0 8px 2px;">
+        El rol es requerido.
+      </mat-error>
+    </div>
+
+    <knv-card-actions fxLayoutAlign="center center">
+      <button mat-flat-button color="primary" type="submit"
+              [disabled]="!form.valid || rolesLoading">
+        Actualizar
+      </button>
+    </knv-card-actions>
+  </form>
+</knv-card-content>
+

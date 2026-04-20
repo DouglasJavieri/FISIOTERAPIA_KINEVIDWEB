@@ -1,0 +1,76 @@
+// =====================================================
+// PAGE LAYOUT VARIABLES
+// =====================================================
+
+// COLORES - Basados en tema KINEVID
+$primary-color: #667eea;
+$primary-dark: #5a67d8;
+$secondary-color: #764ba2;
+$accent-color: #f093fb;
+$success-color: #48bb78;
+$warning-color: #ed8936;
+$error-color: #f56565;
+$info-color: #4299e1;
+
+$text-primary: #2d3748;
+$text-secondary: #718096;
+$text-light: #a0aec0;
+
+$bg-light: #f7fafc;
+$bg-white: #ffffff;
+$bg-gray: #edf2f7;
+
+$border-color: #e2e8f0;
+$border-dark: #cbd5e0;
+
+// ESPACIADO
+$padding: 2rem;
+$padding-md: 1.5rem;
+$padding-sm: 1rem;
+$padding-xs: 0.5rem;
+
+$margin: 2rem;
+$margin-md: 1.5rem;
+$margin-sm: 1rem;
+
+// PAGE LAYOUT ESPECÍFICAS
+$page-layout-height: 200px;
+$page-layout-toolbar-height: 48px;
+
+// BORDES Y SOMBRAS
+$border-radius: 8px;
+$border-radius-lg: 12px;
+$border-radius-sm: 4px;
+
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+
+// BREAKPOINTS
+$breakpoint-xs: 480px;
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+@mixin layout-bp($name) {
+  @if $name == lt-md {
+    @media (max-width: 768px) {
+      @content;
+    }
+  } @else if $name == lt-lg {
+    @media (max-width: 1024px) {
+      @content;
+    }
+  } @else if $name == gt-md {
+    @media (min-width: 769px) {
+      @content;
+    }
+  } @else if $name == gt-lg {
+    @media (min-width: 1025px) {
+      @content;
+    }
+  }
+}

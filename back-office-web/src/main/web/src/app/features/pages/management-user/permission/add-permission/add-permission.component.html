@@ -1,0 +1,79 @@
+<knv-card-header>
+  <knv-card-header-heading>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <div fxFlex="90">
+        <h3 class="text-primary"
+            style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1); font-weight: bold; cursor: default;">
+          Agregar Permiso
+        </h3>
+      </div>
+      <div fxFlex="10" fxLayoutAlign="end center">
+        <button mat-icon-button
+                color="warn"
+                matTooltip="Cancelar"
+                type="button"
+                (click)="close()">
+          <mat-icon style="color: #ff0000; background-color: #fff; border-radius: 50%">cancel</mat-icon>
+        </button>
+      </div>
+    </div>
+  </knv-card-header-heading>
+</knv-card-header>
+<mat-divider></mat-divider>
+<knv-card-content fxLayout="column">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width mt-16">
+      <mat-label>Nombre</mat-label>
+      <input
+        matInput
+        formControlName="name"
+        placeholder="Ej: CREAR_USUARIO"
+        maxlength="60"/>
+      <mat-hint align="end">{{ form.get('name')?.value?.length ?? 0 }}/60</mat-hint>
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre es requerido.
+      </mat-error>
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        Máximo 60 caracteres.
+      </mat-error>
+      <mat-error *ngIf="form.get('name')?.hasError('onlyWhitespace')">
+        El nombre no puede contener solo espacios en blanco.
+      </mat-error>
+      <mat-error *ngIf="form.get('name')?.hasError('leadingWhitespace')">
+        El nombre no puede empezar con espacios en blanco.
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width mt-8">
+      <mat-label>Descripción</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        placeholder="Describe brevemente el propósito del permiso..."
+        maxlength="255"
+        rows="3">
+      </textarea>
+      <mat-hint align="end">{{ form.get('description')?.value?.length ?? 0 }}/255</mat-hint>
+      <mat-error *ngIf="form.get('description')?.hasError('required')">
+        La descripción es requerida.
+      </mat-error>
+      <mat-error *ngIf="form.get('description')?.hasError('maxlength')">
+        Máximo 255 caracteres.
+      </mat-error>
+      <mat-error *ngIf="form.get('description')?.hasError('onlyWhitespace')">
+        La descripción no puede contener solo espacios en blanco.
+      </mat-error>
+      <mat-error *ngIf="form.get('description')?.hasError('leadingWhitespace')">
+        La descripción no puede empezar con espacios en blanco.
+      </mat-error>
+    </mat-form-field>
+    <knv-card-actions fxLayoutAlign="center center">
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!form.valid">
+        Guardar
+      </button>
+    </knv-card-actions>
+  </form>
+</knv-card-content>

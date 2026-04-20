@@ -1,0 +1,16 @@
+<div class="knv-list-table list" fxFlex="grow" fxLayout="column">
+  <div class="knv-list-header"
+       fxLayout="row"
+       fxLayoutAlign="start center"
+       fxLayoutGap="8px"
+       fxLayoutGap.gt-xs="24px">
+    <div class="knv-list-name">{{ name }}</div>
+
+    <div fxLayout="row" fxLayoutAlign="start center" fxFlex>
+      <mat-icon *ngIf="withFilter" class="knv-filter-input-icon">search</mat-icon>
+      <input *ngIf="withFilter" fxFlex class="knv-filter-input" [(ngModel)]="filterValue" #filter [placeholder]="searchPlaceholder">    </div>
+
+    <ng-content select=".actions"></ng-content>
+  </div>
+  <ng-content></ng-content>
+</div>

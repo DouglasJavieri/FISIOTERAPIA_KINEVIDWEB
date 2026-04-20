@@ -1,0 +1,32 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+knv-card-header {
+  padding: 0 !important;
+}
+
+knv-card-content {
+  padding: 0 16px !important;
+  overflow-y: auto;
+  flex: 1;
+}
+
+knv-card-actions {
+  padding: 12px 0 !important;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mt-8 {
+  margin-top: 8px;
+}
+

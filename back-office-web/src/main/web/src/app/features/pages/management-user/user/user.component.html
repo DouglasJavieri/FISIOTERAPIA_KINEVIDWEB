@@ -1,0 +1,36 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[{ name: 'Gestión de Usuarios', link: '/management-users' }]"
+      current="Usuarios">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+  <knv-page-layout-content>
+    <knv-list name="Usuarios" [withFilter]="false">
+      <div class="actions">
+        <button
+          *ngIf="actions['createAction']"
+          mat-menu-item
+          (click)="createUser()">
+          <mat-icon color="primary" class="mr5">add_circle</mat-icon>
+          Agregar Usuario
+        </button>
+      </div>
+      <div fxLayout="row wrap">
+        <div fxFlex="100" class="table-scroll" *ngIf="actions['listAction']">
+          <knv-server-paging-table
+            [dataSource]="dataSource"
+            [columns]="columns"
+            [requestPaginatedData]="requestUserListFn"
+            [itemFormatterFn]="itemUserFormatterFn"
+            [rowActions]="rowActions"
+            [eventManager]="tableEvents"
+            [pageSizeOptions]="pageSizeOptions"
+            [hasFilters]="false">
+          </knv-server-paging-table>
+        </div>
+      </div>
+    </knv-list>
+  </knv-page-layout-content>
+</knv-page-layout>
+

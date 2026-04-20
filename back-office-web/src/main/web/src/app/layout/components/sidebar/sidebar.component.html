@@ -1,0 +1,75 @@
+<aside class="sidebar" [class.sidebar--collapsed]="!isOpen">
+  <div class="sidebar__brand">
+    <div class="sidebar__logo-wrap">
+      <img *ngIf="!logoError"
+           src="assets/images/logo-placeholder.svg"
+           alt="Kinevid Logo"
+           class="sidebar__logo-img"
+           (error)="onLogoError()"/>
+      <div *ngIf="logoError" class="sidebar__logo-fallback">
+        <mat-icon>healing</mat-icon>
+      </div>
+    </div>
+    <div class="sidebar__brand-text" *ngIf="isOpen">
+      <span class="sidebar__brand-name">Kinevid</span>
+      <span class="sidebar__brand-sub">Fisioterapia</span>
+    </div>
+  </div>
+
+  <div class="sidebar__divider"></div>
+
+  <nav class="sidebar__nav">
+    <ul class="menu">
+      <li *ngFor="let item of menuItems" class="menu__item">
+
+        <div
+          *ngIf="hasChildren(item)"
+          class="menu__header"
+          [class.menu__header--active]="isActive(item)"
+          (click)="onMenuClick(item)">
+          <span class="menu__icon-wrap">
+            <mat-icon class="menu__icon">{{ item.icon }}</mat-icon>
+          </span>
+          <span class="menu__label">{{ item.label }}</span>
+          <mat-icon class="menu__expand-icon"
+                    [class.menu__expand-icon--rotated]="isExpanded(item.id!)">
+            expand_more
+          </mat-icon>
+        </div>
+
+        <a
+          *ngIf="!hasChildren(item)"
+          [routerLink]="item.route"
+          class="menu__link"
+          [class.menu__link--active]="isActive(item)"
+          (click)="onMenuClick(item)">
+          <span class="menu__icon-wrap">
+            <mat-icon class="menu__icon">{{ item.icon }}</mat-icon>
+          </span>
+          <span class="menu__label">{{ item.label }}</span>
+        </a>
+
+        <ul *ngIf="hasChildren(item) && isExpanded(item.id!)"
+            class="submenu"
+            [@expandCollapse]>
+          <li *ngFor="let child of item.children" class="submenu__item">
+            <a
+              [routerLink]="child.route"
+              class="submenu__link"
+              [class.submenu__link--active]="isActive(child)"
+              (click)="onChildClick(item, child)">
+              <mat-icon class="submenu__icon">{{ child.icon }}</mat-icon>
+              <span class="submenu__label">{{ child.label }}</span>
+            </a>
+          </li>
+        </ul>
+
+      </li>
+    </ul>
+  </nav>
+  <button (click)="onToggle()" class="sidebar__toggle"
+          [matTooltip]="isOpen ? 'Colapsar menú' : 'Expandir menú'"
+          matTooltipPosition="right">
+    <mat-icon>{{ isOpen ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+  </button>
+</aside>

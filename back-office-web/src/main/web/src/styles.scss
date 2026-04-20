@@ -1,1 +1,149 @@
-/* You can add global styles to this file, and also import other style files */
+// Custom Theming for Angular Material
+@use '@angular/material' as mat;
+
+/* MATERIAL CORE */
+@include mat.core();
+
+/* KINEVID COLOR PALETTE */
+
+$kinevid-primary: mat.define-palette(mat.$deep-purple-palette, 400, 200, 700);
+$kinevid-accent: mat.define-palette(mat.$purple-palette, 300);
+$kinevid-warn: mat.define-palette(mat.$red-palette);
+
+/* THEME */
+
+$kinevid-theme: mat.define-light-theme((
+        color: (
+                primary: $kinevid-primary,
+                accent: $kinevid-accent,
+                warn: $kinevid-warn
+        )
+));
+
+@include mat.all-component-themes($kinevid-theme);
+
+/* COMPONENT THEMES */
+@import 'app/shared/components/list/list.component.theme';
+@import 'app/shared/components/card/card.component.theme';
+
+/* GLOBAL APP STYLES */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: #f5f7fb;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 500;
+}
+
+button {
+  font-weight: 500;
+}
+
+// Forma píldora para botones planos, elevados, outlined y texto
+.mat-flat-button,
+.mat-raised-button,
+.mat-stroked-button,
+.mat-button {
+  border-radius: 20px !important;
+  padding: 0 28px !important;
+  min-width: 110px !important;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease !important;
+
+  &:hover:not([disabled]) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  &:active:not([disabled]) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14) !important;
+  }
+}
+
+// Primary sólidos (Guardar, Actualizar, Iniciar sesión) con purple más oscuro
+.mat-flat-button.mat-primary,
+.mat-raised-button.mat-primary {
+  background-color: #512DA8 !important;
+
+  &:hover:not([disabled]) {
+    background-color: #4527A0 !important;
+    box-shadow: 0 4px 14px rgba(81, 45, 168, 0.45) !important;
+  }
+
+  &:active:not([disabled]) {
+    background-color: #311B92 !important;
+  }
+
+  &[disabled] {
+    background-color: rgba(0, 0, 0, 0.12) !important;
+    color: rgba(0, 0, 0, 0.26) !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// Stroked (Limpiar, Cancelar) hover sutil
+.mat-stroked-button:not([disabled]):hover {
+  background-color: rgba(81, 45, 168, 0.06) !important;
+  border-color: #512DA8 !important;
+  color: #512DA8 !important;
+}
+
+label {
+  font-weight: 400;
+}
+
+/* ── Notiflix – botones en forma de píldora ────────────────── */
+a.nx-confirm-button-ok,
+a.nx-confirm-button-cancel {
+  border-radius: 20px !important;
+  padding: 8px 28px !important;
+  min-width: 90px !important;
+  transition: filter 0.2s ease, transform 0.15s ease !important;
+
+  &:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+  }
+}
+
+/* UTILITIES */
+
+.text-primary {
+  color: #667eea;
+}
+
+/* SNACKBAR COLORS */
+
+.snackbar-error {
+  background-color: #f44336;
+  color: white;
+}
+
+.snackbar-success {
+  background-color: #4bb543;
+  color: white;
+}
+
+.snackbar-warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+.snackbar-info {
+  background-color: #2196f3;
+  color: white;
+}

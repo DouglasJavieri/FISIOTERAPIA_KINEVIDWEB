@@ -1,0 +1,15 @@
+<knv-navbar
+  [user]="currentUser$ | async"
+  [sidebarCollapsed]="sidebarCollapsed"
+  (toggleSidebar)="onToggleSidebar()"
+  (logout)="onLogout()">
+</knv-navbar>
+
+<div class="main-layout" [class.main-layout--sidebar-collapsed]="sidebarCollapsed">
+  <knv-sidebar [isOpen]="!sidebarCollapsed"
+               (toggleSidebar)="onToggleSidebar()">
+  </knv-sidebar>
+  <main class="main-layout__content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

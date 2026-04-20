@@ -1,0 +1,19 @@
+<div class="breadcrumbs-card">
+  <h2 class="bc-title">{{ current }}</h2>
+  <nav class="bc-trail" aria-label="breadcrumbs">
+    <ng-container *ngFor="let crumb of crumbs">
+      <a *ngIf="crumb.link"
+         [routerLink]="crumb.link"
+         class="bc-link">
+        {{ crumb.name }}
+      </a>
+      <span *ngIf="!crumb.link" class="bc-text">{{ crumb.name }}</span>
+      <mat-icon class="bc-separator">chevron_right</mat-icon>
+    </ng-container>
+    <span class="bc-current">{{ current }}</span>
+  </nav>
+  <div class="bc-image" *ngIf="img">
+    <img [src]="img" [alt]="current">
+  </div>
+
+</div>

@@ -1,0 +1,110 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[
+        { name: 'Gestión de Pacientes', link: '/management-pacient' },
+        { name: 'Servicios',            link: '/management-pacient/services' }
+      ]"
+      current="Agregar Servicio">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+
+  <knv-page-layout-content>
+    <knv-list [name]="'Agregar Servicio'" [withFilter]="false">
+      <knv-card-content>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" class="service-form">
+
+          <!-- ── Fila 1: Nombre + Categoría ──────────────────────── -->
+          <div fxLayout="row wrap">
+
+            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre del servicio</mat-label>
+                <input matInput formControlName="name"
+                       placeholder="Ej: Masoterapia Deportiva" maxlength="100" autocomplete="off"/>
+                <mat-hint align="end">{{ f('name')?.value?.length ?? 0 }}/100</mat-hint>
+                <mat-error *ngIf="f('name')?.hasError('required')">El nombre es requerido.</mat-error>
+                <mat-error *ngIf="f('name')?.hasError('minlength')">Mínimo 2 caracteres.</mat-error>
+                <mat-error *ngIf="f('name')?.hasError('onlyWhitespace') || f('name')?.hasError('leadingWhitespace')">
+                  No se permiten espacios en blanco.
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+              <knv-selects
+                formControlName="category"
+                [data]="categoryOptions"
+                [keyAttr]="'value'"
+                [displayAttr]="'label'"
+                [name]="'Categoría'"
+                [placeholder]="'Seleccione una categoría'"
+                [multiple]="false"
+                [isRequired]="true"
+                [showAllOption]="false">
+              </knv-selects>
+            </div>
+
+          </div>
+
+          <!-- ── Fila 2: Duración + Precio ────────────────────────── -->
+          <div fxLayout="row wrap">
+
+            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Duración (minutos)</mat-label>
+                <input matInput formControlName="durationMinutes"
+                       type="number" min="1" max="480"
+                       placeholder="Ej: 60" autocomplete="off"/>
+                <mat-hint>Opcional — entre 1 y 480 min</mat-hint>
+                <mat-error *ngIf="f('durationMinutes')?.hasError('min')">Debe ser al menos 1 minuto.</mat-error>
+                <mat-error *ngIf="f('durationMinutes')?.hasError('max')">No puede superar 480 minutos.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Precio (Bs.)</mat-label>
+                <input matInput formControlName="price"
+                       type="number" min="0.01" step="0.01"
+                       placeholder="Ej: 150.00" autocomplete="off"/>
+                <mat-hint>Opcional</mat-hint>
+                <mat-error *ngIf="f('price')?.hasError('min')">El precio debe ser mayor a 0.</mat-error>
+              </mat-form-field>
+            </div>
+
+          </div>
+
+          <!-- ── Fila 3: Descripción ───────────────────────────────── -->
+          <div fxLayout="row wrap">
+            <div fxFlex="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Descripción</mat-label>
+                <textarea matInput formControlName="description"
+                          placeholder="Descripción breve del servicio..."
+                          rows="3" maxlength="300" autocomplete="off"></textarea>
+                <mat-hint align="end">{{ f('description')?.value?.length ?? 0 }}/300</mat-hint>
+                <mat-error *ngIf="f('description')?.hasError('onlyWhitespace')">
+                  No se permiten solo espacios en blanco.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- ── Acciones ──────────────────────────────────────────── -->
+          <div fxLayout="row" fxLayoutAlign="end center" class="form-actions">
+            <button mat-stroked-button color="accent" type="button" (click)="cancel()">
+              Cancelar
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+              Guardar
+            </button>
+          </div>
+
+        </form>
+      </knv-card-content>
+    </knv-list>
+  </knv-page-layout-content>
+</knv-page-layout>
+

@@ -1,0 +1,55 @@
+<knv-card-header>
+  <knv-card-header-heading>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <div fxFlex="90">
+        <h3 class="text-primary"
+            style="text-shadow: 2px 2px 4px rgba(0,0,0,0.1); font-weight: bold; cursor: default;">
+          Asignar Usuario
+        </h3>
+      </div>
+      <div fxFlex="10" fxLayoutAlign="end center">
+        <button mat-icon-button matTooltip="Cerrar" type="button" (click)="close()">
+          <mat-icon style="color: #ff0000; background-color: #fff; border-radius: 50%">cancel</mat-icon>
+        </button>
+      </div>
+    </div>
+  </knv-card-header-heading>
+</knv-card-header>
+<mat-divider></mat-divider>
+<knv-card-content fxLayout="column">
+  <div class="info-block mt-16">
+    <div class="info-row">
+      <span class="info-label">Empleado:</span>
+      <span class="info-value">
+        {{ data.employee.firstName }} {{ data.employee.paternalSurname }}
+        {{ data.employee.maternalSurname ? data.employee.maternalSurname : '' }}
+      </span>
+    </div>
+    <div class="info-row mt-4">
+      <span class="info-label">Usuario actual:</span>
+      <span class="info-value" [class.unassigned]="!data.employee.username">
+        {{ data.employee.username ?? 'Sin asignación' }}
+      </span>
+    </div>
+  </div>
+  <mat-divider class="mt-16"></mat-divider>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-16">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Seleccionar usuario</mat-label>
+      <mat-select formControlName="userId">
+        <mat-option [value]="null">— Sin asignación —</mat-option>
+        <mat-option *ngFor="let u of userList" [value]="u.id">
+          <span class="option-username">{{ u.username }}</span>
+          <span class="option-email"> — {{ u.email }}</span>
+        </mat-option>
+      </mat-select>
+      <mat-hint *ngIf="userList.length === 0">No hay usuarios disponibles para asignar.</mat-hint>
+    </mat-form-field>
+    <knv-card-actions fxLayoutAlign="center center" class="mt-8">
+      <button mat-flat-button color="primary" type="submit">
+        Guardar
+      </button>
+    </knv-card-actions>
+  </form>
+</knv-card-content>
+

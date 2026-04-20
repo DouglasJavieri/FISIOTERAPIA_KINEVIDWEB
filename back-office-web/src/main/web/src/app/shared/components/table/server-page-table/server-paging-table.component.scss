@@ -1,0 +1,42 @@
+.mat-paginator {
+  display: flex;
+  justify-content: start;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+  tr:hover {
+    background: none;
+  }
+}
+
+th, td {
+  overflow: hidden;
+  //white-space: nowrap;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.counter-number {
+  font-size: 8px;
+  font-weight: bold
+}
+
+.container-counter {
+  position: relative;
+  left: -8px
+}
+
+
+.large-text-btn {
+  cursor: pointer;
+  color: #1D57C4C6;
+  font-style: italic;
+  font-size: 12px;
+  text-align: center;
+}
+
+.mat-expansion-panel:not([class*=mat-elevation-z]) {
+  box-shadow: unset !important;
+}

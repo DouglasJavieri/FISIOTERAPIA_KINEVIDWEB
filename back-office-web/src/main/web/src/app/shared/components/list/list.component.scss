@@ -1,0 +1,55 @@
+.knv-list-table {
+  display: flex;
+  flex-direction: column;
+
+  .knv-list-header {
+    padding-left: 16px;
+    padding-right: 16px;
+    height: 64px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    @media (max-width: 599px) {
+      height: auto;
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+
+    .knv-list-name {
+      font-size: 20px;
+      line-height: 32px;
+      font-weight: 500;
+      padding-right: 16px;
+
+      @media (max-width: 599px) {
+        border-right: none;
+      }
+    }
+
+    .knv-filter-input {
+      font-size: 16px;
+      line-height: 1.125;
+      border: none;
+      height: 32px;
+      background: transparent;
+      color: inherit;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: rgba(0, 0, 0, 0.42);
+      }
+    }
+
+    .knv-filter-input-icon {
+      width: 1.2em;
+      vertical-align: bottom;
+      height: 22px;
+      font-size: 22px;
+      margin-right: 8px;
+      color: rgba(0, 0, 0, 0.54);
+    }
+  }
+}

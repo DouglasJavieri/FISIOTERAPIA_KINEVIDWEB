@@ -1,0 +1,58 @@
+<mat-form-field [class.show-error]="isInvalid && hasBeenTouched && isRequired"
+                [appearance]="'outline'"
+                hideRequiredMarker>
+
+  <mat-label [ngClass]="{'error-label': isInvalid && hasBeenTouched && isRequired}" >{{name}}<span *ngIf="isRequired"> *</span></mat-label>
+
+  <mat-select [disabled]="readonly || isDisabled"
+              [multiple]="multiple"
+              [placeholder]="placeholder"
+              [value]="optionSelected"
+              (selectionChange)="onValueChange($event)"
+              (closed)="resetSearch()"
+              (blur)="onTouch()"
+              [required]="isRequired">
+    <div class="search-container">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="text" placeholder="Buscar..."
+             [value]="currentSearch"
+              (keyup)="filterListData($any($event.target).value)"
+             (keydown)="handleKeyDown($event)"
+             (blur)="onTouch()">
+    </div>
+    <mat-option *ngIf="hasNoResults()" disabled>
+      <div class="no-results-message">
+        No se encontraron resultados para "{{currentSearch}}"
+      </div>
+    </mat-option>
+    <mat-option *ngIf="multiple && optionSelected?.length" (click)="deselectAll()" class="deselect-all-option">
+      Deseleccionar todos
+    </mat-option>
+    <ng-container *ngFor="let option of filteredList">
+      <mat-option *ngIf="option.show"
+                  [value]="option.isAllOption ? 'all' : (keyAttr === 'obj' ? option : option[keyAttr])"
+                  [class.selected-all]="option.isAllOption && optionSelected?.includes('all')">
+        {{option[displayAttr]}}
+      </mat-option>
+    </ng-container>
+  </mat-select>
+
+  <div *ngIf="isInvalid && hasBeenTouched && isRequired" class="validation-error">
+    Campo Requerido.
+  </div>
+
+</mat-form-field>
+<div *ngIf="displayMoreInfo" class="user-info-container">
+  <div class="user-info-header">
+    <h3 class="header-numero" style="font-size: 14px !important;">Número</h3>
+    <h3 class="header-nombre" style="font-size: 14px !important;">Nombre</h3>
+  </div>
+  <div *ngFor="let user of userListFiltered; let i = index" class="user-info">
+    <span class="user-index">{{i + 1}}</span>
+    <span class="user-name">{{user.name}}</span>
+  </div>
+  <div *ngIf="optionSelected === 'all'" class="user-info">
+    <span class="user-index">Todos</span>
+    <span class="user-name">Todos los elementos seleccionados</span>
+  </div>
+</div>

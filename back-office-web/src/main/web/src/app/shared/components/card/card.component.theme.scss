@@ -1,0 +1,17 @@
+@use '@angular/material' as mat;
+
+// Tema del KnvCard — integrado con el design system de KINEVID
+.knv-card {
+  background: #ffffff;
+  color: #2d3748;
+
+  @include mat.elevation(2);
+
+  .knv-card-header-subheading {
+    color: #718096;
+  }
+
+  .knv-card-actions {
+    border-top: 1px solid #e2e8f0;
+  }
+}

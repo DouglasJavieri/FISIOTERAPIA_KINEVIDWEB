@@ -1,0 +1,63 @@
+<header class="navbar" [class.navbar--compact]="sidebarCollapsed">
+  <div class="navbar__left">
+    <button class="navbar__burger" type="button" (click)="onToggleSidebar()" aria-label="Toggle sidebar">
+      <span class="material-icons">menu</span>
+    </button>
+
+    <div class="navbar__title">
+      <span>kinevid</span>
+    </div>
+  </div>
+
+  <div class="navbar__right">
+    <div
+      class="navbar__user"
+      *ngIf="isAuthenticated"
+      (click)="toggleUserMenu()"
+    >
+      <div class="navbar__user-avatar" aria-hidden="true">
+        <span class="material-icons">account_circle</span>
+      </div>
+
+      <div class="navbar__user-text">
+        <span class="navbar__user-name">{{ displayNombre }}</span>
+        <span class="navbar__user-email">{{ displayEmail }}</span>
+      </div>
+
+      <span class="material-icons navbar__chevron">expand_more</span>
+    </div>
+
+    <!-- Menú del usuario -->
+    <div
+      class="navbar__dropdown"
+      *ngIf="showUserMenu"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="navbar__dropdown-header">
+        <div class="navbar__dropdown-title">Hola, {{ displayNombre }}</div>
+        <div class="navbar__dropdown-subtitle">{{ displayEmail }}</div>
+      </div>
+
+      <button class="navbar__dropdown-item" type="button">
+        <span class="material-icons">person</span>
+        <span>Mi Perfil</span>
+      </button>
+
+      <button class="navbar__dropdown-item" type="button">
+        <span class="material-icons">settings</span>
+        <span>Configuración</span>
+      </button>
+
+      <div class="navbar__dropdown-divider"></div>
+
+      <button
+        class="navbar__dropdown-item navbar__dropdown-item--danger"
+        type="button"
+        (click)="onLogout()"
+      >
+        <span class="material-icons">logout</span>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </div>
+</header>
