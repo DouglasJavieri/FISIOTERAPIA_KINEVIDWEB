@@ -22,11 +22,13 @@ out/
 # ========================
 # Angular / Node
 # ========================
-back-office-web/node_modules/
-back-office-web/dist/
-back-office-web/.angular/
-back-office-web/.env
-back-office-web/.env.*
+back-office-web/node/
+back-office-web/src/main/web/node_modules/
+back-office-web/src/main/web/dist/
+back-office-web/src/main/web/.angular/
+
+# Output del build de Angular (generado por ng build, no versionar)
+back-office-api/src/main/resources/static/
 
 # ========================
 # Sistema
