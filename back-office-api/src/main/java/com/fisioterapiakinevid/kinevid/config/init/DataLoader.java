@@ -27,8 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DataLoader implements CommandLineRunner {
-    private static final String ROLE_ROOT           = "ROLE_ROOT";
-    private static final String ROLE_FISIOTERAPEUTA = "ROLE_FISIOTERAPEUTA";
+    private static final String ROLE_ROOT            = "ROLE_ROOT";
+    private static final String ROLE_FISIOTERAPEUTA  = "ROLE_FISIOTERAPEUTA";
+    private static final String ROLE_RECEPCIONISTA   = "ROLE_RECEPCIONISTA";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -60,6 +61,7 @@ public class DataLoader implements CommandLineRunner {
             Role adminRole = createAdminRole(permissions);
             createRootRole(permissions);
             createFisioterapeutaRole();
+            createRecepcionistaRole();
 
             syncPermissionsToExistingFullAccessRoles(permissions);
 
@@ -106,14 +108,14 @@ public class DataLoader implements CommandLineRunner {
                 {"CHANGE_EMPLOYEE_STATUS", "Cambiar estado de empleado"},
                 {"ASSIGN_USER_TO_EMPLOYEE", "Asignar usuario a empleado"},
                 {"REMOVE_USER_FROM_EMPLOYEE", "Desvincular usuario de empleado"},
-                // â”€â”€ Pacientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                // Pacientes
                 {"CREATE_PATIENT", "Crear paciente"},
                 {"VIEW_PATIENT", "Ver paciente"},
                 {"UPDATE_PATIENT", "Actualizar paciente"},
                 {"DELETE_PATIENT", "Eliminar paciente"},
                 {"LIST_PATIENT", "Listar pacientes"},
                 {"CHANGE_PATIENT_STATUS", "Cambiar estado de paciente"},
-                // â”€â”€ Servicios del consultorio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                //  Servicios del consultorio
                 {"CREATE_SERVICE", "Crear servicio"},
                 {"VIEW_SERVICE", "Ver servicio"},
                 {"UPDATE_SERVICE", "Actualizar servicio"},
@@ -236,7 +238,7 @@ public class DataLoader implements CommandLineRunner {
         roleRepository.findByName(ROLE_FISIOTERAPEUTA).orElseGet(() -> {
             Role fisioRole = Role.builder()
                     .name(ROLE_FISIOTERAPEUTA)
-                    .description("Rol para fisioterapeutas: acceso a pacientes, historial clÃ­nico y anÃ¡lisis de imÃ¡genes")
+                    .description("Rol para fisioterapeutas: acceso a pacientes, historial clinico y analisis de imagenes")
                     .status(RoleStatus.ACTIVE)
                     .build();
 
@@ -245,8 +247,8 @@ public class DataLoader implements CommandLineRunner {
             // Permisos base para el fisioterapeuta
             String[] fisioPerms = {
                     "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT", "UPDATE_PATIENT",
-                    "CHANGE_PATIENT_STATUS",
-                    "LIST_SERVICE", "VIEW_SERVICE",
+                    "CHANGE_PATIENT_STATUS", "LIST_SERVICE", "VIEW_SERVICE", "CREATE_SERVICE",
+                    "VIEW_SERVICE", "UPDATE_SERVICE", "DELETE_SERVICE", "LIST_SERVICE", "CHANGE_SERVICE_STATUS",
             };
             for (String permName : fisioPerms) {
                 permissionRepository.findByName(permName).ifPresent(permission -> {
@@ -261,6 +263,40 @@ public class DataLoader implements CommandLineRunner {
             }
 
             log.info("Rol FISIOTERAPEUTA creado con permisos de pacientes y servicios.");
+            return savedRole;
+        });
+    }
+
+    private void createRecepcionistaRole() {
+        log.info("Verificando rol RECEPCIONISTA");
+
+        roleRepository.findByName(ROLE_RECEPCIONISTA).orElseGet(() -> {
+            Role recepRole = Role.builder()
+                    .name(ROLE_RECEPCIONISTA)
+                    .description("Rol para recepcionistas: registro de pacientes y consulta de servicios")
+                    .status(RoleStatus.ACTIVE)
+                    .build();
+
+            Role savedRole = roleRepository.save(recepRole);
+
+            // Permisos base para recepcionista
+            String[] recepPerms = {
+                    "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT",
+                    "LIST_SERVICE", "VIEW_SERVICE",
+            };
+            for (String permName : recepPerms) {
+                permissionRepository.findByName(permName).ifPresent(permission -> {
+                    if (!rolePermissionRepository.existsByRoleIdAndPermissionId(
+                            savedRole.getId(), permission.getId())) {
+                        rolePermissionRepository.save(RolePermission.builder()
+                                .role(savedRole)
+                                .permission(permission)
+                                .build());
+                    }
+                });
+            }
+
+            log.info("Rol RECEPCIONISTA creado con permisos de consulta de pacientes y servicios.");
             return savedRole;
         });
     }

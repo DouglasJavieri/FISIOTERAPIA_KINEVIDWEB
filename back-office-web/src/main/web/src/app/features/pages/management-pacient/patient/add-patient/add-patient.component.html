@@ -1,0 +1,193 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[
+        { name: 'Gestión de Pacientes', link: '/management-pacient' },
+        { name: 'Pacientes', link: '/management-pacient/patients' }
+      ]"
+      current="Agregar Paciente">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+
+  <knv-page-layout-content>
+    <knv-list name="Agregar Paciente" [withFilter]="false">
+      <knv-card-content>
+        <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" class="patient-form">
+          <p class="section-title">Datos Personales</p>
+          <div fxLayout="row wrap">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombres</mat-label>
+                <input matInput formControlName="firstName" placeholder="Ej: Juan Carlos" maxlength="80" autocomplete="off"/>
+                <mat-hint align="end">{{ f('firstName')?.value?.length ?? 0 }}/80</mat-hint>
+                <mat-error *ngIf="f('firstName')?.hasError('required')">El nombre es requerido.</mat-error>
+                <mat-error *ngIf="f('firstName')?.hasError('minlength')">Mínimo 2 caracteres.</mat-error>
+                <mat-error *ngIf="f('firstName')?.hasError('onlyWhitespace') || f('firstName')?.hasError('leadingWhitespace')">No se permiten espacios al inicio.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Apellido paterno</mat-label>
+                <input matInput formControlName="paternalSurname" placeholder="Ej: Pérez" maxlength="80" autocomplete="off"/>
+                <mat-hint align="end">{{ f('paternalSurname')?.value?.length ?? 0 }}/80</mat-hint>
+                <mat-error *ngIf="f('paternalSurname')?.hasError('required')">El apellido paterno es requerido.</mat-error>
+                <mat-error *ngIf="f('paternalSurname')?.hasError('minlength')">Mínimo 2 caracteres.</mat-error>
+                <mat-error *ngIf="f('paternalSurname')?.hasError('onlyWhitespace') || f('paternalSurname')?.hasError('leadingWhitespace')">No se permiten espacios al inicio.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Apellido materno</mat-label>
+                <input matInput formControlName="maternalSurname" placeholder="Ej: López" maxlength="80" autocomplete="off"/>
+                <mat-hint align="end">{{ f('maternalSurname')?.value?.length ?? 0 }}/80</mat-hint>
+                <mat-error *ngIf="f('maternalSurname')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div fxLayout="row wrap">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>C.I.</mat-label>
+                <input matInput formControlName="ci" placeholder="Ej: 1234567" maxlength="20" autocomplete="off"/>
+                <mat-hint align="end">{{ f('ci')?.value?.length ?? 0 }}/20</mat-hint>
+                <mat-error *ngIf="f('ci')?.hasError('required')">El C.I. es requerido.</mat-error>
+                <mat-error *ngIf="f('ci')?.hasError('minlength')">Mínimo 3 caracteres.</mat-error>
+                <mat-error *ngIf="f('ci')?.hasError('onlyWhitespace') || f('ci')?.hasError('leadingWhitespace')">No se permiten espacios en blanco.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <knv-selects
+                formControlName="gender"
+                [data]="genderOptions"
+                [keyAttr]="'value'"
+                [displayAttr]="'label'"
+                [name]="'Género'"
+                [placeholder]="'Seleccione género'"
+                [multiple]="false"
+                [isRequired]="true"
+                [showAllOption]="false">
+              </knv-selects>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Fecha de nacimiento</mat-label>
+                <input matInput [matDatepicker]="pickerBirth"
+                       formControlName="birthDate"
+                       placeholder="DD/MM/YYYY"
+                       [max]="maxDate" readonly/>
+                <mat-datepicker-toggle matSuffix [for]="pickerBirth"></mat-datepicker-toggle>
+                <mat-datepicker #pickerBirth></mat-datepicker>
+                <mat-error *ngIf="f('birthDate')?.hasError('required')">La fecha de nacimiento es requerida.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <p class="section-title">Contacto</p>
+          <div fxLayout="row wrap">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="phone" placeholder="Ej: 76543210" maxlength="15" autocomplete="off"/>
+                <mat-error *ngIf="f('phone')?.hasError('pattern')">Solo números, +, - y paréntesis.</mat-error>
+                <mat-error *ngIf="f('phone')?.hasError('maxlength')">Máximo 15 caracteres.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Correo electrónico</mat-label>
+                <input matInput formControlName="email" placeholder="Ej: juan@email.com" maxlength="80" type="email" autocomplete="off"/>
+                <mat-error *ngIf="f('email')?.hasError('email')">Formato de correo inválido.</mat-error>
+                <mat-error *ngIf="f('email')?.hasError('maxlength')">Máximo 80 caracteres.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Dirección</mat-label>
+                <input matInput formControlName="address" placeholder="Ej: Av. Principal N° 123" maxlength="200" autocomplete="off"/>
+                <mat-hint align="end">{{ f('address')?.value?.length ?? 0 }}/200</mat-hint>
+                <mat-error *ngIf="f('address')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <p class="section-title">Datos Médicos</p>
+          <div fxLayout="row wrap">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <knv-selects
+                formControlName="bloodType"
+                [data]="bloodTypeOptions"
+                [keyAttr]="'value'"
+                [displayAttr]="'label'"
+                [name]="'Tipo de sangre'"
+                [placeholder]="'Seleccione tipo'"
+                [multiple]="false"
+                [isRequired]="false"
+                [showAllOption]="true">
+              </knv-selects>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Ocupación</mat-label>
+                <input matInput formControlName="occupation" placeholder="Ej: Docente" maxlength="100" autocomplete="off"/>
+                <mat-hint align="end">{{ f('occupation')?.value?.length ?? 0 }}/100</mat-hint>
+                <mat-error *ngIf="f('occupation')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <p class="section-title">Contacto de Emergencia</p>
+          <div fxLayout="row wrap">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre de contacto</mat-label>
+                <input matInput formControlName="emergencyContactName" placeholder="Ej: María Pérez" maxlength="100" autocomplete="off"/>
+                <mat-hint align="end">{{ f('emergencyContactName')?.value?.length ?? 0 }}/100</mat-hint>
+                <mat-error *ngIf="f('emergencyContactName')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Teléfono de contacto</mat-label>
+                <input matInput formControlName="emergencyContactPhone" placeholder="Ej: 70123456" maxlength="15" autocomplete="off"/>
+                <mat-error *ngIf="f('emergencyContactPhone')?.hasError('pattern')">Solo números, +, - y paréntesis.</mat-error>
+                <mat-error *ngIf="f('emergencyContactPhone')?.hasError('maxlength')">Máximo 15 caracteres.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <p class="section-title">Notas adicionales</p>
+          <div fxLayout="row wrap">
+            <div fxFlex="100" class="form-col">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Notas</mat-label>
+                <textarea matInput formControlName="notes"
+                          placeholder="Observaciones adicionales sobre el paciente..."
+                          rows="3" maxlength="500" autocomplete="off"></textarea>
+                <mat-hint align="end">{{ f('notes')?.value?.length ?? 0 }}/500</mat-hint>
+                <mat-error *ngIf="f('notes')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="end center" class="form-actions">
+            <button mat-stroked-button color="accent" type="button" (click)="cancel()">
+              Cancelar
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </knv-card-content>
+    </knv-list>
+  </knv-page-layout-content>
+</knv-page-layout>
+

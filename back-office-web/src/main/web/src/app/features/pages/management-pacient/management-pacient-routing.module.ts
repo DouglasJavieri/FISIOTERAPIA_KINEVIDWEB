@@ -15,7 +15,7 @@ const routes: Routes = [
   {
     path: 'services',
     loadChildren: () =>
-      import('./service/service.module').then(m => m.ServiceModule),
+      import('./medical-service/service.module').then(m => m.ServiceModule),
   },
   { path: '', redirectTo: 'patients', pathMatch: 'full' },
 ];

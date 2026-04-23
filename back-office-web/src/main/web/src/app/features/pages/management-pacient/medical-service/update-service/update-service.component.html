@@ -8,17 +8,12 @@
       current="Actualizar Servicio">
     </knv-breadcrumbs>
   </knv-page-layout-header>
-
   <knv-page-layout-content>
     <knv-list [name]="'Actualizar Servicio'" [withFilter]="false">
       <knv-card-content>
-
         <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" class="service-form">
-
-          <!-- ── Fila 1: Nombre + Categoría ──────────────────────── -->
           <div fxLayout="row wrap">
-
-            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Nombre del servicio</mat-label>
                 <input matInput formControlName="name"
@@ -32,7 +27,7 @@
               </mat-form-field>
             </div>
 
-            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <knv-selects
                 formControlName="category"
                 [data]="categoryOptions"
@@ -46,12 +41,7 @@
               </knv-selects>
             </div>
 
-          </div>
-
-          <!-- ── Fila 2: Duración + Precio ────────────────────────── -->
-          <div fxLayout="row wrap">
-
-            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Duración (minutos)</mat-label>
                 <input matInput formControlName="durationMinutes"
@@ -62,8 +52,10 @@
                 <mat-error *ngIf="f('durationMinutes')?.hasError('max')">No puede superar 480 minutos.</mat-error>
               </mat-form-field>
             </div>
+          </div>
 
-            <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+          <div fxLayout="row wrap">
+            <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Precio (Bs.)</mat-label>
                 <input matInput formControlName="price"
@@ -73,10 +65,8 @@
                 <mat-error *ngIf="f('price')?.hasError('min')">El precio debe ser mayor a 0.</mat-error>
               </mat-form-field>
             </div>
-
           </div>
 
-          <!-- ── Fila 3: Descripción ───────────────────────────────── -->
           <div fxLayout="row wrap">
             <div fxFlex="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
@@ -92,7 +82,6 @@
             </div>
           </div>
 
-          <!-- ── Acciones ──────────────────────────────────────────── -->
           <div fxLayout="row" fxLayoutAlign="end center" class="form-actions">
             <button mat-stroked-button color="accent" type="button" (click)="cancel()">
               Cancelar
@@ -101,7 +90,6 @@
               Actualizar
             </button>
           </div>
-
         </form>
       </knv-card-content>
     </knv-list>

@@ -1,0 +1,17 @@
+.patient-form {
+  padding: 8px 0;
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 16px 8px 4px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 4px;
+  }
+  .form-col { padding: 4px 8px; box-sizing: border-box; }
+  .full-width { width: 100%; }
+  .form-actions { padding: 12px 8px 4px; gap: 12px; }
+}
+

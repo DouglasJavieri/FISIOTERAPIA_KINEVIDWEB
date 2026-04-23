@@ -1,9 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PatientListComponent } from './patient-list/patient-list.component';
+import { PatientComponent } from './patient.component';
+import { AddPatientComponent } from './add-patient/add-patient.component';
+import { UpdatePatientComponent } from './update-patient/update-patient.component';
 
 const routes: Routes = [
-  { path: '', component: PatientListComponent },
+  { path: '', component: PatientComponent },
+  { path: 'add', component: AddPatientComponent },
+  { path: 'update/:id', component: UpdatePatientComponent },
 ];
 
 @NgModule({
@@ -11,4 +15,3 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class PatientRoutingModule {}
-
