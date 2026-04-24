@@ -6,7 +6,12 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { PatientService } from '../../../../../core/services/patient/patient.service';
 import { ClinicalEpisodeService } from '../../../../../core/services/clinical/clinical-episode.service';
 import { AppPermission } from '../../../../../core/models/auth.model';
-import { PatientResponse } from '../../../../../core/models/patient/patient.interface';
+import {
+  PatientResponse,
+  genderOptions,
+  bloodTypeOptions,
+  patientStatusOptions,
+} from '../../../../../core/models/patient/patient.interface';
 import {
   ClinicalEpisodeResponse,
   ClinicalEpisodeRequest,
@@ -25,6 +30,11 @@ export class PatientProfileComponent implements OnInit {
   patientId!: number;
   patient: PatientResponse | null = null;
   loading = true;
+
+  // Helpers de etiquetas
+  genderLabel  = (v: string | null) => genderOptions.find(o => o.value === v)?.label ?? v ?? '—';
+  bloodTypeLabel = (v: string | null) => bloodTypeOptions.find(o => o.value === v)?.label ?? v ?? '—';
+  statusLabel  = (v: string | null) => patientStatusOptions.find(o => o.value === v)?.label ?? v ?? '—';
 
   // Episodios
   episodes: ClinicalEpisodeResponse[] = [];
@@ -107,6 +117,10 @@ export class PatientProfileComponent implements OnInit {
         this.loadingEpisodes = false;
       },
     });
+  }
+
+  get activeEpisode() {
+    return this.episodes.find(ep => ep.episodeStatus === 'ACTIVE') ?? null;
   }
 
   onPageChange(event: PageEvent): void {

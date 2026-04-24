@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,6 +24,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             "WHERE e.deleted = false " +
             "AND e.status <> com.fisioterapiakinevid.kinevid.rest.model.enums.emp.EmployeeStatus.ELIMINATION")
     Page<Employee> findAllActive(Pageable pageable);
+
+    @Query("SELECT e " +
+            "FROM Employee e " +
+            "WHERE e.deleted = false " +
+            "AND e.status = com.fisioterapiakinevid.kinevid.rest.model.enums.emp.EmployeeStatus.ACTIVE " +
+            "ORDER BY e.paternalSurname ASC")
+    List<Employee> findAllActiveList();
 
     @Query("SELECT e " +
             "FROM Employee e " +

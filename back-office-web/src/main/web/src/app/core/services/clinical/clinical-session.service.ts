@@ -11,6 +11,8 @@ import {
   ClinicalSessionRequest,
   ClinicalSessionResponse,
   ClinicalSessionUpdateRequest,
+  SessionServiceRequest,
+  SessionServiceResponse,
 } from '../../models/clinical/clinical.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -55,6 +57,26 @@ export class ClinicalSessionService {
 
   delete(id: number): Observable<boolean> {
     const url = this.base + `/delete/${id}`;
+    return this.http.delete<ApiResponse<boolean>>(url)
+      .pipe(map(resp => mapResponseApi(url, resp)));
+  }
+
+  // ── Servicios aplicados en sesión (N:M) ────────────────────────────────────
+
+  addService(sessionId: number, body: SessionServiceRequest): Observable<SessionServiceResponse> {
+    const url = this.base + `/${sessionId}/services`;
+    return this.http.post<ApiResponse<SessionServiceResponse>>(url, body)
+      .pipe(map(resp => mapResponseApi(url, resp)));
+  }
+
+  getServices(sessionId: number): Observable<SessionServiceResponse[]> {
+    const url = this.base + `/${sessionId}/services`;
+    return this.http.get<ApiResponse<SessionServiceResponse[]>>(url)
+      .pipe(map(resp => mapResponseApi(url, resp)));
+  }
+
+  removeService(sessionServiceId: number): Observable<boolean> {
+    const url = this.base + `/services/${sessionServiceId}`;
     return this.http.delete<ApiResponse<boolean>>(url)
       .pipe(map(resp => mapResponseApi(url, resp)));
   }

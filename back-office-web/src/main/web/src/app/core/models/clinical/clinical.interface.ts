@@ -83,3 +83,24 @@ export interface ChangeSessionStatusRequest {
   status: SessionStatus;
 }
 
+// ── Servicios aplicados en sesión (N:M) ───────────────────────────────────────
+
+export interface SessionServiceResponse {
+  id: number;
+  sessionId: number;
+  medicalServiceId: number;
+  medicalServiceName: string;
+  medicalServiceCategory: string | null;
+  quantity: number;
+  unitPrice: number | null;
+  totalPrice: number | null;
+  notes: string | null;
+}
+
+export interface SessionServiceRequest {
+  medicalServiceId: number;
+  quantity: number;
+  unitPrice?: number | null;
+  notes?: string | null;
+}
+

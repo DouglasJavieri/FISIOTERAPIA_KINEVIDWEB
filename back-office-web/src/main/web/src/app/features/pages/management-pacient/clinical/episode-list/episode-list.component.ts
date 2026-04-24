@@ -11,7 +11,6 @@ import { PatientService } from '../../../../../core/services/patient/patient.ser
 import { AppPermission } from '../../../../../core/models/auth.model';
 import {
   ClinicalEpisodeResponse,
-  EpisodeStatus,
   episodeStatusOptions,
 } from '../../../../../core/models/clinical/clinical.interface';
 import { PatientResponse } from '../../../../../core/models/patient/patient.interface';
@@ -22,6 +21,7 @@ import {
   PaginatedFn,
   noopTableEvent,
 } from '../../../../../shared/components/table/table.model';
+import { episodeActionsCode, episodeTableColumns } from './episode-list.util';
 
 @Component({
   selector: 'knv-episode-list',
@@ -40,15 +40,7 @@ export class EpisodeListComponent implements OnInit {
   statusOptions = [{ value: null, label: 'Todos' }, ...episodeStatusOptions];
   patientList: PatientResponse[] = [];
 
-  columns: ITableColumn[] = [
-    { name: 'Episodio #', property: 'episodeNumber', visible: true, isModelProperty: true },
-    { name: 'Paciente', property: 'patientFullName', visible: true, isModelProperty: true },
-    { name: 'CI', property: 'patientCi', visible: true, isModelProperty: true },
-    { name: 'Fecha inicio', property: 'startDate', visible: true, isModelProperty: true },
-    { name: 'Fecha cierre', property: 'endDate', visible: true, isModelProperty: true },
-    { name: 'Estado', property: 'episodeStatusLabel', visible: true, isModelProperty: true },
-    { name: 'Motivo', property: 'reasonForAdmission', visible: true, isModelProperty: true },
-  ];
+  columns: ITableColumn[] = [...episodeTableColumns];
 
   constructor(
     public authService: AuthService,
@@ -83,7 +75,7 @@ export class EpisodeListComponent implements OnInit {
   private buildRowActions(): ITableRowAction[] {
     const actions: ITableRowAction[] = [];
     if (this.actions['viewAction']) {
-      actions.push({ action: 'Ver sesiones', actionCode: 'VIEW_SESSIONS', icon: 'visibility' });
+      actions.push({ action: 'Ver sesiones', actionCode: episodeActionsCode.viewSessionsAction, icon: 'visibility' });
     }
     return actions;
   }
@@ -110,7 +102,7 @@ export class EpisodeListComponent implements OnInit {
   protected tableActionManager = (event: ITableEvents): void => {
     if (event.event === 'ROW_CLICK') {
       const { item, actionCode } = event.data;
-      if (actionCode === 'VIEW_SESSIONS') {
+      if (actionCode === episodeActionsCode.viewSessionsAction) {
         this.router.navigate(['/management-pacient/episodes', item.id, 'sessions']);
       }
     }

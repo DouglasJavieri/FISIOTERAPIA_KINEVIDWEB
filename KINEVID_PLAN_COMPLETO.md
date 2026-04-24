@@ -1,6 +1,6 @@
 # 📋 KINEVID APP — Plan Maestro de Desarrollo
 > **Stack:** Angular 13 · Spring Boot 3 · Java 17 · PostgreSQL  
-> **Fecha de última actualización:** Abril 2026 — Revisión 2.0  
+> **Fecha de última actualización:** Abril 2026 — Revisión 3.0  
 > **Autor:** Douglas Cristhian Javieri Vino  
 > **Arquitectura:** Monolito Modular (preparado para extracción futura a microservicios)
 
@@ -28,29 +28,36 @@
 | Autenticación (JWT + Refresh Token) | ✅ | ✅ |
 | Usuarios (CRUD + estado) | ✅ | ✅ |
 | Roles y Permisos (RBAC granular) | ✅ | ✅ |
-| Empleados (CRUD + asignación de usuario) | ✅ | ✅ |
-| Pacientes (CRUD + paginación + filtros) | ✅ | ✅ |
+| Empleados (CRUD + asignación de usuario + active-list) | ✅ | ✅ |
+| Pacientes (CRUD + paginación + filtros + perfil) | ✅ | ✅ |
 | Servicios del consultorio (CRUD + paginación) | ✅ | ✅ |
+| **Episodios Clínicos** (CRUD + paginación + cierre + reactivación) | ✅ | ✅ |
+| **Sesiones Clínicas** (CRUD + paginación + cambio de estado) | ✅ | ✅ |
+| **Servicios por sesión** (N:M session ↔ medical_service, upsert) | ✅ | ✅ |
+| **Formulario de sesión** (mat-stepper 3 pasos: datos → evaluación → servicios) | — | ✅ |
 
-### 🔄 En desarrollo / Siguiente paso
+### 🔄 Siguiente fase
 
 | Fase | Descripción | Estado |
 |---|---|---|
-| FASE 4 | Backend: Episodios Clínicos + Historia Clínica | ⏳ Próxima |
-| FASE 5 | Frontend: Episodios + Historia Clínica | ⏳ Pendiente |
-| FASE 6 | Backend: Análisis de Imagen | ⏳ Pendiente |
-| FASE 7 | Frontend: Análisis de Imagen (Canvas HTML5) | ⏳ Pendiente |
+| FASE 6 | Backend: Análisis de Imagen (ImageAnalysis + AnalysisPhoto + Cloudinary) | ⏳ Próxima |
+| FASE 7 | Frontend: Análisis de Imagen (Canvas HTML5 + anotaciones) | ⏳ Pendiente |
 | FASE 8 | Backend: Generación de Reportes PDF (iText 7) | ⏳ Pendiente |
 | FASE 9 | Frontend: Descarga y visualización de reportes | ⏳ Pendiente |
 
+> ✅ **Nota importante:** Si el paciente no requiere el módulo de análisis de imagen,  
+> el flujo de Historia Clínica (Episodios → Sesiones → Servicios) está **completamente funcional**  
+> de manera independiente. Las fases 6-9 son un módulo opcional adicional.
+
 ### 🏗️ Infraestructura implementada
 
-- **DataLoader** con seed automático de permisos, roles ROOT/ADMIN/FISIOTERAPEUTA/**RECEPCIONISTA**
+- **DataLoader** con seed automático de permisos, roles ROOT/ADMIN/FISIOTERAPEUTA/RECEPCIONISTA
 - `syncPermissionsToExistingFullAccessRoles()` → ADMIN y ROOT reciben nuevos permisos automáticamente al reiniciar
+- `syncPermissionsToFisioterapeutaRole()` + `syncPermissionsToRecepcionistaRole()` → **roles específicos también sincronizan permisos en cada arranque** *(corregido Rev.3)*
 - **AuditableEntity** base con `createdDate`, `modifiedDate`, `createdBy`, `modifiedBy`, `deleted`
 - **JWT** con access token (10 min) + refresh token (7 días)
 - **CORS** configurado para `http://localhost:4200`
-- `spring.jpa.hibernate.ddl-auto=update` (se migrará a **Flyway** en Fase 4)
+- `spring.jpa.hibernate.ddl-auto=update`
 
 ---
 
@@ -338,158 +345,73 @@ Tiempo después → paciente regresa:
 
 ---
 
-### 🔵 FASE 4 — Backend: Episodios Clínicos + Historia Clínica (PRÓXIMA)
+### ✅ FASE 4 — Backend: Episodios Clínicos + Historia Clínica (COMPLETADA)
 
-**Migración de esquema:**
-- [ ] Introducir **Flyway** (`V1__init_schema.sql` + migraciones incrementales)
-- [ ] Cambiar `ddl-auto=update` → `ddl-auto=validate`
+**Entidades implementadas:**
+- ✅ `ClinicalEpisode` + enum `EpisodeStatus` (ACTIVE / CLOSED)
+- ✅ `ClinicalSession` + enum `SessionStatus` (OPEN / CLOSED / CANCELLED)
+- ✅ `SessionService` (relación N:M sesión ↔ servicio médico con `quantity`, `unitPrice`, `notes`)
 
-**Nuevas entidades:**
-- [ ] `ClinicalEpisode` + enum `EpisodeStatus` (ACTIVE / CLOSED)
-- [ ] `ClinicalSession` + enum `SessionStatus` (OPEN / CLOSED / CANCELLED)
-- [ ] `SessionService` (relación N:M sesión ↔ servicio médico)
-
-**Nuevos endpoints REST:**
+**Endpoints REST implementados:**
 
 *Episodios:*
-- `POST   /api/clinical-episode/create`                           — abrir nuevo episodio
-- `GET    /api/clinical-episode/patient/{patientId}`              — episodios del paciente (paginado)
-- `GET    /api/clinical-episode/{id}`                             — detalle episodio
-- `PATCH  /api/clinical-episode/{id}/close`                       — cerrar episodio (alta)
-- `POST   /api/clinical-episode/patient/{patientId}/reactivate`   — reactivar paciente + nuevo episodio
+- ✅ `POST   /api/clinical-episode/create`
+- ✅ `GET    /api/clinical-episode/list` — lista global paginada (filtros: paciente, estado)
+- ✅ `GET    /api/clinical-episode/patient/{patientId}` — episodios del paciente (paginado)
+- ✅ `GET    /api/clinical-episode/{id}`
+- ✅ `PATCH  /api/clinical-episode/{id}/close` — cierre de episodio + alta médica del paciente
+- ✅ `POST   /api/clinical-episode/patient/{patientId}/reactivate`
 
 *Sesiones:*
-- `POST   /api/clinical-session/create`
-- `GET    /api/clinical-session/episode/{episodeId}`              — sesiones del episodio (paginado)
-- `GET    /api/clinical-session/{id}`
-- `PUT    /api/clinical-session/update/{id}`
-- `PATCH  /api/clinical-session/{id}/status`
-- `DELETE /api/clinical-session/delete/{id}`
+- ✅ `POST   /api/clinical-session/create`
+- ✅ `GET    /api/clinical-session/episode/{episodeId}` — paginado
+- ✅ `GET    /api/clinical-session/{id}`
+- ✅ `PUT    /api/clinical-session/update/{id}`
+- ✅ `PATCH  /api/clinical-session/{id}/status` — OPEN → CLOSED / CANCELLED
+- ✅ `DELETE /api/clinical-session/delete/{id}`
 
-*Servicios de sesión:*
-- `POST   /api/clinical-session/{id}/services`                    — asignar/reemplazar servicios
-- `GET    /api/clinical-session/{id}/services`                    — listar servicios de la sesión
+*Servicios de sesión (N:M):*
+- ✅ `POST   /api/clinical-session/{id}/services` — agregar/actualizar (upsert)
+- ✅ `GET    /api/clinical-session/{id}/services`
+- ✅ `DELETE /api/clinical-session/services/{sessionServiceId}`
 
-**Nuevos permisos en DataLoader:**
-```
-CREATE_EPISODE, VIEW_EPISODE, CLOSE_EPISODE, LIST_EPISODE
-CREATE_CLINICAL_SESSION, VIEW_CLINICAL_SESSION
-UPDATE_CLINICAL_SESSION, DELETE_CLINICAL_SESSION
-LIST_CLINICAL_SESSION, MANAGE_SESSION_SERVICES
-```
+*Empleados (nuevo):*
+- ✅ `GET    /api/employee/active-list` — lista activa sin paginar (para selectores)
 
-**Asignación a roles:**
-- ROOT, ADMIN, FISIOTERAPEUTA: todos los permisos clínicos
-- RECEPCIONISTA: `LIST_EPISODE`, `VIEW_EPISODE`, `CREATE_EPISODE` (puede abrir episodio/registrar visita)
+**Permisos en DataLoader:**
+- ✅ Todos los permisos clínicos creados y asignados a roles
+- ✅ `syncPermissionsToFisioterapeutaRole()` y `syncPermissionsToRecepcionistaRole()` en cada arranque
 
 ---
 
-### 🔵 FASE 5 — Frontend: Episodios + Historia Clínica
+### ✅ FASE 5 — Frontend: Episodios + Historia Clínica (COMPLETADA)
 
-#### 5.1 Sidebar actualizado (Gestión de Pacientes)
+#### Pantallas implementadas
 
-```
-🏥 Gestión de Pacientes
-  ├── 📋 Servicios del Consultorio
-  ├── 🧑‍⚕️ Pacientes
-  │     └── [clic en paciente] → Perfil del Paciente
-  └── 📂 Episodios Clínicos          ← NUEVO ítem en menú
-        └── [filtro paciente + estado] → [clic episodio] → Sesiones del Episodio
-```
+| Pantalla | Ruta | Estado |
+|---|---|---|
+| Perfil del Paciente | `/management-pacient/patients/:id` | ✅ Card + acordeón episodios + acceso rápido a sesiones activas |
+| Episodios Clínicos | `/management-pacient/episodes` | ✅ Lista global paginada + filtros (paciente, estado) |
+| Sesiones del Episodio | `/management-pacient/episodes/:episodeId/sessions` | ✅ Tabla paginada + cambio de estado |
+| Nueva Sesión | `/management-pacient/episodes/:episodeId/sessions/new` | ✅ mat-stepper 3 pasos |
+| Detalle/Editar Sesión | `/management-pacient/episodes/:episodeId/sessions/:sessionId` | ✅ Mismo stepper, modo edición |
 
-#### 5.2 Dos flujos de navegación (reutilizan las mismas pantallas)
+#### Características implementadas
+- ✅ `mat-stepper` lineal: Datos básicos → Evaluación clínica → Servicios aplicados
+- ✅ Creación de sesión en paso 1 antes de avanzar (modo lineal para nueva sesión)
+- ✅ Modo solo lectura si sesión CLOSED/CANCELLED (formularios deshabilitados + badge de estado)
+- ✅ Tabla de servicios aplicados en sesión (agregar, eliminar con validación de estado)
+- ✅ Auto-relleno de precio unitario al seleccionar servicio
+- ✅ Cambio de estado de sesión (OPEN → CLOSED / CANCELLED) desde la lista con botón deshabilitado si ya cerrada
+- ✅ Colores por estado en columna de la tabla (verde/azul/rojo)
+- ✅ Acceso rápido "Sesiones activas" en la card del paciente
+- ✅ Labels legibles para género, grupo sanguíneo y estado del paciente en el perfil
+- ✅ `utils` separados (`episode-list.util.ts`, `session-list.util.ts`) con columnas y action codes
+- ✅ Dos flujos de navegación hacia las mismas pantallas (desde Pacientes y desde Episodios)
+- ✅ Sidebar con `Episodios Clínicos` para roles con permiso `LIST_EPISODE`
 
-**Flujo 1 — Desde "Pacientes" (recepción / gestión):**
-```
-Lista Pacientes → [clic] → Perfil Paciente
-                              ├── Card datos del paciente (mat-card reutilizable)
-                              ├── Botón "Nuevo Episodio" / "Reactivar"
-                              └── mat-accordion: episodios
-                                    ├── Episodio ACTIVO (resaltado, mat-expansion-panel)
-                                    │     └── [Ver Sesiones] ──────────────────────┐
-                                    └── Episodios CERRADOS (colapsados, solo lect.)│
-                                          └── [Ver Sesiones - solo lectura] ───────┤
-                                                                                   ▼
-                                                               Sesiones del Episodio (pantalla compartida)
-                                                                 ├── Card mini del paciente
-                                                                 ├── Info del episodio (estado, fechas)
-                                                                 ├── mat-table paginada de sesiones
-                                                                 └── Botón "Nueva Sesión"
-                                                                       └─► Detalle/Editar Sesión
-```
-
-**Flujo 2 — Desde "Episodios Clínicos" (fisioterapeuta / consulta diaria):**
-```
-Episodios Clínicos
-  ├── mat-select/mat-autocomplete: filtro paciente
-  ├── mat-select: filtro estado (ACTIVE / CLOSED / Todos)
-  └── mat-table paginada de episodios
-        └─[clic episodio]─► Sesiones del Episodio (misma pantalla que Flujo 1)
-                                └─► Detalle/Editar Sesión (misma pantalla)
-```
-
-#### 5.3 Pantallas a crear
-
-| # | Pantalla | Ruta Angular | Descripción |
-|---|---|---|---|
-| 1 | **Perfil del Paciente** | `/management-pacient/patients/:id` | Card paciente + mat-accordion episodios |
-| 2 | **Episodios Clínicos** | `/management-pacient/episodes` | Lista global paginada con filtros |
-| 3 | **Sesiones del Episodio** | `/management-pacient/episodes/:episodeId/sessions` | Tabla sesiones paginada (compartida ambos flujos) |
-| 4 | **Nueva Sesión** | `/management-pacient/episodes/:episodeId/sessions/new` | Formulario pantalla completa (>5 campos) |
-| 5 | **Detalle/Editar Sesión** | `/management-pacient/episodes/:episodeId/sessions/:sessionId` | Formulario completo con servicios |
-
-> 🔁 Las pantallas 3, 4 y 5 son **idénticas** sin importar el flujo de entrada.  
-> El breadcrumb de navegación indica el camino recorrido.
-
-#### 5.4 Componentes Angular Material a usar
-
-| Componente AM | Dónde aplicar |
-|---|---|
-| `mat-card` | Card datos del paciente (componente reutilizable en todas las pantallas clínicas) |
-| `mat-accordion` + `mat-expansion-panel` | Episodios en perfil del paciente |
-| `mat-table` + `mat-paginator` | Lista de episodios y lista de sesiones |
-| `mat-autocomplete` | Filtro de paciente en pantalla Episodios Clínicos |
-| `mat-select` | Filtro de estado del episodio |
-| `mat-chip` | Badge de estado del episodio/sesión (ACTIVE/CLOSED/OPEN) |
-| `mat-badge` | Contador de sesiones en acordeón de episodios |
-| `mat-stepper` | Flujo de "Nueva Sesión" (datos básicos → evaluación → servicios → cierre) |
-| `mat-dialog` | Confirmación al cerrar episodio / reactivar paciente |
-
-#### 5.5 Estructura de carpetas Angular
-
-```
-management-pacient/
-├── patient/                              (ya existe)
-│   ├── patient-profile/                  ← NUEVO: Perfil del paciente
-│   │   ├── patient-profile.component.ts
-│   │   ├── patient-profile.component.html
-│   │   └── patient-profile.component.scss
-│   └── shared/
-│       └── patient-card/                 ← NUEVO: Card reutilizable del paciente
-│           ├── patient-card.component.ts
-│           ├── patient-card.component.html
-│           └── patient-card.component.scss
-│
-└── clinical/                             ← NUEVO módulo
-    ├── clinical.module.ts
-    ├── clinical-routing.module.ts
-    ├── episode-list/                     ← Pantalla "Episodios Clínicos" (Flujo 2)
-    │   ├── episode-list.component.ts
-    │   ├── episode-list.component.html
-    │   └── episode-list.component.scss
-    ├── session-list/                     ← Sesiones del episodio (compartida)
-    │   ├── session-list.component.ts
-    │   ├── session-list.component.html
-    │   └── session-list.component.scss
-    ├── session-form/                     ← Nueva sesión / editar sesión
-    │   ├── session-form.component.ts
-    │   ├── session-form.component.html
-    │   └── session-form.component.scss
-    └── shared/
-        └── episode-status-badge/         ← Chip de estado reutilizable
-            └── ...
-```
-
+> ✅ **El flujo de Historia Clínica está completo y funcional sin el módulo de imagen.**  
+> Las FASES 6-9 (análisis de imagen y reportes PDF) son completamente opcionales.
 
 ---
 
@@ -697,21 +619,24 @@ kinevid/
 ## 📅 Hoja de ruta actualizada
 
 ```
-✅ FASE 1  → Backend: Pacientes + Servicios                    COMPLETADO
-✅ FASE 2  → Frontend: Módulo Servicios                        COMPLETADO
-✅ FASE 3  → Frontend: Módulo Pacientes                        COMPLETADO
-🔵 FASE 4  → Backend: Episodios + Historia Clínica + Flyway    PRÓXIMA
-🔵 FASE 5  → Frontend: Episodios + Sesiones + Servicios        PENDIENTE
-🔵 FASE 6  → Backend: Análisis de Imagen + Cloudinary          PENDIENTE
-🔵 FASE 7  → Frontend: Canvas HTML5 + Anotaciones              PENDIENTE
-🔵 FASE 8  → Backend: Generación PDF (iText 7)                 PENDIENTE
-🔵 FASE 9  → Frontend: Descarga + Vista previa de reportes     PENDIENTE
+✅ FASE 1  → Backend: Pacientes + Servicios                          COMPLETADO
+✅ FASE 2  → Frontend: Módulo Servicios                              COMPLETADO
+✅ FASE 3  → Frontend: Módulo Pacientes                              COMPLETADO
+✅ FASE 4  → Backend: Episodios + Historia Clínica + N:M sesión-svc  COMPLETADO
+✅ FASE 5  → Frontend: Episodios + Sesiones + mat-stepper + servicios COMPLETADO
+🔵 FASE 6  → Backend: Análisis de Imagen + Cloudinary                PRÓXIMA
+🔵 FASE 7  → Frontend: Canvas HTML5 + Anotaciones                    PENDIENTE
+🔵 FASE 8  → Backend: Generación PDF (iText 7)                       PENDIENTE
+🔵 FASE 9  → Frontend: Descarga + Vista previa de reportes           PENDIENTE
 ```
+
+> **Nota:** El sistema de Historia Clínica (Fases 1-5) es completamente funcional de forma  
+> independiente. Las Fases 6-9 son el módulo opcional de análisis de imagen con reportes PDF.
 
 ---
 
-## 🔗 Integración entre módulos (visión global actualizada)
-
+*Plan actualizado el 24/04/2026 — Revisión 3.0*  
+*Fases 4 y 5 marcadas como COMPLETADAS. Próxima: Fase 6 (Análisis de Imagen)*
 ```
 PACIENTE (patient)
   │

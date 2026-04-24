@@ -34,7 +34,7 @@
             </div>
             <div fxFlex="22" fxFlex.lt-sm="45">
               <span class="data-label">Género</span>
-              <span class="data-value">{{ patient.gender }}</span>
+              <span class="data-value">{{ genderLabel(patient.gender) }}</span>
             </div>
             <div fxFlex="22" fxFlex.lt-sm="45">
               <span class="data-label">Teléfono</span>
@@ -50,7 +50,7 @@
             </div>
             <div fxFlex="22" fxFlex.lt-sm="45">
               <span class="data-label">Grupo sanguíneo</span>
-              <span class="data-value">{{ patient.bloodType ?? '—' }}</span>
+              <span class="data-value">{{ bloodTypeLabel(patient.bloodType) }}</span>
             </div>
             <div fxFlex="22" fxFlex.lt-sm="45">
               <span class="data-label">Estado</span>
@@ -60,8 +60,7 @@
                   'chip-inactive':  patient.status === 'INACTIVE',
                   'chip-discharge': patient.status === 'DISCHARGE'
                 }" disableRipple>
-                {{ patient.status === 'ACTIVE' ? 'Activo' :
-                   patient.status === 'INACTIVE' ? 'Inactivo' : 'Alta médica' }}
+                {{ statusLabel(patient.status) }}
               </mat-chip>
             </div>
           </div>
@@ -74,6 +73,15 @@
           <button mat-flat-button color="primary" (click)="editPatient()" style="margin-left:8px">
             <mat-icon>edit</mat-icon> Editar datos
           </button>
+          <!-- Acceso rápido al episodio activo -->
+          <button
+            *ngIf="activeEpisode && actions['listSession']"
+            mat-flat-button color="accent"
+            (click)="viewSessions(activeEpisode)"
+            style="margin-left:8px"
+            matTooltip="Ir directamente a las sesiones del episodio activo #{{ activeEpisode.episodeNumber }}">
+            <mat-icon>event_note</mat-icon> Sesiones activas
+          </button>
           <!-- Reactivar si está DISCHARGE -->
           <button
             *ngIf="patient.status === 'DISCHARGE' && actions['createEpisode']"
@@ -85,7 +93,7 @@
           <!-- Nuevo episodio si está ACTIVE -->
           <button
             *ngIf="patient.status === 'ACTIVE' && actions['createEpisode']"
-            mat-flat-button color="accent"
+            mat-flat-button
             (click)="toggleNewEpisodeForm()"
             style="margin-left:8px">
             <mat-icon>add</mat-icon> Nuevo episodio

@@ -9,9 +9,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTableModule } from '@angular/material/table';
 
 // Shared
 import { SharedModule } from '../../../../shared/shared.module';
@@ -40,9 +45,14 @@ import { SessionFormComponent } from './session-form/session-form.component';
     MatCardModule,
     MatChipsModule,
     MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
     MatTooltipModule,
     MatExpansionModule,
+    MatStepperModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTableModule,
     SharedModule,
     PageLayoutModule,
     BreadcrumbsModule,

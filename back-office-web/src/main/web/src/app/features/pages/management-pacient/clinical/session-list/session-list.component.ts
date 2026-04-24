@@ -11,6 +11,7 @@ import { AppPermission } from '../../../../../core/models/auth.model';
 import {
   ClinicalEpisodeResponse,
   ClinicalSessionResponse,
+  SessionStatus,
   sessionStatusOptions,
 } from '../../../../../core/models/clinical/clinical.interface';
 import {
@@ -20,6 +21,7 @@ import {
   PaginatedFn,
   noopTableEvent,
 } from '../../../../../shared/components/table/table.model';
+import { sessionActionsCode, sessionTableColumns } from './session-list.util';
 
 @Component({
   selector: 'knv-session-list',
@@ -37,14 +39,7 @@ export class SessionListComponent implements OnInit {
   actions: { [key: string]: boolean } = {};
   rowActions: ITableRowAction[] = [];
 
-  columns: ITableColumn[] = [
-    { name: 'Sesión #', property: 'sessionNumber', visible: true, isModelProperty: true },
-    { name: 'Fecha', property: 'sessionDate', visible: true, isModelProperty: true },
-    { name: 'Terapeuta', property: 'employeeFullName', visible: true, isModelProperty: true },
-    { name: 'Motivo', property: 'reasonForConsultation', visible: true, isModelProperty: true },
-    { name: 'Estado', property: 'sessionStatusLabel', visible: true, isModelProperty: true },
-    { name: 'Tiene imagen', property: 'hasImageAnalysis', visible: true, isModelProperty: true },
-  ];
+  columns: ITableColumn[] = [...sessionTableColumns];
 
   constructor(
     public authService: AuthService,
@@ -63,10 +58,11 @@ export class SessionListComponent implements OnInit {
 
   private loadActions(): void {
     this.actions = {
-      listAction: this.authService.hasPermission(AppPermission.LIST_CLINICAL_SESSION),
-      createAction: this.authService.hasPermission(AppPermission.CREATE_CLINICAL_SESSION),
-      updateAction: this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION),
-      deleteAction: this.authService.hasPermission(AppPermission.DELETE_CLINICAL_SESSION),
+      listAction:         this.authService.hasPermission(AppPermission.LIST_CLINICAL_SESSION),
+      createAction:       this.authService.hasPermission(AppPermission.CREATE_CLINICAL_SESSION),
+      updateAction:       this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION),
+      deleteAction:       this.authService.hasPermission(AppPermission.DELETE_CLINICAL_SESSION),
+      changeStatusAction: this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION),
     };
     this.rowActions = this.buildRowActions();
   }
@@ -74,10 +70,19 @@ export class SessionListComponent implements OnInit {
   private buildRowActions(): ITableRowAction[] {
     const actions: ITableRowAction[] = [];
     if (this.actions['updateAction']) {
-      actions.push({ action: 'Ver / Editar', actionCode: 'EDIT_SESSION', icon: 'edit' });
+      actions.push({ action: 'Ver / Editar', actionCode: sessionActionsCode.editAction, icon: 'edit' });
+    }
+    if (this.actions['changeStatusAction']) {
+      actions.push({
+        action: 'Cambiar estado',
+        actionCode: sessionActionsCode.changeStatusAction,
+        icon: 'swap_horiz',
+        tooltip: 'Solo disponible para sesiones ABIERTAS',
+        isDisabledFn: (row: ClinicalSessionResponse) => row.sessionStatus !== 'OPEN',
+      });
     }
     if (this.actions['deleteAction']) {
-      actions.push({ action: 'Eliminar', actionCode: 'DELETE_SESSION', icon: 'delete' });
+      actions.push({ action: 'Eliminar', actionCode: sessionActionsCode.deleteAction, icon: 'delete' });
     }
     return actions;
   }
@@ -102,10 +107,13 @@ export class SessionListComponent implements OnInit {
   protected tableActionManager = (event: ITableEvents): void => {
     if (event.event === 'ROW_CLICK') {
       const { item, actionCode } = event.data;
-      if (actionCode === 'EDIT_SESSION') {
+      if (actionCode === sessionActionsCode.editAction) {
         this.router.navigate(['/management-pacient/episodes', this.episodeId, 'sessions', item.id]);
       }
-      if (actionCode === 'DELETE_SESSION') {
+      if (actionCode === sessionActionsCode.changeStatusAction) {
+        this.changeSessionStatus(item);
+      }
+      if (actionCode === sessionActionsCode.deleteAction) {
         this.deleteSession(item);
       }
     }
@@ -122,6 +130,48 @@ export class SessionListComponent implements OnInit {
     } else {
       this.router.navigate(['/management-pacient/episodes']);
     }
+  }
+
+  changeSessionStatus(item: ClinicalSessionResponse): void {
+    // Solo sesiones OPEN pueden cambiarse
+    if (item.sessionStatus !== 'OPEN') {
+      Notiflix.Report.warning(
+        'No permitido',
+        `La sesión #${item.sessionNumber} ya está en estado "${sessionStatusOptions.find(s => s.value === item.sessionStatus)?.label ?? item.sessionStatus}". Solo se pueden cambiar sesiones ABIERTAS.`,
+        'OK',
+      );
+      return;
+    }
+
+    // Diálogo para elegir CLOSED o CANCELLED
+    Notiflix.Confirm.show(
+      `Cambiar estado — Sesión #${item.sessionNumber}`,
+      '¿Cómo desea cerrar esta sesión?',
+      'Cerrar (CLOSED)',
+      'Cancelar sesión',
+      () => this.applyStatusChange(item, 'CLOSED'),
+      () => this.applyStatusChange(item, 'CANCELLED'),
+    );
+  }
+
+  private applyStatusChange(item: ClinicalSessionResponse, status: SessionStatus): void {
+    const label = sessionStatusOptions.find(s => s.value === status)?.label ?? status;
+    Notiflix.Loading.pulse('Cambiando estado...');
+    this.sessionService.changeStatus(item.id, { status }).subscribe({
+      next: () => {
+        Notiflix.Loading.remove(300);
+        Notiflix.Report.success(
+          'Estado actualizado',
+          `La sesión #${item.sessionNumber} fue marcada como "${label}".`,
+          'OK',
+        );
+        this.tableEvents.next({ event: 'RELOAD_PAGE' });
+      },
+      error: err => {
+        Notiflix.Loading.remove(300);
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo cambiar el estado.', 'OK');
+      },
+    });
   }
 
   deleteSession(item: ClinicalSessionResponse): void {

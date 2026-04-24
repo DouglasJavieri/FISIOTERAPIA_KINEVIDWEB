@@ -64,6 +64,8 @@ public class DataLoader implements CommandLineRunner {
             createRecepcionistaRole();
 
             syncPermissionsToExistingFullAccessRoles(permissions);
+            syncPermissionsToFisioterapeutaRole();
+            syncPermissionsToRecepcionistaRole();
 
             User adminUser = createAdminUser();
             assignAdminRoleToUser(adminUser, adminRole);
@@ -341,5 +343,54 @@ public class DataLoader implements CommandLineRunner {
                 }
             });
         }
+    }
+
+    /**
+     * Sincroniza en cada arranque los permisos base del FISIOTERAPEUTA.
+     * Permite agregar nuevos permisos al rol sin necesidad de borrar la BD.
+     */
+    private void syncPermissionsToFisioterapeutaRole() {
+        String[] fisioPerms = {
+                "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT", "UPDATE_PATIENT",
+                "CHANGE_PATIENT_STATUS", "LIST_SERVICE", "VIEW_SERVICE", "CREATE_SERVICE",
+                "UPDATE_SERVICE", "DELETE_SERVICE", "CHANGE_SERVICE_STATUS",
+                "CREATE_EPISODE", "VIEW_EPISODE", "CLOSE_EPISODE", "LIST_EPISODE",
+                "CREATE_CLINICAL_SESSION", "VIEW_CLINICAL_SESSION", "UPDATE_CLINICAL_SESSION",
+                "DELETE_CLINICAL_SESSION", "LIST_CLINICAL_SESSION", "MANAGE_SESSION_SERVICES",
+        };
+        syncPermissionsToRole(ROLE_FISIOTERAPEUTA, fisioPerms);
+    }
+
+    /**
+     * Sincroniza en cada arranque los permisos base del RECEPCIONISTA.
+     * Permite agregar nuevos permisos al rol sin necesidad de borrar la BD.
+     */
+    private void syncPermissionsToRecepcionistaRole() {
+        String[] recepPerms = {
+                "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT",
+                "LIST_SERVICE", "VIEW_SERVICE",
+                "CREATE_EPISODE", "VIEW_EPISODE", "LIST_EPISODE",
+                "LIST_CLINICAL_SESSION", "VIEW_CLINICAL_SESSION",
+        };
+        syncPermissionsToRole(ROLE_RECEPCIONISTA, recepPerms);
+    }
+
+    private void syncPermissionsToRole(String roleName, String[] permissionNames) {
+        roleRepository.findByName(roleName).ifPresent(role -> {
+            int assigned = 0;
+            for (String permName : permissionNames) {
+                permissionRepository.findByName(permName).ifPresent(permission -> {
+                    if (!rolePermissionRepository.existsByRoleIdAndPermissionId(
+                            role.getId(), permission.getId())) {
+                        rolePermissionRepository.save(RolePermission.builder()
+                                .role(role)
+                                .permission(permission)
+                                .build());
+                    }
+                });
+                assigned++;
+            }
+            log.info("Sync de permisos al rol {} completado ({} verificados)", roleName, assigned);
+        });
     }
 }

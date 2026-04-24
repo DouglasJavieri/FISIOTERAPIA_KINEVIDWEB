@@ -79,5 +79,11 @@ export class EmployeeService {
     return this.http.get<ApiResponse<UserResponse[]>>(url)
       .pipe(map(resp => mapResponseApi(url, resp)));
   }
+
+  getActiveList(): Observable<EmployeeResponse[]> {
+    const url = this.base + '/active-list';
+    return this.http.get<ApiResponse<EmployeeResponse[]>>(url)
+      .pipe(map(resp => mapResponseApi(url, resp)));
+  }
 }
 

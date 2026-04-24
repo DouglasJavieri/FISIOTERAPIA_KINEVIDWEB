@@ -286,6 +286,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         return employee;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmployeeResponseDTO> getActiveEmployeeList() throws OperationException {
+        try {
+            return employeeRepository.findAllActiveList()
+                    .stream()
+                    .map(EmployeeResponseDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error inesperado al obtener lista activa de empleados", e);
+            throw new OperationException("Ocurrió un error inesperado al obtener la lista de empleados activos");
+        }
+    }
 }
 
 

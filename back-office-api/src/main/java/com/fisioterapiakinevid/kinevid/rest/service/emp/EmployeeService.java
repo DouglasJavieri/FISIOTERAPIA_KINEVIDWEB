@@ -32,6 +32,8 @@ public interface EmployeeService {
     EmployeeResponseDTO removeUserFromEmployee(Long employeeId) throws OperationException;
 
     List<UserResponseDto> getUsersAvailableForEmployee() throws OperationException;
+
+    List<EmployeeResponseDTO> getActiveEmployeeList() throws OperationException;
 }
 
 

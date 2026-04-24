@@ -1,5 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatStepper } from '@angular/material/stepper';
+import * as Notiflix from 'notiflix';
+
+import { AuthService } from '../../../../../core/services/auth.service';
+import { ClinicalSessionService } from '../../../../../core/services/clinical/clinical-session.service';
+import { ClinicalEpisodeService } from '../../../../../core/services/clinical/clinical-episode.service';
+import { EmployeeService } from '../../../../../core/services/employee/employee.service';
+import { MedicalServiceService } from '../../../../../core/services/medical-service/medical-service.service';
+import { AppPermission } from '../../../../../core/models/auth.model';
+import {
+  ClinicalEpisodeResponse,
+  ClinicalSessionRequest,
+  ClinicalSessionResponse,
+  ClinicalSessionUpdateRequest,
+  SessionServiceRequest,
+  SessionServiceResponse,
+  sessionStatusOptions,
+} from '../../../../../core/models/clinical/clinical.interface';
+import { EmployeeResponse } from '../../../../../core/models/employee/employee.interface';
+import { MedicalServiceResponse } from '../../../../../core/models/medical-service/medical-service.interface';
+import {
+  noOnlyWhitespaceValidator,
+  noWhitespaceValidator,
+} from '../../../../../shared/utils/validators.util';
 
 @Component({
   selector: 'knv-session-form',
@@ -7,21 +32,322 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./session-form.component.scss'],
 })
 export class SessionFormComponent implements OnInit {
+
+  @ViewChild('stepper') stepper!: MatStepper;
+
   episodeId!: number;
   sessionId: number | null = null;
   isNew = true;
+  isLoading = false;
+  isSavingService = false;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  episode: ClinicalEpisodeResponse | null = null;
+  session: ClinicalSessionResponse | null = null;
+  employeeList: EmployeeResponse[] = [];
+  serviceList: MedicalServiceResponse[] = [];
+  appliedServices: SessionServiceResponse[] = [];
+
+  // Paso 1 — Datos básicos
+  step1!: FormGroup;
+  maxDate = new Date();
+
+  // Paso 2 — Evaluación clínica
+  step2!: FormGroup;
+
+  // Paso 3 — Servicio a agregar
+  step3!: FormGroup;
+
+  canUpdate = false;
+  sessionLocked = false;
+  sessionStatusOptions = sessionStatusOptions;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    public authService: AuthService,
+    private sessionService: ClinicalSessionService,
+    private episodeService: ClinicalEpisodeService,
+    private employeeService: EmployeeService,
+    private medicalServiceService: MedicalServiceService,
+  ) {}
 
   ngOnInit(): void {
     this.episodeId = Number(this.route.snapshot.paramMap.get('episodeId'));
     const sid = this.route.snapshot.paramMap.get('sessionId');
     this.sessionId = sid && sid !== 'new' ? Number(sid) : null;
     this.isNew = !this.sessionId;
+
+    this.canUpdate = this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION);
+
+    this.buildForms();
+    this.loadCatalogues();
+
+    if (!this.isNew) {
+      this.loadSession();
+    } else {
+      this.loadEpisode();
+    }
+  }
+
+  private buildForms(): void {
+    this.step1 = new FormGroup({
+      employeeId: new FormControl(null, [Validators.required]),
+      sessionDate: new FormControl(null, [Validators.required]),
+      reasonForConsultation: new FormControl('', [
+        Validators.required, Validators.maxLength(500), noWhitespaceValidator(),
+      ]),
+      relevantBackground: new FormControl('', [
+        Validators.maxLength(1000), noOnlyWhitespaceValidator(),
+      ]),
+    });
+
+    this.step2 = new FormGroup({
+      kinesiologicalEvaluation: new FormControl('', [noOnlyWhitespaceValidator()]),
+      treatmentApplied: new FormControl('', [noOnlyWhitespaceValidator()]),
+      observations: new FormControl('', [noOnlyWhitespaceValidator()]),
+      evolution: new FormControl('', [noOnlyWhitespaceValidator()]),
+    });
+
+    this.step3 = new FormGroup({
+      medicalServiceId: new FormControl(null, [Validators.required]),
+      quantity: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(99)]),
+      unitPrice: new FormControl(null, [Validators.min(0)]),
+      notes: new FormControl('', [Validators.maxLength(500), noOnlyWhitespaceValidator()]),
+    });
+  }
+
+  private loadCatalogues(): void {
+    this.employeeService.getActiveList().subscribe({
+      next: list => this.employeeList = list,
+      error: () => {},
+    });
+    this.medicalServiceService.getActiveList().subscribe({
+      next: list => this.serviceList = list,
+      error: () => {},
+    });
+  }
+
+  private loadEpisode(): void {
+    this.episodeService.getById(this.episodeId).subscribe({
+      next: ep => this.episode = ep,
+      error: () => Notiflix.Report.failure('Error', 'No se pudo cargar el episodio.', 'OK'),
+    });
+  }
+
+  private loadSession(): void {
+    Notiflix.Loading.pulse('Cargando sesión...');
+    this.sessionService.getById(this.sessionId!).subscribe({
+      next: s => {
+        this.session = s;
+        this.sessionLocked = s.sessionStatus !== 'OPEN';
+
+        this.step1.patchValue({
+          employeeId: s.employeeId,
+          sessionDate: s.sessionDate,
+          reasonForConsultation: s.reasonForConsultation,
+          relevantBackground: s.relevantBackground ?? '',
+        });
+        this.step2.patchValue({
+          kinesiologicalEvaluation: s.kinesiologicalEvaluation ?? '',
+          treatmentApplied: s.treatmentApplied ?? '',
+          observations: s.observations ?? '',
+          evolution: s.evolution ?? '',
+        });
+
+        if (this.sessionLocked || !this.canUpdate) {
+          this.step1.disable();
+          this.step2.disable();
+        }
+
+        this.loadAppliedServices();
+        Notiflix.Loading.remove(300);
+      },
+      error: () => {
+        Notiflix.Loading.remove(300);
+        Notiflix.Report.failure('Error', 'No se pudo cargar la sesión.', 'OK');
+      },
+    });
+  }
+
+  private loadAppliedServices(): void {
+    if (!this.sessionId) return;
+    this.sessionService.getServices(this.sessionId).subscribe({
+      next: list => this.appliedServices = list,
+      error: () => {},
+    });
+  }
+
+  // ─── Paso 1: guardar datos básicos ─────────────────────────────────────────
+
+  saveStep1(): void {
+    if (this.step1.invalid) {
+      this.step1.markAllAsTouched();
+      return;
+    }
+    if (this.isNew) {
+      this.createSession();
+    } else {
+      this.updateSession();
+    }
+  }
+
+  private createSession(): void {
+    const v = this.step1.value;
+    const body: ClinicalSessionRequest = {
+      episodeId: this.episodeId,
+      employeeId: v.employeeId,
+      sessionDate: this.formatDate(v.sessionDate),
+      reasonForConsultation: v.reasonForConsultation.trim(),
+      relevantBackground: v.relevantBackground?.trim() || null,
+    };
+    Notiflix.Loading.pulse('Creando sesión...');
+    this.sessionService.create(body).subscribe({
+      next: s => {
+        Notiflix.Loading.remove(300);
+        this.session = s;
+        this.sessionId = s.id;
+        this.isNew = false;
+        this.stepper.next();
+      },
+      error: err => {
+        Notiflix.Loading.remove(300);
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear la sesión.', 'OK');
+      },
+    });
+  }
+
+  private updateSession(): void {
+    const v1 = this.step1.value;
+    const v2 = this.step2.value;
+    const body: ClinicalSessionUpdateRequest = {
+      employeeId: v1.employeeId,
+      reasonForConsultation: v1.reasonForConsultation?.trim(),
+      relevantBackground: v1.relevantBackground?.trim() || null,
+      kinesiologicalEvaluation: v2.kinesiologicalEvaluation?.trim() || null,
+      treatmentApplied: v2.treatmentApplied?.trim() || null,
+      observations: v2.observations?.trim() || null,
+      evolution: v2.evolution?.trim() || null,
+    };
+    Notiflix.Loading.pulse('Guardando cambios...');
+    this.sessionService.update(this.sessionId!, body).subscribe({
+      next: s => {
+        Notiflix.Loading.remove(300);
+        this.session = s;
+        Notiflix.Notify.success('Sesión actualizada correctamente.');
+        this.stepper.next();
+      },
+      error: err => {
+        Notiflix.Loading.remove(300);
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo actualizar la sesión.', 'OK');
+      },
+    });
+  }
+
+  // ─── Paso 2: evaluación clínica ────────────────────────────────────────────
+
+  saveStep2(): void {
+    if (this.sessionLocked || !this.canUpdate) {
+      this.stepper.next();
+      return;
+    }
+    this.updateSession();
+  }
+
+  // ─── Paso 3: servicios aplicados ───────────────────────────────────────────
+
+  addService(): void {
+    if (this.step3.invalid) {
+      this.step3.markAllAsTouched();
+      return;
+    }
+    const v = this.step3.value;
+    const body: SessionServiceRequest = {
+      medicalServiceId: v.medicalServiceId,
+      quantity: v.quantity,
+      unitPrice: v.unitPrice || null,
+      notes: v.notes?.trim() || null,
+    };
+    this.isSavingService = true;
+    this.sessionService.addService(this.sessionId!, body).subscribe({
+      next: () => {
+        this.isSavingService = false;
+        this.step3.reset({ quantity: 1 });
+        this.loadAppliedServices();
+        Notiflix.Notify.success('Servicio agregado.');
+      },
+      error: err => {
+        this.isSavingService = false;
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo agregar el servicio.', 'OK');
+      },
+    });
+  }
+
+  removeService(ss: SessionServiceResponse): void {
+    Notiflix.Confirm.show(
+      'Eliminar servicio',
+      `¿Eliminar "${ss.medicalServiceName}" de esta sesión?`,
+      'Sí', 'No',
+      () => {
+        this.sessionService.removeService(ss.id).subscribe({
+          next: () => {
+            this.loadAppliedServices();
+            Notiflix.Notify.success('Servicio eliminado.');
+          },
+          error: err => Notiflix.Report.failure('Error', err?.error?.message ?? 'Error al eliminar.', 'OK'),
+        });
+      },
+    );
+  }
+
+  // ─── Utilidades ────────────────────────────────────────────────────────────
+
+  f1(name: string) { return this.step1.get(name); }
+  f2(name: string) { return this.step2.get(name); }
+  f3(name: string) { return this.step3.get(name); }
+
+  private formatDate(date: any): string {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    const d = new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  getEmployeeName(id: number): string {
+    const emp = this.employeeList.find(e => e.id === id);
+    return emp ? `${emp.firstName} ${emp.paternalSurname}` : String(id);
+  }
+
+  getServiceName(id: number): string {
+    const svc = this.serviceList.find(s => s.id === id);
+    return svc ? svc.name : String(id);
+  }
+
+  onServiceSelected(serviceId: number): void {
+    const svc = this.serviceList.find(s => s.id === serviceId);
+    if (svc?.price) {
+      this.step3.get('unitPrice')?.setValue(svc.price);
+    }
+  }
+
+  finalize(): void {
+    Notiflix.Report.success(
+      'Sesión guardada',
+      this.isNew
+        ? 'La sesión fue registrada exitosamente.'
+        : 'Los cambios fueron guardados.',
+      'OK',
+      () => this.goBack(),
+    );
   }
 
   goBack(): void {
     this.router.navigate(['/management-pacient/episodes', this.episodeId, 'sessions']);
   }
-}
 
+  get statusLabel(): string {
+    return sessionStatusOptions.find(s => s.value === this.session?.sessionStatus)?.label ?? '';
+  }
+}

@@ -7,9 +7,12 @@ import com.fisioterapiakinevid.kinevid.rest.model.dto.clinical.ChangeSessionStat
 import com.fisioterapiakinevid.kinevid.rest.model.dto.clinical.ClinicalSessionRequestDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.clinical.ClinicalSessionResponseDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.clinical.ClinicalSessionUpdateRequestDTO;
+import com.fisioterapiakinevid.kinevid.rest.model.dto.clinical.SessionServiceRequestDTO;
+import com.fisioterapiakinevid.kinevid.rest.model.dto.clinical.SessionServiceResponseDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.enums.clinical.SessionStatus;
 import com.fisioterapiakinevid.kinevid.rest.response.ResponseBody;
 import com.fisioterapiakinevid.kinevid.rest.service.clinical.ClinicalSessionService;
+import com.fisioterapiakinevid.kinevid.rest.service.clinical.SessionServiceManagementService;
 import com.fisioterapiakinevid.kinevid.rest.util.ApiUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +30,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.http.ResponseEntity.ok;
 
 /**
@@ -41,6 +46,7 @@ import static org.springframework.http.ResponseEntity.ok;
 public class ClinicalSessionController {
 
     private final ClinicalSessionService sessionService;
+    private final SessionServiceManagementService sessionServiceManagement;
 
 
     @PostMapping("/create")
@@ -201,6 +207,89 @@ public class ClinicalSessionController {
             throw ApiResponseException.badRequest(e.getMessage());
         } catch (Exception e) {
             log.error("Error inesperado al eliminar sesión ID={}", id, e);
+            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  SERVICIOS APLICADOS EN SESIÓN (N:M  session ↔ medical_service)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @PostMapping("/{sessionId}/services")
+    @PreAuthorize("hasAuthority('UPDATE_CLINICAL_SESSION')")
+    @Operation(summary = "Agregar / actualizar servicio en sesión",
+            description = "Agrega un servicio médico a la sesión. Si ya existía, actualiza cantidad y notas (upsert). La sesión debe estar ABIERTA. Requiere permiso UPDATE_CLINICAL_SESSION.",
+            tags = {"clinical-sessions"},
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Servicio agregado/actualizado", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Error de validación o sesión no OPEN", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(hidden = true))),
+                    @ApiResponse(responseCode = "403", description = "Sin permiso UPDATE_CLINICAL_SESSION", content = @Content(schema = @Schema(hidden = true)))
+            }, security = @SecurityRequirement(name = "bearerToken"))
+    public ResponseEntity<ResponseBody<SessionServiceResponseDTO>> addServiceToSession(
+            @PathVariable Long sessionId,
+            @Valid @RequestBody SessionServiceRequestDTO request) {
+        try {
+            SessionServiceResponseDTO result = sessionServiceManagement.addServiceToSession(sessionId, request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiUtil.buildSuccessResponse(result, "Servicio agregado a la sesión exitosamente."));
+        } catch (OperationException e) {
+            log.error("Error al agregar servicio a sesión ID={}: {}", sessionId, e.getMessage());
+            throw ApiResponseException.badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado al agregar servicio a sesión ID={}", sessionId, e);
+            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/{sessionId}/services")
+    @PreAuthorize("hasAuthority('VIEW_CLINICAL_SESSION')")
+    @Operation(summary = "Listar servicios de una sesión",
+            description = "Retorna todos los servicios médicos aplicados en una sesión. Requiere permiso VIEW_CLINICAL_SESSION.",
+            tags = {"clinical-sessions"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Sesión no encontrada", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(hidden = true))),
+                    @ApiResponse(responseCode = "403", description = "Sin permiso VIEW_CLINICAL_SESSION", content = @Content(schema = @Schema(hidden = true)))
+            }, security = @SecurityRequirement(name = "bearerToken"))
+    public ResponseEntity<ResponseBody<List<SessionServiceResponseDTO>>> getServicesBySession(
+            @PathVariable Long sessionId) {
+        try {
+            List<SessionServiceResponseDTO> result = sessionServiceManagement.getServicesBySession(sessionId);
+            return ok(ApiUtil.buildResponseWithDefaults(result));
+        } catch (OperationException e) {
+            log.error("Error al listar servicios de sesión ID={}: {}", sessionId, e.getMessage());
+            throw ApiResponseException.badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado al listar servicios de sesión ID={}", sessionId, e);
+            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @DeleteMapping("/services/{sessionServiceId}")
+    @PreAuthorize("hasAuthority('UPDATE_CLINICAL_SESSION')")
+    @Operation(summary = "Eliminar servicio de sesión (lógico)",
+            description = "Elimina lógicamente un servicio de una sesión. Solo si la sesión sigue ABIERTA. Requiere permiso UPDATE_CLINICAL_SESSION.",
+            tags = {"clinical-sessions"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Servicio eliminado de la sesión", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Registro no encontrado o sesión no está OPEN", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(hidden = true))),
+                    @ApiResponse(responseCode = "403", description = "Sin permiso UPDATE_CLINICAL_SESSION", content = @Content(schema = @Schema(hidden = true)))
+            }, security = @SecurityRequirement(name = "bearerToken"))
+    public ResponseEntity<ResponseBody<Boolean>> removeServiceFromSession(@PathVariable Long sessionServiceId) {
+        try {
+            sessionServiceManagement.removeServiceFromSession(sessionServiceId);
+            return ok(ApiUtil.buildSuccessResponse(true, "Servicio eliminado de la sesión exitosamente."));
+        } catch (OperationException e) {
+            log.error("Error al eliminar servicio de sesión ID={}: {}", sessionServiceId, e.getMessage());
+            throw ApiResponseException.badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado al eliminar servicio de sesión ID={}", sessionServiceId, e);
             throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
         }
     }

@@ -256,7 +256,7 @@ public class EmployeeController {
     @GetMapping("/users-available")
     @PreAuthorize("hasAuthority('ASSIGN_USER_TO_EMPLOYEE')")
     @Operation(summary = "Listar usuarios disponibles para asignar",
-            description = "Retorna usuarios activos que aÃºn no tienen empleado asignado. Usado por el modal de asignaciÃ³n. Requiere permiso ASSIGN_USER_TO_EMPLOYEE.",
+            description = "Retorna usuarios activos que aún no tienen empleado asignado. Usado por el modal de asignación. Requiere permiso ASSIGN_USER_TO_EMPLOYEE.",
             tags = {"employees"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente", content = @Content(mediaType = "application/json")),
@@ -273,6 +273,30 @@ public class EmployeeController {
             throw ApiResponseException.badRequest(e.getMessage());
         } catch (Exception e) {
             log.error("Error inesperado al obtener usuarios disponibles", e);
+            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/active-list")
+    @PreAuthorize("hasAuthority('LIST_EMPLOYEE')")
+    @Operation(summary = "Lista activa de empleados (sin paginar)",
+            description = "Retorna todos los empleados con estado ACTIVE para selectores. Requiere permiso LIST_EMPLOYEE.",
+            tags = {"employees"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content(schema = @Schema(hidden = true))),
+                    @ApiResponse(responseCode = "403", description = "Sin permiso LIST_EMPLOYEE", content = @Content(schema = @Schema(hidden = true)))
+            }, security = @SecurityRequirement(name = "bearerToken"))
+    public ResponseEntity<ResponseBody<List<EmployeeResponseDTO>>> getActiveEmployeeList() {
+        try {
+            List<EmployeeResponseDTO> list = employeeService.getActiveEmployeeList();
+            return ok(ApiUtil.buildResponseWithDefaults(list));
+        } catch (OperationException e) {
+            log.error("Error al obtener lista activa de empleados: {}", e.getMessage());
+            throw ApiResponseException.badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado al obtener lista activa de empleados", e);
             throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
         }
     }
