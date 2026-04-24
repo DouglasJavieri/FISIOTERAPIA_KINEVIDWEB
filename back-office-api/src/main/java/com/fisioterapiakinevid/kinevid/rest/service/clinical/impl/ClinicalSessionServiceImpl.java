@@ -15,6 +15,7 @@ import com.fisioterapiakinevid.kinevid.rest.service.clinical.ClinicalSessionServ
 import com.fisioterapiakinevid.kinevid.rest.service.emp.EmployeeService;
 import com.fisioterapiakinevid.kinevid.rest.util.FormatUtil;
 import com.fisioterapiakinevid.kinevid.rest.util.ValidationUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,7 +27,7 @@ import java.time.LocalDate;
 
 /**
  * @author Douglas Cristhian Javieri Vino
- * @created 23/04/2026
+ * Creado: 23/04/2026
  */
 @Service
 @Slf4j
@@ -36,6 +37,7 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
     private final ClinicalSessionRepository sessionRepository;
     private final ClinicalEpisodeService episodeService;
     private final EmployeeService employeeService;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
@@ -50,7 +52,7 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
             }
 
             // Validar fisioterapeuta
-            var employeeDTO = employeeService.getEmployeeById(request.getEmployeeId());
+            employeeService.getEmployeeById(request.getEmployeeId());
 
             ValidationUtil.throwExceptionIfInvalidText("Motivo de consulta", request.getReasonForConsultation(), true, 500);
 
@@ -60,12 +62,9 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
                     .map(max -> max + 1)
                     .orElse(1);
 
-            // Proxy JPA para FK
-            ClinicalEpisode episodeRef = new ClinicalEpisode();
-            episodeRef.setId(request.getEpisodeId());
-
-            Employee employeeRef = new Employee();
-            employeeRef.setId(request.getEmployeeId());
+            // Referencias JPA reales para que Hibernate pueda cargar relaciones lazy luego
+            ClinicalEpisode episodeRef = entityManager.getReference(ClinicalEpisode.class, request.getEpisodeId());
+            Employee employeeRef = entityManager.getReference(Employee.class, request.getEmployeeId());
 
             ClinicalSession session = ClinicalSession.builder()
                     .episode(episodeRef)
@@ -142,9 +141,7 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
             // Actualizar fisioterapeuta si se envía
             if (request.getEmployeeId() != null) {
                 employeeService.getEmployeeById(request.getEmployeeId()); // valida existencia
-                Employee employeeRef = new Employee();
-                employeeRef.setId(request.getEmployeeId());
-                session.setEmployee(employeeRef);
+                session.setEmployee(entityManager.getReference(Employee.class, request.getEmployeeId()));
             }
 
             if (request.getReasonForConsultation() != null && !request.getReasonForConsultation().isBlank()) {
@@ -240,16 +237,7 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
 
 
     private ClinicalSession loadSessionWithRelations(Long sessionId) throws OperationException {
-        return sessionRepository.findById(sessionId)
-                .map(s -> {
-                    s.getEpisode().getId();
-                    s.getEpisode().getEpisodeNumber();
-                    s.getEpisode().getPatient().getId();
-                    s.getEpisode().getPatient().getFirstName();
-                    s.getEmployee().getId();
-                    s.getEmployee().getFirstName();
-                    return s;
-                })
+        return sessionRepository.findByIdWithRelations(sessionId)
                 .orElseThrow(() -> new OperationException(FormatUtil.noRegistrado("Sesión Clínica", sessionId)));
     }
 }

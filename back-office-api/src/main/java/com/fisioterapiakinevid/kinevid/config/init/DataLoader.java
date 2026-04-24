@@ -225,7 +225,7 @@ public class DataLoader implements CommandLineRunner {
         roleRepository.findByName(ROLE_ROOT).orElseGet(() -> {
             Role newRole = Role.builder()
                     .name(ROLE_ROOT)
-                    .description("Rol raÃ­z con acceso total al sistema")
+                    .description("Rol raiz con acceso total al sistema")
                     .status(RoleStatus.ACTIVE)
                     .build();
 

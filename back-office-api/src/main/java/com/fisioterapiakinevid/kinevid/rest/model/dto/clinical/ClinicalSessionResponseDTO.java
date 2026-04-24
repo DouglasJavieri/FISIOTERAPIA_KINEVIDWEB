@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 /**
  * @author Douglas Cristhian Javieri Vino
- * @created 23/04/2026
+ * Creado: 23/04/2026
  */
 @Getter
 @Setter
@@ -38,11 +38,13 @@ public class ClinicalSessionResponseDTO {
 
     public ClinicalSessionResponseDTO(ClinicalSession session) {
         this.id = session.getId();
-        this.episodeId = session.getEpisode().getId();
-        this.episodeNumber = session.getEpisode().getEpisodeNumber();
-        this.patientId = session.getEpisode().getPatient().getId();
+        this.episodeId = session.getEpisode() != null ? session.getEpisode().getId() : null;
+        this.episodeNumber = session.getEpisode() != null ? session.getEpisode().getEpisodeNumber() : null;
+        this.patientId = session.getEpisode() != null && session.getEpisode().getPatient() != null
+                ? session.getEpisode().getPatient().getId()
+                : null;
         this.patientFullName = buildPatientFullName(session);
-        this.employeeId = session.getEmployee().getId();
+        this.employeeId = session.getEmployee() != null ? session.getEmployee().getId() : null;
         this.employeeFullName = buildEmployeeFullName(session);
         this.sessionDate = session.getSessionDate();
         this.sessionNumber = session.getSessionNumber();
@@ -57,23 +59,37 @@ public class ClinicalSessionResponseDTO {
     }
 
     private String buildPatientFullName(ClinicalSession session) {
+        if (session.getEpisode() == null || session.getEpisode().getPatient() == null) {
+            return null;
+        }
         var patient = session.getEpisode().getPatient();
-        StringBuilder sb = new StringBuilder(patient.getFirstName());
-        sb.append(" ").append(patient.getPaternalSurname());
+        String firstName = patient.getFirstName() != null ? patient.getFirstName() : "";
+        String paternalSurname = patient.getPaternalSurname() != null ? patient.getPaternalSurname() : "";
+        StringBuilder sb = new StringBuilder(firstName);
+        if (!paternalSurname.isBlank()) {
+            sb.append(" ").append(paternalSurname);
+        }
         if (patient.getMaternalSurname() != null && !patient.getMaternalSurname().isBlank()) {
             sb.append(" ").append(patient.getMaternalSurname());
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     private String buildEmployeeFullName(ClinicalSession session) {
+        if (session.getEmployee() == null) {
+            return null;
+        }
         var emp = session.getEmployee();
-        StringBuilder sb = new StringBuilder(emp.getFirstName());
-        sb.append(" ").append(emp.getPaternalSurname());
+        String firstName = emp.getFirstName() != null ? emp.getFirstName() : "";
+        String paternalSurname = emp.getPaternalSurname() != null ? emp.getPaternalSurname() : "";
+        StringBuilder sb = new StringBuilder(firstName);
+        if (!paternalSurname.isBlank()) {
+            sb.append(" ").append(paternalSurname);
+        }
         if (emp.getMaternalSurname() != null && !emp.getMaternalSurname().isBlank()) {
             sb.append(" ").append(emp.getMaternalSurname());
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 }
 

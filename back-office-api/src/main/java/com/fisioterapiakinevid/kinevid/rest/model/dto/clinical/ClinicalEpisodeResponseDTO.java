@@ -10,7 +10,7 @@ import java.time.LocalDate;
  * DTO de respuesta para ClinicalEpisode.
  *
  * @author Douglas Cristhian Javieri Vino
- * @created 23/04/2026
+ * Creado: 23/04/2026
  */
 @Getter
 @Setter
@@ -33,9 +33,9 @@ public class ClinicalEpisodeResponseDTO {
 
     public ClinicalEpisodeResponseDTO(ClinicalEpisode episode) {
         this.id = episode.getId();
-        this.patientId = episode.getPatient().getId();
+        this.patientId = episode.getPatient() != null ? episode.getPatient().getId() : null;
         this.patientFullName = buildFullName(episode);
-        this.patientCi = episode.getPatient().getCi();
+        this.patientCi = episode.getPatient() != null ? episode.getPatient().getCi() : null;
         this.episodeNumber = episode.getEpisodeNumber();
         this.startDate = episode.getStartDate();
         this.endDate = episode.getEndDate();
@@ -45,12 +45,19 @@ public class ClinicalEpisodeResponseDTO {
     }
 
     private String buildFullName(ClinicalEpisode episode) {
-        StringBuilder sb = new StringBuilder(episode.getPatient().getFirstName());
-        sb.append(" ").append(episode.getPatient().getPaternalSurname());
+        if (episode.getPatient() == null) {
+            return null;
+        }
+        String firstName = episode.getPatient().getFirstName() != null ? episode.getPatient().getFirstName() : "";
+        String paternalSurname = episode.getPatient().getPaternalSurname() != null ? episode.getPatient().getPaternalSurname() : "";
+        StringBuilder sb = new StringBuilder(firstName);
+        if (!paternalSurname.isBlank()) {
+            sb.append(" ").append(paternalSurname);
+        }
         if (episode.getPatient().getMaternalSurname() != null && !episode.getPatient().getMaternalSurname().isBlank()) {
             sb.append(" ").append(episode.getPatient().getMaternalSurname());
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 }
 

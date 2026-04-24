@@ -13,10 +13,17 @@ import java.util.Optional;
 
 /**
  * @author Douglas Cristhian Javieri Vino
- * @created 23/04/2026
+ * Creado: 23/04/2026
  */
 @Repository
 public interface ClinicalSessionRepository extends JpaRepository<ClinicalSession, Long> {
+
+    @Query("SELECT s FROM ClinicalSession s " +
+           "JOIN FETCH s.episode e " +
+           "JOIN FETCH e.patient " +
+           "JOIN FETCH s.employee " +
+           "WHERE s.id = :sessionId AND s.deleted = false")
+    Optional<ClinicalSession> findByIdWithRelations(@Param("sessionId") Long sessionId);
 
     @Query("SELECT s FROM ClinicalSession s WHERE s.episode.id = :episodeId AND s.deleted = false ORDER BY s.sessionNumber DESC")
     Page<ClinicalSession> findAllByEpisodeId(@Param("episodeId") Long episodeId, Pageable pageable);
