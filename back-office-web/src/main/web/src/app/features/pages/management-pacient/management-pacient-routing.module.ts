@@ -17,6 +17,11 @@ const routes: Routes = [
     loadChildren: () =>
       import('./medical-service/service.module').then(m => m.ServiceModule),
   },
+  {
+    path: 'episodes',
+    loadChildren: () =>
+      import('./clinical/clinical.module').then(m => m.ClinicalModule),
+  },
   { path: '', redirectTo: 'patients', pathMatch: 'full' },
 ];
 

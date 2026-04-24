@@ -13,6 +13,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule }      from '@angular/material/tooltip';
 import { MatDatepickerModule }  from '@angular/material/datepicker';
 import { MatNativeDateModule }  from '@angular/material/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 // Shared & Layout
 import { SharedModule } from '../../../../shared/shared.module';
@@ -23,6 +28,7 @@ import { BreadcrumbsModule } from '../../../../shared/components/breadcrumbs/bre
 import { PatientComponent } from './patient.component';
 import { AddPatientComponent } from './add-patient/add-patient.component';
 import { UpdatePatientComponent } from './update-patient/update-patient.component';
+import { PatientProfileComponent } from './patient-profile/patient-profile.component';
 import { PatientRoutingModule } from './patient-routing.module';
 
 @NgModule({
@@ -30,6 +36,7 @@ import { PatientRoutingModule } from './patient-routing.module';
     PatientComponent,
     AddPatientComponent,
     UpdatePatientComponent,
+    PatientProfileComponent,
   ],
   imports: [
     CommonModule,
@@ -44,6 +51,11 @@ import { PatientRoutingModule } from './patient-routing.module';
     MatTooltipModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatCardModule,
+    MatChipsModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
     SharedModule,
     PageLayoutModule,
     BreadcrumbsModule,

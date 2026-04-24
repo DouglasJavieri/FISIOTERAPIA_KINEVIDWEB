@@ -386,49 +386,110 @@ LIST_CLINICAL_SESSION, MANAGE_SESSION_SERVICES
 
 ### 🔵 FASE 5 — Frontend: Episodios + Historia Clínica
 
-**Estructura de carpetas:**
+#### 5.1 Sidebar actualizado (Gestión de Pacientes)
+
 ```
-patient/
-└── clinical/
+🏥 Gestión de Pacientes
+  ├── 📋 Servicios del Consultorio
+  ├── 🧑‍⚕️ Pacientes
+  │     └── [clic en paciente] → Perfil del Paciente
+  └── 📂 Episodios Clínicos          ← NUEVO ítem en menú
+        └── [filtro paciente + estado] → [clic episodio] → Sesiones del Episodio
+```
+
+#### 5.2 Dos flujos de navegación (reutilizan las mismas pantallas)
+
+**Flujo 1 — Desde "Pacientes" (recepción / gestión):**
+```
+Lista Pacientes → [clic] → Perfil Paciente
+                              ├── Card datos del paciente (mat-card reutilizable)
+                              ├── Botón "Nuevo Episodio" / "Reactivar"
+                              └── mat-accordion: episodios
+                                    ├── Episodio ACTIVO (resaltado, mat-expansion-panel)
+                                    │     └── [Ver Sesiones] ──────────────────────┐
+                                    └── Episodios CERRADOS (colapsados, solo lect.)│
+                                          └── [Ver Sesiones - solo lectura] ───────┤
+                                                                                   ▼
+                                                               Sesiones del Episodio (pantalla compartida)
+                                                                 ├── Card mini del paciente
+                                                                 ├── Info del episodio (estado, fechas)
+                                                                 ├── mat-table paginada de sesiones
+                                                                 └── Botón "Nueva Sesión"
+                                                                       └─► Detalle/Editar Sesión
+```
+
+**Flujo 2 — Desde "Episodios Clínicos" (fisioterapeuta / consulta diaria):**
+```
+Episodios Clínicos
+  ├── mat-select/mat-autocomplete: filtro paciente
+  ├── mat-select: filtro estado (ACTIVE / CLOSED / Todos)
+  └── mat-table paginada de episodios
+        └─[clic episodio]─► Sesiones del Episodio (misma pantalla que Flujo 1)
+                                └─► Detalle/Editar Sesión (misma pantalla)
+```
+
+#### 5.3 Pantallas a crear
+
+| # | Pantalla | Ruta Angular | Descripción |
+|---|---|---|---|
+| 1 | **Perfil del Paciente** | `/management-pacient/patients/:id` | Card paciente + mat-accordion episodios |
+| 2 | **Episodios Clínicos** | `/management-pacient/episodes` | Lista global paginada con filtros |
+| 3 | **Sesiones del Episodio** | `/management-pacient/episodes/:episodeId/sessions` | Tabla sesiones paginada (compartida ambos flujos) |
+| 4 | **Nueva Sesión** | `/management-pacient/episodes/:episodeId/sessions/new` | Formulario pantalla completa (>5 campos) |
+| 5 | **Detalle/Editar Sesión** | `/management-pacient/episodes/:episodeId/sessions/:sessionId` | Formulario completo con servicios |
+
+> 🔁 Las pantallas 3, 4 y 5 son **idénticas** sin importar el flujo de entrada.  
+> El breadcrumb de navegación indica el camino recorrido.
+
+#### 5.4 Componentes Angular Material a usar
+
+| Componente AM | Dónde aplicar |
+|---|---|
+| `mat-card` | Card datos del paciente (componente reutilizable en todas las pantallas clínicas) |
+| `mat-accordion` + `mat-expansion-panel` | Episodios en perfil del paciente |
+| `mat-table` + `mat-paginator` | Lista de episodios y lista de sesiones |
+| `mat-autocomplete` | Filtro de paciente en pantalla Episodios Clínicos |
+| `mat-select` | Filtro de estado del episodio |
+| `mat-chip` | Badge de estado del episodio/sesión (ACTIVE/CLOSED/OPEN) |
+| `mat-badge` | Contador de sesiones en acordeón de episodios |
+| `mat-stepper` | Flujo de "Nueva Sesión" (datos básicos → evaluación → servicios → cierre) |
+| `mat-dialog` | Confirmación al cerrar episodio / reactivar paciente |
+
+#### 5.5 Estructura de carpetas Angular
+
+```
+management-pacient/
+├── patient/                              (ya existe)
+│   ├── patient-profile/                  ← NUEVO: Perfil del paciente
+│   │   ├── patient-profile.component.ts
+│   │   ├── patient-profile.component.html
+│   │   └── patient-profile.component.scss
+│   └── shared/
+│       └── patient-card/                 ← NUEVO: Card reutilizable del paciente
+│           ├── patient-card.component.ts
+│           ├── patient-card.component.html
+│           └── patient-card.component.scss
+│
+└── clinical/                             ← NUEVO módulo
     ├── clinical.module.ts
     ├── clinical-routing.module.ts
-    ├── episode-list/                     ← Lista de episodios del paciente
+    ├── episode-list/                     ← Pantalla "Episodios Clínicos" (Flujo 2)
     │   ├── episode-list.component.ts
-    │   ├── episode-list.component.html   ← Cabecera paciente + episodios (acordeón)
+    │   ├── episode-list.component.html
     │   └── episode-list.component.scss
-    ├── add-episode/                      ← Abrir nuevo episodio / reactivar
-    │   └── ...
-    ├── session-list/                     ← Sesiones de un episodio
+    ├── session-list/                     ← Sesiones del episodio (compartida)
     │   ├── session-list.component.ts
     │   ├── session-list.component.html
     │   └── session-list.component.scss
-    ├── add-session/                      ← Nueva sesión dentro del episodio
-    │   └── ...
-    └── view-session/                     ← Ver / editar sesión (+ servicios)
-        └── ...
+    ├── session-form/                     ← Nueva sesión / editar sesión
+    │   ├── session-form.component.ts
+    │   ├── session-form.component.html
+    │   └── session-form.component.scss
+    └── shared/
+        └── episode-status-badge/         ← Chip de estado reutilizable
+            └── ...
 ```
 
-**Navegación Angular:**
-```
-/management-pacient/patients                → lista pacientes
-/management-pacient/patients/:id/clinical   → episodios del paciente
-/management-pacient/patients/:id/clinical/:episodeId/sessions          → sesiones
-/management-pacient/patients/:id/clinical/:episodeId/sessions/:sessionId → detalle
-```
-
-**Pantalla Episode List:**
-- Cabecera con datos del paciente (nombre, CI, edad, estado)
-- Episodio activo resaltado, con botón "Nueva Sesión"
-- Episodios cerrados en acordeón (colapsados, solo lectura)
-- Botón "Reactivar" si paciente en DISCHARGE
-- Botón "Dar de Alta (cerrar episodio)" en episodio activo
-
-**Pantalla View Session:**
-- Formulario editable (solo si `session_status = OPEN`)
-- Sección evaluación + tratamiento + observaciones + evolución
-- Multiselect de servicios aplicados (con cantidad y notas)
-- Botón "Ir a Análisis de Imagen" (si aplica)
-- Botón "Cerrar Sesión"
 
 ---
 
@@ -538,12 +599,13 @@ clinical/
 │
 └── 🏥 Gestión de Pacientes  [ADMIN / ROOT / FISIOTERAPEUTA / RECEPCIONISTA]
     ├── 📋 Servicios del Consultorio
-    └── 🧑‍⚕️ Pacientes
-          └── Perfil del Paciente
-                └── 📂 Episodios Clínicos
-                      └── 📝 Sesiones
-                            └── 🦶 Análisis de Imagen
-                                  └── 📄 Reporte PDF
+    ├── 🧑‍⚕️ Pacientes
+    │     └── [clic] → Perfil del Paciente
+    │                     └── Acordeón de Episodios → Sesiones → Detalle Sesión
+    └── 📂 Episodios Clínicos          ← NUEVO [ADMIN/ROOT/FISIOTERAPEUTA/RECEPCIONISTA]
+          └── [filtros] → Lista episodios → Sesiones → Detalle Sesión
+                                              └── ��� Análisis de Imagen
+                                                    └── 📄 Reporte PDF
 ```
 
 ---

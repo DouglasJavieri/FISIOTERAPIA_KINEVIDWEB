@@ -1,0 +1,20 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[
+        { name: 'Gestión de Pacientes', link: '/management-pacient' },
+        { name: 'Episodios Clínicos', link: '/management-pacient/episodes' },
+        { name: 'Sesiones', link: '/management-pacient/episodes/' + episodeId + '/sessions' }
+      ]"
+      [current]="isNew ? 'Nueva Sesión' : 'Editar Sesión'">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+  <knv-page-layout-content>
+    <div style="padding: 20px; text-align: center; color: #888">
+      <mat-icon style="font-size:48px; width:48px; height:48px">construction</mat-icon>
+      <p>Formulario de sesión — próximo paso</p>
+      <button mat-stroked-button (click)="goBack()">Volver a sesiones</button>
+    </div>
+  </knv-page-layout-content>
+</knv-page-layout>
+

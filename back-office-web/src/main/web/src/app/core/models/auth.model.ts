@@ -133,4 +133,18 @@ export enum AppPermission {
   DELETE_SERVICE              = 'DELETE_SERVICE',
   LIST_SERVICE                = 'LIST_SERVICE',
   CHANGE_SERVICE_STATUS       = 'CHANGE_SERVICE_STATUS',
+
+  // ── Episodios Clínicos ────────────────────────────────────────────────────
+  CREATE_EPISODE              = 'CREATE_EPISODE',
+  VIEW_EPISODE                = 'VIEW_EPISODE',
+  CLOSE_EPISODE               = 'CLOSE_EPISODE',
+  LIST_EPISODE                = 'LIST_EPISODE',
+
+  // ── Sesiones Clínicas ─────────────────────────────────────────────────────
+  CREATE_CLINICAL_SESSION     = 'CREATE_CLINICAL_SESSION',
+  VIEW_CLINICAL_SESSION       = 'VIEW_CLINICAL_SESSION',
+  UPDATE_CLINICAL_SESSION     = 'UPDATE_CLINICAL_SESSION',
+  DELETE_CLINICAL_SESSION     = 'DELETE_CLINICAL_SESSION',
+  LIST_CLINICAL_SESSION       = 'LIST_CLINICAL_SESSION',
+  MANAGE_SESSION_SERVICES     = 'MANAGE_SESSION_SERVICES',
 }

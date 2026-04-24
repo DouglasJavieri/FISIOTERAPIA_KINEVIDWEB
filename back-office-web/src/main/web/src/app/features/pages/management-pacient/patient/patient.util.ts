@@ -2,6 +2,7 @@ import { ITableColumn } from '../../../../shared/components/table/table.model';
 import { PatientPageResponse } from '../../../../core/models/patient/patient.interface';
 
 export const patientActionsCode = {
+  viewProfileAction:  'viewProfileAction',
   updateAction:       'updateAction',
   changeStatusAction: 'changeStatusAction',
   deleteAction:       'deleteAction',

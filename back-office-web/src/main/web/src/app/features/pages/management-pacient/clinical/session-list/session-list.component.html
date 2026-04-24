@@ -1,0 +1,81 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[
+        { name: 'Gestión de Pacientes', link: '/management-pacient' },
+        { name: 'Episodios Clínicos', link: '/management-pacient/episodes' }
+      ]"
+      [current]="'Ep. #' + (episode?.episodeNumber ?? '')">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+
+  <knv-page-layout-content>
+
+    <!-- Card info del episodio -->
+    <mat-card class="episode-card" *ngIf="episode">
+      <mat-card-content>
+        <div fxLayout="row wrap" fxLayoutGap="20px">
+          <div fxFlex="auto">
+            <p class="episode-card__label">Paciente</p>
+            <p class="episode-card__value">{{ episode.patientFullName }} <span class="ci">(CI: {{ episode.patientCi }})</span></p>
+          </div>
+          <div fxFlex="auto">
+            <p class="episode-card__label">Episodio</p>
+            <p class="episode-card__value"># {{ episode.episodeNumber }}</p>
+          </div>
+          <div fxFlex="auto">
+            <p class="episode-card__label">Fecha inicio</p>
+            <p class="episode-card__value">{{ episode.startDate }}</p>
+          </div>
+          <div fxFlex="auto">
+            <p class="episode-card__label">Fecha cierre</p>
+            <p class="episode-card__value">{{ episode.endDate ?? '—' }}</p>
+          </div>
+          <div fxFlex="auto">
+            <p class="episode-card__label">Estado</p>
+            <mat-chip [class]="episode.episodeStatus === 'ACTIVE' ? 'chip-active' : 'chip-closed'" disableRipple>
+              {{ episode.episodeStatus === 'ACTIVE' ? 'Activo' : 'Cerrado' }}
+            </mat-chip>
+          </div>
+          <div fxFlex="auto">
+            <p class="episode-card__label">Motivo de ingreso</p>
+            <p class="episode-card__value">{{ episode.reasonForAdmission }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tabla de sesiones -->
+    <knv-list name="Sesiones del Episodio" [withFilter]="false">
+
+      <div class="actions">
+        <button mat-stroked-button color="primary" (click)="goBack()" style="margin-right:8px">
+          <mat-icon>arrow_back</mat-icon> Volver
+        </button>
+        <button
+          *ngIf="actions['createAction'] && episode?.episodeStatus === 'ACTIVE'"
+          mat-flat-button color="primary"
+          (click)="newSession()">
+          <mat-icon>add</mat-icon> Nueva Sesión
+        </button>
+      </div>
+
+      <div fxLayout="row wrap">
+        <div fxFlex="100" class="table-scroll" *ngIf="actions['listAction']">
+          <knv-server-paging-table
+            [dataSource]="dataSource"
+            [columns]="columns"
+            [requestPaginatedData]="requestSessionsFn"
+            [itemFormatterFn]="itemFormatterFn"
+            [rowActions]="rowActions"
+            [eventManager]="tableEvents"
+            [pageSizeOptions]="pageSizeOptions"
+            [hasFilters]="false">
+          </knv-server-paging-table>
+        </div>
+      </div>
+
+    </knv-list>
+  </knv-page-layout-content>
+</knv-page-layout>
+

@@ -1,0 +1,67 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[{ name: 'Gestión de Pacientes', link: '/management-pacient' }]"
+      current="Episodios Clínicos">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+
+  <knv-page-layout-content>
+    <knv-list name="Episodios Clínicos" [withFilter]="false">
+
+      <div fxLayout="row wrap">
+        <div fxFlex="100" class="table-scroll" *ngIf="actions['listAction']">
+          <knv-server-paging-table
+            [dataSource]="dataSource"
+            [columns]="columns"
+            [requestPaginatedData]="requestEpisodeListFn"
+            [itemFormatterFn]="itemFormatterFn"
+            [rowActions]="rowActions"
+            [eventManager]="tableEvents"
+            [pageSizeOptions]="pageSizeOptions"
+            [hasFilters]="true">
+
+            <!-- Filtros -->
+            <form [formGroup]="form" (ngSubmit)="applyFilter()">
+              <div fxLayout="row wrap" fxLayoutGap="10px">
+
+                <!-- Filtro paciente (selector con buscador) -->
+                <div fxFlex="30" fxFlex.lt-md="100">
+                  <knv-selects
+                    formControlName="patientId"
+                    name="Paciente"
+                    [data]="patientList"
+                    displayAttr="fullName"
+                    keyAttr="id"
+                    [showAllOption]="false"
+                    placeholder="Buscar paciente...">
+                  </knv-selects>
+                </div>
+
+                <!-- Filtro estado -->
+                <div fxFlex="20" fxFlex.lt-md="100">
+                  <mat-form-field appearance="outline" style="width:100%">
+                    <mat-label>Estado</mat-label>
+                    <mat-select formControlName="status">
+                      <mat-option [value]="null">Todos</mat-option>
+                      <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
+                        {{ opt.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+              </div>
+              <div fxLayout="row" fxLayoutAlign="start center" style="gap:10px; padding:5px">
+                <button mat-flat-button color="accent" type="submit">Buscar</button>
+                <button mat-stroked-button color="accent" type="button" (click)="clearFilter()">Limpiar</button>
+              </div>
+            </form>
+          </knv-server-paging-table>
+        </div>
+      </div>
+
+    </knv-list>
+  </knv-page-layout-content>
+</knv-page-layout>
+

@@ -59,15 +59,15 @@ export class SidebarComponent implements OnInit {
         icon: 'admin_panel_settings',
         route: null,
         children: [
-          { id: 'users',       label: 'Usuarios',   icon: 'person',    route: '/management-users/users' },
-          { id: 'employees',   label: 'Empleados',  icon: 'badge',     route: '/management-users/employees' },
-          { id: 'roles',       label: 'Roles',      icon: 'security',  route: '/management-users/roles' },
-          { id: 'permissions', label: 'Permisos',   icon: 'lock',      route: '/management-users/permissions' },
+          { id: 'users',label: 'Usuarios', icon: 'person', route: '/management-users/users' },
+          { id: 'employees', label: 'Empleados', icon: 'badge', route: '/management-users/employees' },
+          { id: 'roles', label: 'Roles', icon: 'security',  route: '/management-users/roles' },
+          { id: 'permissions', label: 'Permisos', icon: 'lock', route: '/management-users/permissions' },
         ]
       });
     }
 
-    // ── Gestión de Pacientes (ADMIN, ROOT, FISIOTERAPEUTA) ───────────────────
+    // ── Gestión de Pacientes (ADMIN, ROOT, FISIOTERAPEUTA, RECEPCIONISTA) ───
     if (this.authService.hasPermission(AppPermission.LIST_PATIENT)) {
       const patientChildren: MenuItem[] = [
         { id: 'patients', label: 'Pacientes', icon: 'personal_injury', route: '/management-pacient/patients' },
@@ -75,6 +75,11 @@ export class SidebarComponent implements OnInit {
       if (this.authService.hasPermission(AppPermission.LIST_SERVICE)) {
         patientChildren.push(
           { id: 'services', label: 'Servicios', icon: 'medical_services', route: '/management-pacient/services' }
+        );
+      }
+      if (this.authService.hasPermission(AppPermission.LIST_EPISODE)) {
+        patientChildren.push(
+          { id: 'episodes', label: 'Episodios Clínicos', icon: 'folder_open', route: '/management-pacient/episodes' }
         );
       }
       items.push({

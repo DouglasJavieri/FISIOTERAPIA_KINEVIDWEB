@@ -24,11 +24,11 @@ const routes: Routes = [
           import('./management-user/management-user.module').then(m => m.ManagementUserModule),
       },
 
-      // ── Management Pacient (ADMIN / ROOT / FISIOTERAPEUTA) ────────────
+      // ── Management Pacient (ADMIN / ROOT / FISIOTERAPEUTA / RECEPCIONISTA) ─
       {
         path: 'management-pacient',
         canActivate: [RoleGuard],
-        data: { roles: [AppRole.ADMIN, AppRole.ROOT, AppRole.FISIOTERAPEUTA] },
+        data: { roles: [AppRole.ADMIN, AppRole.ROOT, AppRole.FISIOTERAPEUTA, AppRole.RECEPCIONISTA] },
         loadChildren: () =>
           import('./management-pacient/management-pacient.module').then(m => m.ManagementPacientModule),
       },

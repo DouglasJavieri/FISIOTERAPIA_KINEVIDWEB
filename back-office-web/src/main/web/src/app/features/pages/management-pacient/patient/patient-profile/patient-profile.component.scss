@@ -1,0 +1,93 @@
+.patient-card {
+  margin-bottom: 20px;
+
+  .patient-avatar {
+    background: #1976d2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    mat-icon { color: white; font-size: 28px; width: 28px; height: 28px; }
+  }
+}
+
+.patient-data {
+  margin-top: 16px;
+
+  .data-label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .data-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.form-card {
+  margin-bottom: 20px;
+  border-left: 4px solid #ff9800;
+}
+
+.episodes-card {
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    mat-icon { color: #1976d2; }
+  }
+
+  .total-chip {
+    background: #e3f2fd !important;
+    color: #1565c0 !important;
+    font-size: 12px;
+    min-height: 22px;
+    padding: 0 8px;
+  }
+}
+
+.panel-active {
+  border-left: 4px solid #4caf50;
+  .ep-icon { color: #4caf50; }
+}
+.panel-closed {
+  border-left: 4px solid #bdbdbd;
+  .ep-icon { color: #bdbdbd; }
+}
+
+.ep-chip {
+  margin-left: 8px;
+  font-size: 11px !important;
+  min-height: 20px;
+  padding: 0 8px;
+}
+
+.panel-content {
+  padding: 8px 0;
+  p { margin: 4px 0; font-size: 14px; }
+}
+
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 12px;
+}
+
+.close-form {
+  width: 100%;
+  margin-top: 8px;
+}
+
+// Status chips
+.chip-active    { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
+.chip-inactive  { background-color: #fff3e0 !important; color: #e65100 !important; }
+.chip-discharge { background-color: #e3f2fd !important; color: #1565c0 !important; }
+.chip-closed    { background-color: #f5f5f5 !important; color: #757575 !important; }
+

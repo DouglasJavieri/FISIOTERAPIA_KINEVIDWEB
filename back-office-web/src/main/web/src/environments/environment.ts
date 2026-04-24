@@ -20,6 +20,8 @@ export const environment = {
     employee: '/employee',
     patient: '/patient',
     medicalService: '/medical-service',
+    clinicalEpisode: '/clinical-episode',
+    clinicalSession: '/clinical-session',
   }
 };
 

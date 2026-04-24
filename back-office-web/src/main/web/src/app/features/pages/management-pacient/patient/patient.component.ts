@@ -66,14 +66,20 @@ export class PatientComponent implements OnInit {
       listAction: this.authService.hasPermission(AppPermission.LIST_PATIENT),
       createAction: this.authService.hasPermission(AppPermission.CREATE_PATIENT),
       updateAction: this.authService.hasPermission(AppPermission.UPDATE_PATIENT),
-      changeStatusAction: this.authService.hasPermission(AppPermission.CHANGE_PATIENT_STATUS),
+      changeStatusAction:this.authService.hasPermission(AppPermission.CHANGE_PATIENT_STATUS),
       deleteAction: this.authService.hasPermission(AppPermission.DELETE_PATIENT),
+      viewProfileAction: this.authService.hasPermission(AppPermission.VIEW_PATIENT),
     };
     this.rowActions = this.buildRowActions();
   }
 
   protected buildRowActions = (): ITableRowAction[] => {
     const actions: ITableRowAction[] = [];
+    if (this.actions['viewProfileAction']) {
+      actions.push({ action: 'Ver perfil',
+        actionCode: patientActionsCode.viewProfileAction,
+        icon: 'folder_open' });
+    }
     if (this.actions['updateAction']) {
       actions.push({ action: 'Actualizar',
         actionCode: patientActionsCode.updateAction,
@@ -114,10 +120,15 @@ export class PatientComponent implements OnInit {
 
   protected rowActionEvent = (event: { item: PatientPageResponse; actionCode: string }): void => {
     const { item, actionCode } = event;
+    if (actionCode === patientActionsCode.viewProfileAction) this.viewProfile(item);
     if (actionCode === patientActionsCode.updateAction) this.updatePatient(item);
     if (actionCode === patientActionsCode.changeStatusAction) this.changePatientStatus(item);
     if (actionCode === patientActionsCode.deleteAction) this.deletePatient(item);
   };
+
+  viewProfile(item: PatientPageResponse): void {
+    this.router.navigate(['/management-pacient/patients', item.id]);
+  }
 
   createPatient(): void {
     this.router.navigate(['/management-pacient/patients/add']);

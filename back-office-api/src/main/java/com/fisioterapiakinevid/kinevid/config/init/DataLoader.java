@@ -122,6 +122,18 @@ public class DataLoader implements CommandLineRunner {
                 {"DELETE_SERVICE", "Eliminar servicio"},
                 {"LIST_SERVICE", "Listar servicios"},
                 {"CHANGE_SERVICE_STATUS", "Cambiar estado de servicio"},
+                // Episodios clínicos
+                {"CREATE_EPISODE", "Abrir episodio clínico"},
+                {"VIEW_EPISODE", "Ver episodio clínico"},
+                {"CLOSE_EPISODE", "Cerrar episodio clínico (alta médica)"},
+                {"LIST_EPISODE", "Listar episodios clínicos"},
+                // Sesiones clínicas
+                {"CREATE_CLINICAL_SESSION", "Crear sesión clínica"},
+                {"VIEW_CLINICAL_SESSION", "Ver sesión clínica"},
+                {"UPDATE_CLINICAL_SESSION", "Actualizar sesión clínica"},
+                {"DELETE_CLINICAL_SESSION", "Eliminar sesión clínica"},
+                {"LIST_CLINICAL_SESSION", "Listar sesiones clínicas"},
+                {"MANAGE_SESSION_SERVICES", "Gestionar servicios de una sesión"},
         };
 
         for (String[] permData : permissionsData) {
@@ -248,7 +260,12 @@ public class DataLoader implements CommandLineRunner {
             String[] fisioPerms = {
                     "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT", "UPDATE_PATIENT",
                     "CHANGE_PATIENT_STATUS", "LIST_SERVICE", "VIEW_SERVICE", "CREATE_SERVICE",
-                    "VIEW_SERVICE", "UPDATE_SERVICE", "DELETE_SERVICE", "LIST_SERVICE", "CHANGE_SERVICE_STATUS",
+                    "UPDATE_SERVICE", "DELETE_SERVICE", "CHANGE_SERVICE_STATUS",
+                    // Episodios clínicos
+                    "CREATE_EPISODE", "VIEW_EPISODE", "CLOSE_EPISODE", "LIST_EPISODE",
+                    // Sesiones clínicas
+                    "CREATE_CLINICAL_SESSION", "VIEW_CLINICAL_SESSION", "UPDATE_CLINICAL_SESSION",
+                    "DELETE_CLINICAL_SESSION", "LIST_CLINICAL_SESSION", "MANAGE_SESSION_SERVICES",
             };
             for (String permName : fisioPerms) {
                 permissionRepository.findByName(permName).ifPresent(permission -> {
@@ -283,6 +300,8 @@ public class DataLoader implements CommandLineRunner {
             String[] recepPerms = {
                     "LIST_PATIENT", "VIEW_PATIENT", "CREATE_PATIENT",
                     "LIST_SERVICE", "VIEW_SERVICE",
+                    // Episodios clínicos (puede registrar visita y ver episodios)
+                    "CREATE_EPISODE", "VIEW_EPISODE", "LIST_EPISODE",
             };
             for (String permName : recepPerms) {
                 permissionRepository.findByName(permName).ifPresent(permission -> {

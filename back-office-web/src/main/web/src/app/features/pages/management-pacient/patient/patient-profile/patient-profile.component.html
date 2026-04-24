@@ -1,0 +1,226 @@
+<knv-page-layout mode="card">
+  <knv-page-layout-header>
+    <knv-breadcrumbs
+      [crumbs]="[{ name: 'Gestión de Pacientes', link: '/management-pacient' },
+                 { name: 'Pacientes', link: '/management-pacient/patients' }]"
+      [current]="patient ? patient.firstName + ' ' + patient.paternalSurname : 'Perfil'">
+    </knv-breadcrumbs>
+  </knv-page-layout-header>
+
+  <knv-page-layout-content>
+
+    <!-- Loading -->
+    <div *ngIf="loading" style="text-align:center; padding:40px">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <ng-container *ngIf="!loading && patient">
+
+      <!-- ─── Card datos del paciente ─────────────────────────────── -->
+      <mat-card class="patient-card">
+        <mat-card-header>
+          <div mat-card-avatar class="patient-avatar">
+            <mat-icon>person</mat-icon>
+          </div>
+          <mat-card-title>{{ patient.firstName }} {{ patient.paternalSurname }} {{ patient.maternalSurname }}</mat-card-title>
+          <mat-card-subtitle>CI: {{ patient.ci }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div fxLayout="row wrap" fxLayoutGap="16px" class="patient-data">
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Edad</span>
+              <span class="data-value">{{ patient.age ?? '—' }} años</span>
+            </div>
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Género</span>
+              <span class="data-value">{{ patient.gender }}</span>
+            </div>
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Teléfono</span>
+              <span class="data-value">{{ patient.phone ?? '—' }}</span>
+            </div>
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Email</span>
+              <span class="data-value">{{ patient.email ?? '—' }}</span>
+            </div>
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Dirección</span>
+              <span class="data-value">{{ patient.address ?? '—' }}</span>
+            </div>
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Grupo sanguíneo</span>
+              <span class="data-value">{{ patient.bloodType ?? '—' }}</span>
+            </div>
+            <div fxFlex="22" fxFlex.lt-sm="45">
+              <span class="data-label">Estado</span>
+              <mat-chip
+                [ngClass]="{
+                  'chip-active':    patient.status === 'ACTIVE',
+                  'chip-inactive':  patient.status === 'INACTIVE',
+                  'chip-discharge': patient.status === 'DISCHARGE'
+                }" disableRipple>
+                {{ patient.status === 'ACTIVE' ? 'Activo' :
+                   patient.status === 'INACTIVE' ? 'Inactivo' : 'Alta médica' }}
+              </mat-chip>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-stroked-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon> Volver
+          </button>
+          <button mat-flat-button color="primary" (click)="editPatient()" style="margin-left:8px">
+            <mat-icon>edit</mat-icon> Editar datos
+          </button>
+          <!-- Reactivar si está DISCHARGE -->
+          <button
+            *ngIf="patient.status === 'DISCHARGE' && actions['createEpisode']"
+            mat-flat-button color="accent"
+            (click)="toggleNewEpisodeForm()"
+            style="margin-left:8px">
+            <mat-icon>restart_alt</mat-icon> Reactivar paciente
+          </button>
+          <!-- Nuevo episodio si está ACTIVE -->
+          <button
+            *ngIf="patient.status === 'ACTIVE' && actions['createEpisode']"
+            mat-flat-button color="accent"
+            (click)="toggleNewEpisodeForm()"
+            style="margin-left:8px">
+            <mat-icon>add</mat-icon> Nuevo episodio
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- ─── Formulario nuevo episodio / reactivar ──────────────── -->
+      <mat-card *ngIf="showNewEpisodeForm" class="form-card">
+        <mat-card-header>
+          <mat-card-title>
+            {{ patient.status === 'DISCHARGE' ? 'Reactivar paciente — Nuevo Episodio' : 'Abrir nuevo episodio clínico' }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="newEpisodeForm">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Motivo de ingreso</mat-label>
+              <textarea matInput formControlName="reasonForAdmission" rows="3"
+                        placeholder="Describa el motivo de ingreso..."></textarea>
+              <mat-error *ngIf="newEpisodeForm.get('reasonForAdmission')?.hasError('required')">
+                El motivo de ingreso es requerido
+              </mat-error>
+            </mat-form-field>
+          </form>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary"
+                  [disabled]="newEpisodeForm.invalid || savingEpisode"
+                  (click)="patient.status === 'DISCHARGE' ? submitReactivate() : submitNewEpisode()">
+            <mat-icon>save</mat-icon>
+            {{ patient.status === 'DISCHARGE' ? 'Reactivar y crear episodio' : 'Crear episodio' }}
+          </button>
+          <button mat-stroked-button (click)="toggleNewEpisodeForm()" style="margin-left:8px">Cancelar</button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- ─── Acordeón de episodios ──────────────────────────────── -->
+      <mat-card class="episodes-card" *ngIf="actions['listEpisode']">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>folder_open</mat-icon>
+            Historial de Episodios Clínicos
+            <mat-chip class="total-chip" disableRipple>{{ totalEpisodes }}</mat-chip>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+
+          <div *ngIf="loadingEpisodes" style="text-align:center; padding:20px">
+            <mat-spinner diameter="30"></mat-spinner>
+          </div>
+
+          <mat-accordion *ngIf="!loadingEpisodes" multi>
+            <mat-expansion-panel
+              *ngFor="let ep of episodes"
+              [expanded]="ep.episodeStatus === 'ACTIVE'"
+              [ngClass]="{'panel-active': ep.episodeStatus === 'ACTIVE', 'panel-closed': ep.episodeStatus === 'CLOSED'}">
+
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon class="ep-icon">{{ ep.episodeStatus === 'ACTIVE' ? 'folder_open' : 'folder' }}</mat-icon>
+                  Episodio #{{ ep.episodeNumber }}
+                  <mat-chip
+                    class="ep-chip"
+                    [ngClass]="ep.episodeStatus === 'ACTIVE' ? 'chip-active' : 'chip-closed'"
+                    disableRipple>
+                    {{ ep.episodeStatus === 'ACTIVE' ? 'Activo' : 'Cerrado' }}
+                  </mat-chip>
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{ ep.startDate }} → {{ ep.endDate ?? 'Presente' }}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <!-- Contenido del panel -->
+              <div class="panel-content">
+                <p><strong>Motivo de ingreso:</strong> {{ ep.reasonForAdmission }}</p>
+                <p *ngIf="ep.dischargeReason"><strong>Motivo de alta:</strong> {{ ep.dischargeReason }}</p>
+
+                <div class="panel-actions">
+                  <!-- Ver sesiones (ambos estados) -->
+                  <button mat-flat-button color="primary"
+                          *ngIf="actions['listSession']"
+                          (click)="viewSessions(ep)">
+                    <mat-icon>event_note</mat-icon>
+                    Ver sesiones
+                  </button>
+
+                  <!-- Cerrar episodio (solo ACTIVE) -->
+                  <ng-container *ngIf="ep.episodeStatus === 'ACTIVE' && actions['closeEpisode']">
+                    <button mat-stroked-button color="warn"
+                            (click)="toggleCloseForm(ep.id)"
+                            style="margin-left:8px">
+                      <mat-icon>check_circle</mat-icon>
+                      Dar de alta
+                    </button>
+
+                    <div *ngIf="showCloseForm[ep.id]" class="close-form">
+                      <form [formGroup]="closeEpisodeForm">
+                        <mat-form-field appearance="outline" style="width:100%; margin-top:12px">
+                          <mat-label>Motivo del alta médica</mat-label>
+                          <textarea matInput formControlName="dischargeReason" rows="2"></textarea>
+                          <mat-error *ngIf="closeEpisodeForm.get('dischargeReason')?.hasError('required')">
+                            El motivo del alta es requerido
+                          </mat-error>
+                        </mat-form-field>
+                      </form>
+                      <div style="display:flex; gap:8px">
+                        <button mat-flat-button color="warn"
+                                [disabled]="closeEpisodeForm.invalid || closingEpisode"
+                                (click)="submitCloseEpisode(ep.id)">
+                          Confirmar alta
+                        </button>
+                        <button mat-stroked-button (click)="toggleCloseForm(ep.id)">Cancelar</button>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+
+            </mat-expansion-panel>
+          </mat-accordion>
+
+          <!-- Paginación de episodios -->
+          <mat-paginator *ngIf="totalEpisodes > pageSize"
+            [length]="totalEpisodes"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[5, 10]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+
+        </mat-card-content>
+      </mat-card>
+
+    </ng-container>
+  </knv-page-layout-content>
+</knv-page-layout>
+
