@@ -82,7 +82,7 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
 .navbar__title {
   font-weight: 800;
   font-size: 1.15rem;
-  text-transform: lowercase;
+  text-transform: uppercase;
   letter-spacing: 3px;
   background: linear-gradient(
     90deg,
@@ -256,8 +256,8 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
 }
 
 .navbar__dropdown-item--danger {
-  color: #ff8a80;
-  .material-icons { color: #ff8a80; }
+  color: $nav-muted;
+  .material-icons { color: $nav-muted; }
 
   &:hover {
     background: rgba(255, 100, 80, 0.10);
