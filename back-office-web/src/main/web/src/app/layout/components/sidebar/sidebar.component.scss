@@ -1,20 +1,21 @@
-// ── Paleta del sistema (referencia: breadcrumbs) ───────────────────
-$sidebar-from:      #faf0ff;   // Lavanda casi blanco
-$sidebar-mid:       #ede7f6;   // Violeta muy claro
-$sidebar-to:        #e1d5f5;   // Lila suave
+// ── Paleta oscura (dark purple/indigo) ────────────────────────────
+$sidebar-bg-top:    #160d2e;   // Púrpura muy oscuro
+$sidebar-bg-mid:    #1e1040;   // Índigo oscuro
+$sidebar-bg-bot:    #150c2b;   // Casi negro violáceo
 
-$accent-start:      #9c27b0;   // Purple 600
-$accent-end:        #6a1b9a;   // Purple 900
-$accent-bright:     #7b1fa2;   // Purple 800
-$accent-glow:       rgba(156, 39, 176, 0.25);
+$accent-start:      #ce93d8;   // Purple 200 (luminoso)
+$accent-mid:        #ab47bc;   // Purple 400
+$accent-end:        #9c27b0;   // Purple 600
+$accent-glow:       rgba(206, 147, 216, 0.35);
+$accent-pill-bg:    rgba(206, 147, 216, 0.22);  // fondo píldora activa
+$accent-pill-solid: rgba(206, 147, 216, 0.30);  // más claro y luminoso
 
-$text-primary:      #2e0a4a;   // Casi negro violáceo
-$text-secondary:    rgba(74, 20, 140, 0.65);   // #4a148c con opacidad
-$hover-bg:          rgba(156, 39, 176, 0.08);
-$active-bg:         rgba(156, 39, 176, 0.13);
-$active-border:     #9c27b0;
+$text-primary:      #f0e6ff;   // Blanco lavanda
+$text-secondary:    rgba(220, 200, 255, 0.55);
+$hover-bg:          rgba(206, 147, 216, 0.10);
+$active-text:       #f0e6ff;
 
-$sidebar-width:    250px;
+$sidebar-width:     250px;
 $sidebar-collapsed: 72px;
 
 // ── Sidebar contenedor ─────────────────────────────────────────────
@@ -24,33 +25,33 @@ $sidebar-collapsed: 72px;
   top: 0;
   height: 100vh;
   width: $sidebar-width;
-  background: linear-gradient(160deg, $sidebar-from 0%, $sidebar-mid 55%, $sidebar-to 100%);
+  background: linear-gradient(175deg, $sidebar-bg-top 0%, $sidebar-bg-mid 50%, $sidebar-bg-bot 100%);
   z-index: 999;
   display: flex;
   flex-direction: column;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 
-  // Borde derecho degradado púrpura
+  // Borde derecho con glow púrpura
   &::after {
     content: '';
     position: absolute;
     right: 0;
     top: 0;
-    width: 3px;
+    width: 1.5px;
     height: 100%;
     background: linear-gradient(180deg,
-      #ce93d8  0%,
-      #9c27b0  40%,
-      #6a1b9a  100%
+      transparent 0%,
+      rgba(206, 147, 216, 0.5) 30%,
+      rgba(171, 71, 188, 0.7) 60%,
+      transparent 100%
     );
-    opacity: 0.9;
     pointer-events: none;
   }
 
   box-shadow:
-    3px 0 16px rgba(156, 39, 176, 0.12),
-    1px 0  4px rgba(0, 0, 0, 0.06);
+    4px 0 24px rgba(0, 0, 0, 0.5),
+    1px 0  6px rgba(0, 0, 0, 0.3);
 }
 
 // ── Sección de logo / branding ─────────────────────────────────────
@@ -59,7 +60,7 @@ $sidebar-collapsed: 72px;
   align-items: center;
   gap: 12px;
   padding: 20px 16px 16px;
-  margin-top: 60px;   // offset del navbar
+  margin-top: 60px;
   flex-shrink: 0;
   overflow: hidden;
 
@@ -69,16 +70,16 @@ $sidebar-collapsed: 72px;
     height: 42px;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(156, 39, 176, 0.08);
-    border: 1.5px solid rgba(156, 39, 176, 0.35);
+    background: rgba(206, 147, 216, 0.12);
+    border: 1.5px solid rgba(206, 147, 216, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 12px rgba(156, 39, 176, 0.2);
+    box-shadow: 0 0 16px rgba(206, 147, 216, 0.25);
     transition: box-shadow 0.3s ease;
 
     &:hover {
-      box-shadow: 0 0 18px rgba(156, 39, 176, 0.35);
+      box-shadow: 0 0 24px rgba(206, 147, 216, 0.45);
     }
   }
 
@@ -87,13 +88,14 @@ $sidebar-collapsed: 72px;
     height: 100%;
     object-fit: cover;
     padding: 5px;
+    filter: brightness(1.3);
   }
 
   .sidebar__logo-fallback {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: $accent-bright;
+    color: $accent-start;
 
     mat-icon {
       font-size: 26px;
@@ -120,7 +122,7 @@ $sidebar-collapsed: 72px;
   .sidebar__brand-sub {
     font-size: 0.7rem;
     color: $text-secondary;
-    letter-spacing: 0.8px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     white-space: nowrap;
     margin-top: 1px;
@@ -133,8 +135,8 @@ $sidebar-collapsed: 72px;
   margin: 0 16px 8px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(156, 39, 176, 0.25) 30%,
-    rgba(156, 39, 176, 0.25) 70%,
+    rgba(206, 147, 216, 0.2) 30%,
+    rgba(206, 147, 216, 0.2) 70%,
     transparent 100%
   );
   flex-shrink: 0;
@@ -148,14 +150,14 @@ $sidebar-collapsed: 72px;
   padding: 8px 0 80px;
 
   scrollbar-width: thin;
-  scrollbar-color: rgba(156, 39, 176, 0.2) transparent;
+  scrollbar-color: rgba(206, 147, 216, 0.2) transparent;
 
   &::-webkit-scrollbar       { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(156, 39, 176, 0.2);
+    background: rgba(206, 147, 216, 0.2);
     border-radius: 2px;
-    &:hover { background: rgba(156, 39, 176, 0.4); }
+    &:hover { background: rgba(206, 147, 216, 0.4); }
   }
 }
 
@@ -166,7 +168,7 @@ $sidebar-collapsed: 72px;
   margin: 0;
 
   &__item {
-    margin: 2px 10px;
+    margin: 3px 10px;
   }
 
   // Estilos compartidos entre header y link
@@ -174,23 +176,23 @@ $sidebar-collapsed: 72px;
     display: flex;
     align-items: center;
     padding: 0.78rem 0.9rem;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     user-select: none;
     position: relative;
     overflow: hidden;
     transition:
-      background 0.25s ease,
-      transform  0.2s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.25s ease;
+      background  0.25s ease,
+      transform   0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow  0.25s ease;
     color: $text-secondary;
 
-    // Destello de hover (ripple suave)
+    // Destello de hover (shimmer)
     &::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06), transparent 70%);
+      background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05), transparent 70%);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
@@ -198,11 +200,14 @@ $sidebar-collapsed: 72px;
     &:hover {
       background: $hover-bg;
       color: $text-primary;
-      transform: translateX(3px);
+      transform: translateX(4px);
 
       &::after { opacity: 1; }
 
-      .menu__icon { color: $accent-bright; }
+      .menu__icon {
+        color: $accent-start;
+        filter: drop-shadow(0 0 6px $accent-glow);
+      }
     }
   }
 
@@ -211,12 +216,20 @@ $sidebar-collapsed: 72px;
     @extend %menu-item-base;
 
     &--active {
-      background: $active-bg;
-      color: $text-primary;
-      box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.2),
-                  0 2px 12px rgba(102, 126, 234, 0.15);
+      background: linear-gradient(135deg, rgba(206, 147, 216, 0.32) 0%, rgba(171, 71, 188, 0.22) 100%);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow:
+        inset 0 0 0 1px rgba(206, 147, 216, 0.45),
+        0 4px 20px rgba(171, 71, 188, 0.35),
+        0 0 12px rgba(206, 147, 216, 0.15);
 
-      .menu__icon { color: $active-border; }
+      .menu__icon {
+        color: #f3e5f5;
+        filter: drop-shadow(0 0 10px rgba(206, 147, 216, 0.7));
+      }
+
+      .menu__expand-icon { color: $accent-start; }
     }
   }
 
@@ -226,24 +239,30 @@ $sidebar-collapsed: 72px;
     text-decoration: none;
 
     &--active {
-      background: $active-bg;
-      color: $text-primary;
-      box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.2),
-                  0 2px 12px rgba(102, 126, 234, 0.15);
+      background: linear-gradient(135deg, rgba(206, 147, 216, 0.32) 0%, rgba(171, 71, 188, 0.22) 100%);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow:
+        inset 0 0 0 1px rgba(206, 147, 216, 0.45),
+        0 4px 20px rgba(171, 71, 188, 0.35),
+        0 0 12px rgba(206, 147, 216, 0.15);
 
-      .menu__icon { color: $active-border; }
+      .menu__icon {
+        color: #f3e5f5;
+        filter: drop-shadow(0 0 10px rgba(206, 147, 216, 0.7));
+      }
 
       // Indicador izquierdo luminoso
       &::before {
         content: '';
         position: absolute;
         left: 0;
-        top: 20%;
-        height: 60%;
+        top: 18%;
+        height: 64%;
         width: 3px;
         background: linear-gradient(180deg, $accent-start, $accent-end);
         border-radius: 0 3px 3px 0;
-        box-shadow: 0 0 8px $accent-glow;
+        box-shadow: 0 0 10px $accent-glow;
       }
     }
   }
@@ -264,7 +283,7 @@ $sidebar-collapsed: 72px;
     width: 1.2rem;
     height: 1.2rem;
     color: $text-secondary;
-    transition: color 0.25s ease, transform 0.25s ease;
+    transition: color 0.25s ease, filter 0.25s ease, transform 0.25s ease;
   }
 
   &__label {
@@ -287,7 +306,7 @@ $sidebar-collapsed: 72px;
 
     &--rotated {
       transform: rotate(180deg);
-      color: $accent-bright;
+      color: $accent-start;
     }
   }
 }
@@ -298,8 +317,7 @@ $sidebar-collapsed: 72px;
   padding: 4px 0 4px 16px;
   margin: 2px 0 0;
   overflow: hidden;
-
-  border-left: 1.5px solid rgba(156, 39, 176, 0.25);
+  border-left: 1.5px solid rgba(206, 147, 216, 0.2);
   margin-left: 22px;
 
   &__item {
@@ -310,11 +328,12 @@ $sidebar-collapsed: 72px;
     display: flex;
     align-items: center;
     padding: 0.6rem 0.8rem;
-    border-radius: 8px;
+    border-radius: 10px;
     text-decoration: none;
     color: $text-secondary;
     font-size: 0.84rem;
     font-weight: 400;
+    overflow: hidden;
     transition:
       background 0.22s ease,
       color      0.22s ease,
@@ -324,30 +343,54 @@ $sidebar-collapsed: 72px;
 
     &:hover {
       background: $hover-bg;
-      color: $accent-end;
-      transform: translateX(3px);
+      color: $text-primary;
+      transform: translateX(4px);
 
-      .submenu__icon { color: $accent-start; }
+      .submenu__icon {
+        color: $accent-start;
+        filter: drop-shadow(0 0 5px $accent-glow);
+      }
     }
 
     &--active {
-      background: rgba(156, 39, 176, 0.12);
-      color: $accent-end;
-      font-weight: 600;
+      background: linear-gradient(135deg, #ede0f7 0%, #dfd0f4 60%, #d8caf2 100%);
+      color: #3a1060;
+      font-weight: 700;
+      box-shadow:
+        inset 0 0 0 1px rgba(171, 71, 188, 0.22),
+        0 3px 14px rgba(171, 71, 188, 0.2);
 
-      .submenu__icon { color: $accent-start; }
+      .submenu__label {
+        letter-spacing: 0.3px;
+      }
 
+      .submenu__icon {
+        color: #7b1fa2;
+        filter: drop-shadow(0 0 5px rgba(171, 71, 188, 0.5));
+      }
+
+      // Barra lateral sólida
       &::before {
         content: '';
         position: absolute;
         left: -17.5px;
         top: 50%;
         transform: translateY(-50%);
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: $accent-start;
-        box-shadow: 0 0 6px rgba(156, 39, 176, 0.5);
+        width: 4px;
+        height: 60%;
+        border-radius: 2px;
+        background: linear-gradient(180deg, #ab47bc, #6a1b9a);
+        box-shadow: 0 0 8px rgba(171, 71, 188, 0.6);
+      }
+
+      // Shimmer interior suave
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 15% 50%, rgba(255,255,255,0.35), transparent 60%);
+        border-radius: inherit;
+        pointer-events: none;
       }
     }
   }
@@ -357,9 +400,9 @@ $sidebar-collapsed: 72px;
     width: 1rem;
     height: 1rem;
     margin-right: 10px;
-    color: rgba(156, 39, 176, 0.5);
+    color: rgba(206, 147, 216, 0.45);
     flex-shrink: 0;
-    transition: color 0.25s ease;
+    transition: color 0.25s ease, filter 0.25s ease;
   }
 
   &__label {
@@ -377,9 +420,9 @@ $sidebar-collapsed: 72px;
   left: 0.85rem;
   width: 40px;
   height: 40px;
-  background: #ffffff;
-  color: $accent-end;
-  border: 1.5px solid rgba(156, 39, 176, 0.3);
+  background: linear-gradient(135deg, rgba(206, 147, 216, 0.30) 0%, rgba(171, 71, 188, 0.25) 100%);
+  color: $accent-start;
+  border: 1.5px solid rgba(206, 147, 216, 0.55);
   border-radius: 10px;
   cursor: pointer;
   display: flex;
@@ -388,31 +431,34 @@ $sidebar-collapsed: 72px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   box-shadow:
-    0 3px 10px rgba(156, 39, 176, 0.18),
-    0 1px 4px  rgba(0, 0, 0, 0.08);
+    0 3px 14px rgba(0, 0, 0, 0.45),
+    0 0  14px rgba(206, 147, 216, 0.25);
 
   mat-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
-    color: $accent-end;
+    color: #f3e5f5;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
   }
 
   &:hover {
-    background: linear-gradient(135deg, #f3e5f5, #e1bee7);
-    border-color: $accent-start;
-    transform: translateY(-2px) scale(1.05);
+    background: linear-gradient(135deg, rgba(206, 147, 216, 0.50) 0%, rgba(171, 71, 188, 0.42) 100%);
+    border-color: rgba(206, 147, 216, 0.8);
+    transform: translateY(-2px) scale(1.08);
     box-shadow:
-      0 6px 18px rgba(156, 39, 176, 0.28),
-      0 2px 6px  rgba(0, 0, 0, 0.1);
+      0 6px 22px rgba(0, 0, 0, 0.50),
+      0 0  20px rgba(206, 147, 216, 0.45);
 
-    mat-icon { color: $accent-start; }
+    mat-icon {
+      color: #ffffff;
+      filter: drop-shadow(0 0 8px rgba(206, 147, 216, 0.9));
+    }
   }
 
   &:active {
     transform: translateY(0) scale(0.97);
-    box-shadow: 0 2px 6px rgba(156, 39, 176, 0.18);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   }
 }
 
