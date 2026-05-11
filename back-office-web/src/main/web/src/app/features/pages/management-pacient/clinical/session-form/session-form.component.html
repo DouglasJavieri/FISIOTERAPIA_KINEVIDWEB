@@ -109,9 +109,9 @@
           <mat-step [stepControl]="step2" label="Evaluación clínica" [editable]="!sessionLocked">
             <form [formGroup]="step2" autocomplete="off">
 
-              <p class="section-title">Evaluación kinesiológica</p>
+              <p class="section-title">Evaluación kinesiológica - Fila 1</p>
               <div fxLayout="row wrap">
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Evaluación kinesiológica</mat-label>
                     <textarea matInput formControlName="kinesiologicalEvaluation"
@@ -121,7 +121,63 @@
                   </mat-form-field>
                 </div>
 
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Antecedente actual de enfermedad</mat-label>
+                    <textarea matInput formControlName="actualIllnessHistory"
+                              placeholder="Historia de la enfermedad actual..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('actualIllnessHistory')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Marcha/Postura</mat-label>
+                    <textarea matInput formControlName="gait"
+                              placeholder="Descripción de la marcha y postura..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('gait')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <p class="section-title">Evaluación kinesiológica - Fila 2</p>
+              <div fxLayout="row wrap">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Pruebas funcionales</mat-label>
+                    <textarea matInput formControlName="functionalTests"
+                              placeholder="Resultados de pruebas funcionales..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('functionalTests')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Exámenes complementarios</mat-label>
+                    <textarea matInput formControlName="complementaryExams"
+                              placeholder="Resultado de exámenes (rayos X, resonancia, etc.)..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('complementaryExams')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Diagnóstico kinesiológico</mat-label>
+                    <textarea matInput formControlName="kinesiologicalDiagnosis"
+                              placeholder="Diagnóstico basado en la evaluación..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('kinesiologicalDiagnosis')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <p class="section-title">Evaluación kinesiológica - Fila 3</p>
+              <div fxLayout="row wrap">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Tratamiento aplicado</mat-label>
                     <textarea matInput formControlName="treatmentApplied"
@@ -130,10 +186,8 @@
                     <mat-error *ngIf="f2('treatmentApplied')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
                   </mat-form-field>
                 </div>
-              </div>
 
-              <div fxLayout="row wrap">
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Observaciones</mat-label>
                     <textarea matInput formControlName="observations"
@@ -143,7 +197,7 @@
                   </mat-form-field>
                 </div>
 
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Evolución del paciente</mat-label>
                     <textarea matInput formControlName="evolution"

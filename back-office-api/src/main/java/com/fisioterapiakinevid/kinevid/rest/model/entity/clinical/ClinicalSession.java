@@ -52,6 +52,21 @@ public class ClinicalSession extends AuditableEntity implements Serializable {
     @Column(name = "kinesiological_evaluation", columnDefinition = "TEXT")
     private String kinesiologicalEvaluation;
 
+    @Column(name = "actual_illness_history", length = 1024)
+    private String actualIllnessHistory;
+
+    @Column(name = "gait", length = 1024)
+    private String gait;
+
+    @Column(name = "functional_tests", length = 1024)
+    private String functionalTests;
+
+    @Column(name = "complementary_exams", length = 1024)
+    private String complementaryExams;
+
+    @Column(name = "kinesiological_diagnosis", length = 1024)
+    private String kinesiologicalDiagnosis;
+
     @Column(name = "treatment_applied", columnDefinition = "TEXT")
     private String treatmentApplied;
 

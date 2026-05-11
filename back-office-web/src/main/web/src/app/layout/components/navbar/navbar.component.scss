@@ -1,21 +1,21 @@
-// ── Paleta navbar (mismos colores que breadcrumb/card) ───────────
-$nav-bg-from:    #f3e5f5;   // Lavanda muy claro
-$nav-bg-mid:     #e1bee7;   // Púrpura claro
-$nav-bg-to:      #ce93d8;   // Púrpura medio
+// ── Paleta navbar (colores teal claros) ───────────────────────────
+$nav-bg-from:    #EAF1FF;   // Azul muy claro
+$nav-bg-mid:     #DFE8F6;   // Azul claro medio
+$nav-bg-to:      #D4DFF0;   // Azul claro
 
-$nav-border:     rgba(156, 39, 176, 0.35);
-$nav-glow:       rgba(156, 39, 176, 0.20);
+$nav-border:     rgba(40, 167, 181, 0.3);
+$nav-glow:       rgba(40, 167, 181, 0.15);
 
-$nav-text:       #4a148c;   // Púrpura oscuro (título breadcrumb)
-$nav-muted:      #6a1b9a;   // Púrpura medio
-$nav-hover-bg:   rgba(156, 39, 176, 0.08);
-$nav-accent:     #9c27b0;   // Púrpura acento (borde breadcrumb)
-$nav-accent-dim: rgba(156, 39, 176, 0.25);
+$nav-text:       #0B1C30;   // Texto oscuro principal
+$nav-muted:      #4a7c8a;   // Teal medio
+$nav-hover-bg:   rgba(40, 167, 181, 0.08);
+$nav-accent:     #28A7B5;   // Teal acento
+$nav-accent-dim: rgba(40, 167, 181, 0.2);
 
 // ── Contenedor principal ───────────────────────────────────────────
 .navbar {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0; left: 250px; right: 0;
   height: 60px;
   z-index: 1100;
   display: flex;
@@ -28,11 +28,11 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
     $nav-bg-mid  60%,
     $nav-bg-to  100%
   );
-  border-bottom: 1.5px solid rgba(156, 39, 176, 0.40);
+  border-bottom: 1.5px solid rgba(40, 167, 181, 0.25);
   box-shadow:
-    0 2px 12px rgba(156, 39, 176, 0.15),
+    0 2px 12px rgba(40, 167, 181, 0.1),
     0 1px 4px  rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.50);
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
 
   &::after {
     content: '';
@@ -41,13 +41,17 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
     height: 1.5px;
     background: linear-gradient(90deg,
       transparent 0%,
-      rgba(156, 39, 176, 0.4) 25%,
-      rgba(156, 39, 176, 0.75) 50%,
-      rgba(156, 39, 176, 0.4) 75%,
+      rgba(40, 167, 181, 0.3) 25%,
+      rgba(40, 167, 181, 0.5) 50%,
+      rgba(40, 167, 181, 0.3) 75%,
       transparent 100%
     );
     pointer-events: none;
     animation: borderGlow 3s ease-in-out infinite;
+  }
+
+  &--compact {
+    left: 72px;
   }
 }
 
@@ -75,8 +79,8 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
 }
 
 @keyframes iconPulse {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(156,39,176,0.4)); }
-  50%       { filter: drop-shadow(0 0 12px rgba(156,39,176,0.80)); }
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(40,167,181,0.4)); }
+  50%       { filter: drop-shadow(0 0 12px rgba(40,167,181,0.80)); }
 }
 
 .navbar__title {
@@ -86,13 +90,13 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
   letter-spacing: 3px;
   background: linear-gradient(
     90deg,
-    #4a148c  0%,
-    #7b1fa2  20%,
-    #9c27b0  38%,
-    #6a1b9a  55%,
-    #4a148c  72%,
-    #7b1fa2  88%,
-    #4a148c 100%
+    #1F8C9A  0%,
+    #28A7B5  20%,
+    #2DBDC0  38%,
+    #0B6A7A  55%,
+    #1F8C9A  72%,
+    #28A7B5  88%,
+    #1F8C9A 100%
   );
   background-size: 250% auto;
   -webkit-background-clip: text;
@@ -124,7 +128,7 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
 
   &:hover {
     background: $nav-hover-bg;
-    border-color: rgba(156, 39, 176, 0.35);
+    border-color: rgba(40, 167, 181, 0.35);
   }
 }
 
@@ -135,9 +139,9 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(206,147,216,0.35), rgba(156,39,176,0.15));
-  border: 1.5px solid rgba(156, 39, 176, 0.45);
-  box-shadow: 0 0 8px rgba(156, 39, 176, 0.18);
+  background: linear-gradient(135deg, rgba(40,167,181,0.2), rgba(31,140,154,0.15));
+  border: 1.5px solid rgba(40, 167, 181, 0.35);
+  box-shadow: 0 0 8px rgba(40, 167, 181, 0.18);
   transition: box-shadow 0.25s ease;
 
   .material-icons {
@@ -146,7 +150,7 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
   }
 
   .navbar__user:hover & {
-    box-shadow: 0 0 16px rgba(156, 39, 176, 0.40);
+    box-shadow: 0 0 16px rgba(40, 167, 181, 0.40);
   }
 }
 
@@ -188,11 +192,11 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
   top: calc(100% + 10px);
   width: 280px;
   background: linear-gradient(160deg, #f3e5f5 0%, #e1bee7 100%);
-  border: 1px solid rgba(156, 39, 176, 0.30);
+  border: 1px solid rgba(40, 167, 181, 0.30);
   border-radius: 14px;
   box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.60),
-    0 0 20px rgba(231, 131, 181, 0.08);
+    0 0 20px rgba(40, 167, 181, 0.08);
   overflow: hidden;
   animation: dropdownIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -205,10 +209,10 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
 .navbar__dropdown-header {
   padding: 16px 18px;
   background: linear-gradient(135deg,
-    rgba(231, 131, 181, 0.16) 0%,
-    rgba(123, 51, 126, 0.10) 100%
+    rgba(40, 167, 181, 0.16) 0%,
+    rgba(31, 140, 154, 0.10) 100%
   );
-  border-bottom: 1px solid rgba(231, 131, 181, 0.18);
+  border-bottom: 1px solid rgba(40, 167, 181, 0.18);
 }
 
 .navbar__dropdown-title {
@@ -237,7 +241,7 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
   transition: background 0.18s ease, color 0.18s ease;
 
   &:hover {
-    background: rgba(231, 131, 181, 0.10);
+    background: rgba(40, 167, 181, 0.10);
     color: $nav-text;
     .material-icons { color: $nav-accent; }
   }
@@ -252,7 +256,7 @@ $nav-accent-dim: rgba(156, 39, 176, 0.25);
 .navbar__dropdown-divider {
   height: 1px;
   margin: 4px 0;
-  background: rgba(231, 131, 181, 0.15);
+  background: rgba(40, 167, 181, 0.15);
 }
 
 .navbar__dropdown-item--danger {

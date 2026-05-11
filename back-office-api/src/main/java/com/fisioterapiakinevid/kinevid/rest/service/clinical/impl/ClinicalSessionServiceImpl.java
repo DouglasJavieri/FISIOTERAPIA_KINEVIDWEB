@@ -154,6 +154,21 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
             if (request.getKinesiologicalEvaluation() != null) {
                 session.setKinesiologicalEvaluation(request.getKinesiologicalEvaluation().trim());
             }
+            if (request.getActualIllnessHistory() != null) {
+                session.setActualIllnessHistory(request.getActualIllnessHistory().trim());
+            }
+            if (request.getGait() != null) {
+                session.setGait(request.getGait().trim());
+            }
+            if (request.getFunctionalTests() != null) {
+                session.setFunctionalTests(request.getFunctionalTests().trim());
+            }
+            if (request.getComplementaryExams() != null) {
+                session.setComplementaryExams(request.getComplementaryExams().trim());
+            }
+            if (request.getKinesiologicalDiagnosis() != null) {
+                session.setKinesiologicalDiagnosis(request.getKinesiologicalDiagnosis().trim());
+            }
             if (request.getTreatmentApplied() != null) {
                 session.setTreatmentApplied(request.getTreatmentApplied().trim());
             }

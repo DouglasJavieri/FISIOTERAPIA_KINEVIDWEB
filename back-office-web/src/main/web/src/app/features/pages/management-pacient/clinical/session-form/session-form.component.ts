@@ -47,14 +47,11 @@ export class SessionFormComponent implements OnInit {
   serviceList: MedicalServiceResponse[] = [];
   appliedServices: SessionServiceResponse[] = [];
 
-  // Paso 1 — Datos básicos
   step1!: FormGroup;
   maxDate = new Date();
 
-  // Paso 2 — Evaluación clínica
   step2!: FormGroup;
 
-  // Paso 3 — Servicio a agregar
   step3!: FormGroup;
 
   canUpdate = false;
@@ -103,6 +100,11 @@ export class SessionFormComponent implements OnInit {
 
     this.step2 = new FormGroup({
       kinesiologicalEvaluation: new FormControl('', [noOnlyWhitespaceValidator()]),
+      actualIllnessHistory: new FormControl('', [noOnlyWhitespaceValidator()]),
+      gait: new FormControl('', [noOnlyWhitespaceValidator()]),
+      functionalTests: new FormControl('', [noOnlyWhitespaceValidator()]),
+      complementaryExams: new FormControl('', [noOnlyWhitespaceValidator()]),
+      kinesiologicalDiagnosis: new FormControl('', [noOnlyWhitespaceValidator()]),
       treatmentApplied: new FormControl('', [noOnlyWhitespaceValidator()]),
       observations: new FormControl('', [noOnlyWhitespaceValidator()]),
       evolution: new FormControl('', [noOnlyWhitespaceValidator()]),
@@ -147,12 +149,17 @@ export class SessionFormComponent implements OnInit {
           reasonForConsultation: s.reasonForConsultation,
           relevantBackground: s.relevantBackground ?? '',
         });
-        this.step2.patchValue({
-          kinesiologicalEvaluation: s.kinesiologicalEvaluation ?? '',
-          treatmentApplied: s.treatmentApplied ?? '',
-          observations: s.observations ?? '',
-          evolution: s.evolution ?? '',
-        });
+         this.step2.patchValue({
+           kinesiologicalEvaluation: s.kinesiologicalEvaluation ?? '',
+           actualIllnessHistory: s.actualIllnessHistory ?? '',
+           gait: s.gait ?? '',
+           functionalTests: s.functionalTests ?? '',
+           complementaryExams: s.complementaryExams ?? '',
+           kinesiologicalDiagnosis: s.kinesiologicalDiagnosis ?? '',
+           treatmentApplied: s.treatmentApplied ?? '',
+           observations: s.observations ?? '',
+           evolution: s.evolution ?? '',
+         });
 
         if (this.sessionLocked || !this.canUpdate) {
           this.step1.disable();
@@ -216,34 +223,38 @@ export class SessionFormComponent implements OnInit {
     });
   }
 
-  private updateSession(): void {
-    const v1 = this.step1.value;
-    const v2 = this.step2.value;
-    const body: ClinicalSessionUpdateRequest = {
-      employeeId: v1.employeeId,
-      reasonForConsultation: v1.reasonForConsultation?.trim(),
-      relevantBackground: v1.relevantBackground?.trim() || null,
-      kinesiologicalEvaluation: v2.kinesiologicalEvaluation?.trim() || null,
-      treatmentApplied: v2.treatmentApplied?.trim() || null,
-      observations: v2.observations?.trim() || null,
-      evolution: v2.evolution?.trim() || null,
-    };
-    Notiflix.Loading.pulse('Guardando cambios...');
-    this.sessionService.update(this.sessionId!, body).subscribe({
-      next: s => {
-        Notiflix.Loading.remove(300);
-        this.session = s;
-        Notiflix.Notify.success('Sesión actualizada correctamente.');
-        this.stepper.next();
-      },
-      error: err => {
-        Notiflix.Loading.remove(300);
-        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo actualizar la sesión.', 'OK');
-      },
-    });
-  }
+   private updateSession(): void {
+     const v1 = this.step1.value;
+     const v2 = this.step2.value;
+     const body: ClinicalSessionUpdateRequest = {
+       employeeId: v1.employeeId,
+       reasonForConsultation: v1.reasonForConsultation?.trim(),
+       relevantBackground: v1.relevantBackground?.trim() || null,
+       kinesiologicalEvaluation: v2.kinesiologicalEvaluation?.trim() || null,
+       actualIllnessHistory: v2.actualIllnessHistory?.trim() || null,
+       gait: v2.gait?.trim() || null,
+       functionalTests: v2.functionalTests?.trim() || null,
+       complementaryExams: v2.complementaryExams?.trim() || null,
+       kinesiologicalDiagnosis: v2.kinesiologicalDiagnosis?.trim() || null,
+       treatmentApplied: v2.treatmentApplied?.trim() || null,
+       observations: v2.observations?.trim() || null,
+       evolution: v2.evolution?.trim() || null,
+     };
+     Notiflix.Loading.pulse('Guardando cambios...');
+     this.sessionService.update(this.sessionId!, body).subscribe({
+       next: s => {
+         Notiflix.Loading.remove(300);
+         this.session = s;
+         Notiflix.Notify.success('Sesión actualizada correctamente.');
+         this.stepper.next();
+       },
+       error: err => {
+         Notiflix.Loading.remove(300);
+         Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo actualizar la sesión.', 'OK');
+       },
+     });
+   }
 
-  // ─── Paso 2: evaluación clínica ────────────────────────────────────────────
 
   saveStep2(): void {
     if (this.sessionLocked || !this.canUpdate) {
@@ -253,13 +264,24 @@ export class SessionFormComponent implements OnInit {
     this.updateSession();
   }
 
-  // ─── Paso 3: servicios aplicados ───────────────────────────────────────────
 
   addService(): void {
     if (this.step3.invalid) {
       this.step3.markAllAsTouched();
       return;
     }
+
+
+    if (!this.sessionId) {
+      console.error('sessionId es null/undefined. Estado actual:', {
+        sessionId: this.sessionId,
+        isNew: this.isNew,
+        session: this.session?.id
+      });
+      Notiflix.Report.failure('Error', 'La sesión no ha sido guardada correctamente. Por favor, recargue la página.', 'OK');
+      return;
+    }
+
     const v = this.step3.value;
     const body: SessionServiceRequest = {
       medicalServiceId: v.medicalServiceId,
@@ -299,7 +321,6 @@ export class SessionFormComponent implements OnInit {
     );
   }
 
-  // ─── Utilidades ────────────────────────────────────────────────────────────
 
   f1(name: string) { return this.step1.get(name); }
   f2(name: string) { return this.step2.get(name); }

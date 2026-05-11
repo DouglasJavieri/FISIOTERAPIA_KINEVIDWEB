@@ -17,8 +17,8 @@
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Nombres</mat-label>
-                <input matInput formControlName="firstName" placeholder="Ej: Juan Carlos" maxlength="80" autocomplete="off"/>
+                <mat-label>Nombres *</mat-label>
+                <input matInput formControlName="firstName" placeholder="Ej: Juan" maxlength="80" autocomplete="off"/>
                 <mat-hint align="end">{{ f('firstName')?.value?.length ?? 0 }}/80</mat-hint>
                 <mat-error *ngIf="f('firstName')?.hasError('required')">El nombre es requerido.</mat-error>
                 <mat-error *ngIf="f('firstName')?.hasError('minlength')">Mínimo 2 caracteres.</mat-error>
@@ -28,8 +28,8 @@
 
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Apellido paterno</mat-label>
-                <input matInput formControlName="paternalSurname" placeholder="Ej: Pérez" maxlength="80" autocomplete="off"/>
+                <mat-label>Apellido paterno *</mat-label>
+                <input matInput formControlName="paternalSurname" placeholder="Ej: García" maxlength="80" autocomplete="off"/>
                 <mat-hint align="end">{{ f('paternalSurname')?.value?.length ?? 0 }}/80</mat-hint>
                 <mat-error *ngIf="f('paternalSurname')?.hasError('required')">El apellido paterno es requerido.</mat-error>
                 <mat-error *ngIf="f('paternalSurname')?.hasError('minlength')">Mínimo 2 caracteres.</mat-error>
@@ -50,7 +50,7 @@
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>C.I.</mat-label>
+                <mat-label>C.I. *</mat-label>
                 <input matInput formControlName="ci" placeholder="Ej: 1234567" maxlength="20" autocomplete="off"/>
                 <mat-hint align="end">{{ f('ci')?.value?.length ?? 0 }}/20</mat-hint>
                 <mat-error *ngIf="f('ci')?.hasError('required')">El C.I. es requerido.</mat-error>
@@ -87,6 +87,7 @@
             </div>
           </div>
 
+          <!-- ── SECCIÓN: Contacto ───────────────────────────────────────── -->
           <p class="section-title">Contacto</p>
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
@@ -117,6 +118,7 @@
             </div>
           </div>
 
+          <!-- ── SECCIÓN: Datos Médicos ──────────────────────────────────── -->
           <p class="section-title">Datos Médicos</p>
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
@@ -143,12 +145,13 @@
             </div>
           </div>
 
+          <!-- ── SECCIÓN: Contacto de Emergencia ────────────────────────── -->
           <p class="section-title">Contacto de Emergencia</p>
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Nombre de contacto</mat-label>
-                <input matInput formControlName="emergencyContactName" placeholder="Ej: María Pérez" maxlength="100" autocomplete="off"/>
+                <input matInput formControlName="emergencyContactName" placeholder="Ej: María González" maxlength="100" autocomplete="off"/>
                 <mat-hint align="end">{{ f('emergencyContactName')?.value?.length ?? 0 }}/100</mat-hint>
                 <mat-error *ngIf="f('emergencyContactName')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
               </mat-form-field>
@@ -164,6 +167,7 @@
             </div>
           </div>
 
+          <!-- ── SECCIÓN: Notas ──────────────────────────────────────────── -->
           <p class="section-title">Notas adicionales</p>
           <div fxLayout="row wrap">
             <div fxFlex="100" class="form-col">
@@ -171,13 +175,14 @@
                 <mat-label>Notas</mat-label>
                 <textarea matInput formControlName="notes"
                           placeholder="Observaciones adicionales sobre el paciente..."
-                          rows="3" maxlength="500" autocomplete="off"></textarea>
+                          rows="4" maxlength="500" autocomplete="off"></textarea>
                 <mat-hint align="end">{{ f('notes')?.value?.length ?? 0 }}/500</mat-hint>
                 <mat-error *ngIf="f('notes')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
               </mat-form-field>
             </div>
           </div>
 
+          <!-- ── ACCIONES ───────────────────────────────────────────────── -->
           <div fxLayout="row" fxLayoutAlign="end center" class="form-actions">
             <button mat-stroked-button color="accent" type="button" (click)="cancel()">
               Cancelar

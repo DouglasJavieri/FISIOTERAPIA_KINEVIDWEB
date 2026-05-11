@@ -5,14 +5,18 @@ import com.fisioterapiakinevid.kinevid.rest.model.entity.p.Permission;
 import com.fisioterapiakinevid.kinevid.rest.model.entity.role.Role;
 import com.fisioterapiakinevid.kinevid.rest.model.entity.rp.RolePermission;
 import com.fisioterapiakinevid.kinevid.rest.model.entity.ur.UserRole;
+import com.fisioterapiakinevid.kinevid.rest.model.entity.svc.MedicalService;
 import com.fisioterapiakinevid.kinevid.rest.model.enums.auth.UserStatus;
 import com.fisioterapiakinevid.kinevid.rest.model.enums.p.PermissionStatus;
 import com.fisioterapiakinevid.kinevid.rest.model.enums.role.RoleStatus;
+import com.fisioterapiakinevid.kinevid.rest.model.enums.svc.ServiceCategory;
+import com.fisioterapiakinevid.kinevid.rest.model.enums.svc.ServiceStatus;
 import com.fisioterapiakinevid.kinevid.rest.repository.p.PermissionRepository;
 import com.fisioterapiakinevid.kinevid.rest.repository.role.RoleRepository;
 import com.fisioterapiakinevid.kinevid.rest.repository.rp.RolePermissionRepository;
 import com.fisioterapiakinevid.kinevid.rest.repository.u.UserRepository;
 import com.fisioterapiakinevid.kinevid.rest.repository.ur.UserRoleRepository;
+import com.fisioterapiakinevid.kinevid.rest.repository.svc.MedicalServiceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -36,6 +41,7 @@ public class DataLoader implements CommandLineRunner {
     private final PermissionRepository permissionRepository;
     private final RolePermissionRepository rolePermissionRepository;
     private final UserRoleRepository userRoleRepository;
+    private final MedicalServiceRepository medicalServiceRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${kinevid.app.admin.username}")
@@ -69,6 +75,8 @@ public class DataLoader implements CommandLineRunner {
 
             User adminUser = createAdminUser();
             assignAdminRoleToUser(adminUser, adminRole);
+
+            createDefaultServices();
 
             log.info("DataLoader completado exitosamente");
 
@@ -225,7 +233,7 @@ public class DataLoader implements CommandLineRunner {
         roleRepository.findByName(ROLE_ROOT).orElseGet(() -> {
             Role newRole = Role.builder()
                     .name(ROLE_ROOT)
-                    .description("Rol raiz con acceso total al sistema")
+                    .description("Rol raÃ­z con acceso total al sistema")
                     .status(RoleStatus.ACTIVE)
                     .build();
 
@@ -392,5 +400,59 @@ public class DataLoader implements CommandLineRunner {
             }
             log.info("Sync de permisos al rol {} completado ({} verificados)", roleName, assigned);
         });
+    }
+
+    private void createDefaultServices() {
+        log.info("Creando servicios médicos iniciales");
+        // ELECTROTERAPIA
+        createServiceIfNotExists("Ultrasonido", "Terapia con ultrasonido terapéutico", ServiceCategory.ELECTROTHERAPY, 30, new BigDecimal("150.00"));
+        createServiceIfNotExists("Magnetoterapia", "Tratamiento con campos magnéticos", ServiceCategory.ELECTROTHERAPY, 30, new BigDecimal("160.00"));
+        createServiceIfNotExists("Laser", "Terapia con láser de baja potencia", ServiceCategory.ELECTROTHERAPY, 25, new BigDecimal("180.00"));
+        createServiceIfNotExists("Terapia Combinada", "Combinación de técnicas electroterápicas", ServiceCategory.ELECTROTHERAPY, 40, new BigDecimal("200.00"));
+        createServiceIfNotExists("Electroanalgesia", "Tratamiento del dolor mediante electroterapia", ServiceCategory.ELECTROTHERAPY, 25, new BigDecimal("140.00"));
+        createServiceIfNotExists("Electroestimulación", "Estimulación muscular mediante corrientes eléctricas", ServiceCategory.ELECTROTHERAPY, 30, new BigDecimal("150.00"));
+        // GIMNASIO TERAPÉUTICO
+        createServiceIfNotExists("Fortalecimiento Muscular", "Ejercicios de fortalecimiento muscular dirigido", ServiceCategory.THERAPEUTIC_GYMNASIUM, 45, new BigDecimal("120.00"));
+        createServiceIfNotExists("Reducción de Rangos de Movimiento", "Mejora de la amplitud articular", ServiceCategory.THERAPEUTIC_GYMNASIUM, 40, new BigDecimal("130.00"));
+        createServiceIfNotExists("Reeducación Postural", "Corrección y educación de la postura", ServiceCategory.THERAPEUTIC_GYMNASIUM, 50, new BigDecimal("140.00"));
+        createServiceIfNotExists("Reeducación de la Marcha", "Tratamiento de alteraciones en la marcha", ServiceCategory.THERAPEUTIC_GYMNASIUM, 45, new BigDecimal("135.00"));
+        createServiceIfNotExists("Readaptación Deportiva", "Rehabilitación funcional para deportistas", ServiceCategory.THERAPEUTIC_GYMNASIUM, 60, new BigDecimal("170.00"));
+        createServiceIfNotExists("Reacondicionamiento Físico", "Programa de acondicionamiento y recuperación", ServiceCategory.THERAPEUTIC_GYMNASIUM, 50, new BigDecimal("150.00"));
+        createServiceIfNotExists("Estimulación Temprana", "Estimulación psicomotriz en etapas iniciales", ServiceCategory.THERAPEUTIC_GYMNASIUM, 40, new BigDecimal("110.00"));
+        // TERMOTERAPIA
+        createServiceIfNotExists("Calor Seco", "Aplicación de calor seco terapéutico", ServiceCategory.THERMOTHERAPY, 20, new BigDecimal("100.00"));
+        createServiceIfNotExists("Calor Húmedo", "Aplicación de calor húmedo terapéutico", ServiceCategory.THERMOTHERAPY, 20, new BigDecimal("110.00"));
+        createServiceIfNotExists("Crioterapia", "Aplicación de frío terapéutico", ServiceCategory.THERMOTHERAPY, 20, new BigDecimal("100.00"));
+        createServiceIfNotExists("Terapia de Contraste", "Alternancia de calor y frío", ServiceCategory.THERMOTHERAPY, 30, new BigDecimal("120.00"));
+        // TERAPIA MANUAL
+        createServiceIfNotExists("Drenaje Linfático", "Drenaje linfático manual terapéutico", ServiceCategory.MANUAL_THERAPY, 45, new BigDecimal("160.00"));
+        createServiceIfNotExists("Masoterapia", "Masaje terapéutico", ServiceCategory.MANUAL_THERAPY, 50, new BigDecimal("150.00"));
+        createServiceIfNotExists("Liberación Miofascial", "Técnica de liberación de fascia muscular", ServiceCategory.MANUAL_THERAPY, 40, new BigDecimal("140.00"));
+        createServiceIfNotExists("Técnicas de Energía Muscular", "PNF y técnicas de energía muscular", ServiceCategory.MANUAL_THERAPY, 35, new BigDecimal("130.00"));
+        createServiceIfNotExists("Maderoterapia", "Tratamiento con herramientas de madera", ServiceCategory.MANUAL_THERAPY, 30, new BigDecimal("120.00"));
+        createServiceIfNotExists("Terapia de Percusión", "Masaje percutivo terapéutico", ServiceCategory.MANUAL_THERAPY, 30, new BigDecimal("110.00"));
+        // KINESIOTERAPIA
+        createServiceIfNotExists("Vendaje Funcional", "Vendaje funcional y estabilización", ServiceCategory.KINESIOTHERAPY, 25, new BigDecimal("80.00"));
+        createServiceIfNotExists("Kinesiotaping", "Aplicación de cinta kinesiológica", ServiceCategory.KINESIOTHERAPY, 30, new BigDecimal("90.00"));
+        createServiceIfNotExists("Prescripción de Ortesis", "Evaluación y prescripción de ortesis", ServiceCategory.KINESIOTHERAPY, 40, new BigDecimal("100.00"));
+        createServiceIfNotExists("Prescripción de Plantillas", "Evaluación y prescripción de plantillas personalizadas", ServiceCategory.KINESIOTHERAPY, 40, new BigDecimal("120.00"));
+        // ANÁLISIS POSTURAL
+        createServiceIfNotExists("Análisis de Pisada", "Análisis biomecánico de la pisada", ServiceCategory.POSTURAL_ANALYSIS, 60, new BigDecimal("200.00"));
+        log.info("Servicios médicos iniciales creados exitosamente");
+    }
+
+    private void createServiceIfNotExists(String name, String description, ServiceCategory category, Integer durationMinutes, BigDecimal price) {
+        if (!medicalServiceRepository.existsByName(name)) {
+            MedicalService service = MedicalService.builder()
+                    .name(name)
+                    .description(description)
+                    .category(category)
+                    .durationMinutes(durationMinutes)
+                    .price(price)
+                    .status(ServiceStatus.ACTIVE)
+                    .build();
+            medicalServiceRepository.save(service);
+            log.debug("Servicio creado: {} ({})", name, category.getDescription());
+        }
     }
 }

@@ -1,6 +1,6 @@
 # 📋 KINEVID APP — Plan Maestro de Desarrollo
 > **Stack:** Angular 13 · Spring Boot 3 · Java 17 · PostgreSQL  
-> **Fecha de última actualización:** Abril 2026 — Revisión 3.0  
+> **Fecha de última actualización:** Abril 2026 — Revisión 3.0
 > **Autor:** Douglas Cristhian Javieri Vino  
 > **Arquitectura:** Monolito Modular (preparado para extracción futura a microservicios)
 
@@ -45,8 +45,8 @@
 | FASE 8 | Backend: Generación de Reportes PDF (iText 7) | ⏳ Pendiente |
 | FASE 9 | Frontend: Descarga y visualización de reportes | ⏳ Pendiente |
 
-> ✅ **Nota importante:** Si el paciente no requiere el módulo de análisis de imagen,  
-> el flujo de Historia Clínica (Episodios → Sesiones → Servicios) está **completamente funcional**  
+> ✅ **Nota importante:** Si el paciente no requiere el módulo de análisis de imagen,
+> el flujo de Historia Clínica (Episodios → Sesiones → Servicios) está **completamente funcional**
 > de manera independiente. Las fases 6-9 son un módulo opcional adicional.
 
 ### 🏗️ Infraestructura implementada
@@ -410,7 +410,7 @@ Tiempo después → paciente regresa:
 - ✅ Dos flujos de navegación hacia las mismas pantallas (desde Pacientes y desde Episodios)
 - ✅ Sidebar con `Episodios Clínicos` para roles con permiso `LIST_EPISODE`
 
-> ✅ **El flujo de Historia Clínica está completo y funcional sin el módulo de imagen.**  
+> ✅ **El flujo de Historia Clínica está completo y funcional sin el módulo de imagen.**
 > Las FASES 6-9 (análisis de imagen y reportes PDF) son completamente opcionales.
 
 ---
@@ -473,11 +473,13 @@ clinical/
 
 ### 🔵 FASE 8 — Backend: Generación de Reportes PDF (iText 7)
 
+> 📄 **Documentación completa:** Ver `FASE6_ANALISIS_IMAGEN_PLANIFICACION.md`
+
 **Implementación:**
 - [ ] Dependencia `itext7-core` en `pom.xml`
-- [ ] `ReportService.generateAnalysisReport(Long analysisId)` → devuelve `byte[]`
+- [ ] `ReportService.generateFootAnalysisReport(Long analysisId)` → devuelve URL
 - [ ] Sube el PDF a Cloudinary (misma interfaz `StorageService`)
-- [ ] Guarda URL en `image_analysis.report_url`
+- [ ] Guarda URL en `foot_analysis.report_url`
 
 **Contenido del PDF:**
 1. Encabezado: logo del consultorio, fecha, número de reporte
@@ -485,22 +487,32 @@ clinical/
 3. Datos del fisioterapeuta
 4. Episodio y número de sesión
 5. Servicios aplicados en la sesión
-6. Historia clínica de la sesión (evaluación, tratamiento, observaciones, evolución)
-7. Imagen(es) seleccionada(s) con trazos y ángulos
-8. Diagnóstico: NORMAL / PRONACIÓN / SUPINACIÓN
-9. Pie de página: fecha de generación y espacio para firma
+6. Historia clínica de la sesión (evaluación, tratamiento, observaciones)
+7. **Datos del Análisis de Pisada:**
+   - Antecedentes relevantes
+   - Evaluación kinésica
+   - Observaciones
+   - Análisis biomecánico (pie izquierdo y derecho)
+   - Clasificación de huella plantar
+   - Distancia intermaleolar y intercondílea
+8. **Imágenes seleccionadas** con trazos y ángulos visualizados
+9. Diagnóstico: NORMAL / PRONACIÓN / SUPINACIÓN
+10. Pie de página: fecha de generación y espacio para firma
 
 **Endpoint:**
-- `GET /api/image-analysis/{id}/report` → genera (si no existe) o devuelve URL del PDF
+- `POST /api/foot-analysis/{id}/report/generate` → genera (si no existe) o devuelve URL del PDF
 
 ---
 
 ### 🔵 FASE 9 — Frontend: Descarga y Visualización de Reportes
 
-- [ ] Botón "Generar / Descargar Reporte PDF" en la sesión y en el análisis
+> 📄 **Documentación completa:** Ver `FASE6_ANALISIS_IMAGEN_PLANIFICACION.md`
+
+- [ ] Botón "Generar / Descargar Reporte PDF" en el análisis de pisada
 - [ ] Vista previa del PDF en modal (iframe con URL de Cloudinary)
-- [ ] Indicador visual en la tabla de sesiones si la sesión tiene reporte generado
-- [ ] Historial de reportes por paciente (lista de URLs descargables)
+- [ ] Indicador visual en la tabla de sesiones si tiene análisis completo
+- [ ] Link de descarga del PDF (si ya fue generado)
+- [ ] Historial de reportes por paciente (lista de URLs descargables en episodio cerrado)
 
 ---
 
@@ -630,12 +642,12 @@ kinevid/
 🔵 FASE 9  → Frontend: Descarga + Vista previa de reportes           PENDIENTE
 ```
 
-> **Nota:** El sistema de Historia Clínica (Fases 1-5) es completamente funcional de forma  
+> **Nota:** El sistema de Historia Clínica (Fases 1-5) es completamente funcional de forma
 > independiente. Las Fases 6-9 son el módulo opcional de análisis de imagen con reportes PDF.
 
 ---
 
-*Plan actualizado el 24/04/2026 — Revisión 3.0*  
+*Plan actualizado el 24/04/2026 — Revisión 3.0*
 *Fases 4 y 5 marcadas como COMPLETADAS. Próxima: Fase 6 (Análisis de Imagen)*
 ```
 PACIENTE (patient)

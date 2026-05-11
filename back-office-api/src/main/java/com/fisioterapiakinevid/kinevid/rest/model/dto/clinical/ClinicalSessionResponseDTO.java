@@ -30,6 +30,11 @@ public class ClinicalSessionResponseDTO {
     private String reasonForConsultation;
     private String relevantBackground;
     private String kinesiologicalEvaluation;
+    private String actualIllnessHistory;
+    private String gait;
+    private String functionalTests;
+    private String complementaryExams;
+    private String kinesiologicalDiagnosis;
     private String treatmentApplied;
     private String observations;
     private String evolution;
@@ -51,6 +56,11 @@ public class ClinicalSessionResponseDTO {
         this.reasonForConsultation = session.getReasonForConsultation();
         this.relevantBackground = session.getRelevantBackground();
         this.kinesiologicalEvaluation = session.getKinesiologicalEvaluation();
+        this.actualIllnessHistory = session.getActualIllnessHistory();
+        this.gait = session.getGait();
+        this.functionalTests = session.getFunctionalTests();
+        this.complementaryExams = session.getComplementaryExams();
+        this.kinesiologicalDiagnosis = session.getKinesiologicalDiagnosis();
         this.treatmentApplied = session.getTreatmentApplied();
         this.observations = session.getObservations();
         this.evolution = session.getEvolution();

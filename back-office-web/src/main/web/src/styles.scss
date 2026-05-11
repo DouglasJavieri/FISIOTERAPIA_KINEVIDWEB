@@ -6,8 +6,16 @@
 
 /* KINEVID COLOR PALETTE */
 
-$kinevid-primary: mat.define-palette(mat.$deep-purple-palette, 400, 200, 700);
-$kinevid-accent: mat.define-palette(mat.$purple-palette, 300);
+// Nuevos colores personalizados
+$color-primary:      #28A7B5;      // Teal primario
+$color-bg-light:     #CDF8FF;      // Fondo claro alternativa 1
+$color-bg-light-alt: #8FF2FF;      // Fondo claro alternativa 2
+$color-neutral:      #64748B;      // Neutral
+$color-btn-dark:     #0B1C30;      // Botones oscuros
+$color-surface:      #EAF1FF;      // Superficie clara (sidebar/navbar)
+
+$kinevid-primary: mat.define-palette(mat.$light-blue-palette, 400, 200, 700);
+$kinevid-accent: mat.define-palette(mat.$cyan-palette, 300);
 $kinevid-warn: mat.define-palette(mat.$red-palette);
 
 /* THEME */
@@ -35,7 +43,7 @@ html, body {
 body {
   margin: 0;
   font-family: 'Roboto', sans-serif;
-  background: #f5f7fb;
+  background: #f8fbff;
   overflow-x: hidden;
 }
 
@@ -68,18 +76,19 @@ button {
   }
 }
 
-// Primary sólidos (Guardar, Actualizar, Iniciar sesión) con purple más oscuro
+// Primary sólidos (Guardar, Actualizar, Iniciar sesión) con color oscuro
 .mat-flat-button.mat-primary,
 .mat-raised-button.mat-primary {
-  background-color: #512DA8 !important;
+  background-color: #0B1C30 !important;
+  color: #FFFFFF !important;
 
   &:hover:not([disabled]) {
-    background-color: #4527A0 !important;
-    box-shadow: 0 4px 14px rgba(81, 45, 168, 0.45) !important;
+    background-color: #0d2240 !important;
+    box-shadow: 0 4px 14px rgba(11, 28, 48, 0.45) !important;
   }
 
   &:active:not([disabled]) {
-    background-color: #311B92 !important;
+    background-color: #0a1929 !important;
   }
 
   &[disabled] {
@@ -92,9 +101,9 @@ button {
 
 // Stroked (Limpiar, Cancelar) hover sutil
 .mat-stroked-button:not([disabled]):hover {
-  background-color: rgba(81, 45, 168, 0.06) !important;
-  border-color: #512DA8 !important;
-  color: #512DA8 !important;
+  background-color: rgba(40, 167, 181, 0.06) !important;
+  border-color: #28A7B5 !important;
+  color: #28A7B5 !important;
 }
 
 label {
@@ -123,7 +132,7 @@ a.nx-confirm-button-cancel {
 /* UTILITIES */
 
 .text-primary {
-  color: #667eea;
+  color: #28A7B5;
 }
 
 /* SNACKBAR COLORS */

@@ -54,6 +54,11 @@ export interface ClinicalSessionResponse {
   reasonForConsultation: string;
   relevantBackground: string | null;
   kinesiologicalEvaluation: string | null;
+  actualIllnessHistory: string | null;
+  gait: string | null;
+  functionalTests: string | null;
+  complementaryExams: string | null;
+  kinesiologicalDiagnosis: string | null;
   treatmentApplied: string | null;
   observations: string | null;
   evolution: string | null;
@@ -74,6 +79,11 @@ export interface ClinicalSessionUpdateRequest {
   reasonForConsultation?: string | null;
   relevantBackground?: string | null;
   kinesiologicalEvaluation?: string | null;
+  actualIllnessHistory?: string | null;
+  gait?: string | null;
+  functionalTests?: string | null;
+  complementaryExams?: string | null;
+  kinesiologicalDiagnosis?: string | null;
   treatmentApplied?: string | null;
   observations?: string | null;
   evolution?: string | null;

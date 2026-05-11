@@ -36,20 +36,58 @@ export class AddPatientComponent implements OnInit {
 
   private buildForm(): void {
     this.form = new FormGroup({
-      firstName: new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(80), noWhitespaceValidator(),]),
-      paternalSurname: new FormControl('', [Validators.required, Validators.minLength(2), Validators.maxLength(80), noWhitespaceValidator(),]),
-      maternalSurname: new FormControl('', [Validators.maxLength(80), noOnlyWhitespaceValidator(),]),
-      ci: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(20), noWhitespaceValidator(),]),
+      firstName: new FormControl('', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(80),
+        noWhitespaceValidator(),
+      ]),
+      paternalSurname: new FormControl('', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(80),
+        noWhitespaceValidator(),
+      ]),
+      maternalSurname: new FormControl('', [
+        Validators.maxLength(80),
+        noOnlyWhitespaceValidator(),
+      ]),
+      ci: new FormControl('', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(20),
+        noWhitespaceValidator(),
+      ]),
       gender: new FormControl(null, [Validators.required]),
       birthDate: new FormControl(null, [Validators.required]),
-      phone: new FormControl('', [Validators.maxLength(15), Validators.pattern('^[0-9+\\-\\s()]*$'), noOnlyWhitespaceValidator(),]),
-      email: new FormControl('', [Validators.email, Validators.maxLength(80),]),
-      address: new FormControl('', [Validators.maxLength(200), noOnlyWhitespaceValidator(),]),
+      phone: new FormControl('', [
+        Validators.maxLength(15),
+        Validators.pattern('^[0-9+\\-\\s()]*$'),
+        noOnlyWhitespaceValidator(),
+      ]),
+      email: new FormControl('', [Validators.email, Validators.maxLength(80)]),
+      address: new FormControl('', [
+        Validators.maxLength(200),
+        noOnlyWhitespaceValidator(),
+      ]),
       bloodType: new FormControl(null),
-      occupation: new FormControl('', [Validators.maxLength(100), noOnlyWhitespaceValidator(),]),
-      emergencyContactName: new FormControl('', [Validators.maxLength(100), noOnlyWhitespaceValidator(),]),
-      emergencyContactPhone: new FormControl('', [Validators.maxLength(15), Validators.pattern('^[0-9+\\-\\s()]*$'), noOnlyWhitespaceValidator(),]),
-      notes: new FormControl('', [Validators.maxLength(500), noOnlyWhitespaceValidator(),]),
+      occupation: new FormControl('', [
+        Validators.maxLength(100),
+        noOnlyWhitespaceValidator(),
+      ]),
+      emergencyContactName: new FormControl('', [
+        Validators.maxLength(100),
+        noOnlyWhitespaceValidator(),
+      ]),
+      emergencyContactPhone: new FormControl('', [
+        Validators.maxLength(15),
+        Validators.pattern('^[0-9+\\-\\s()]*$'),
+        noOnlyWhitespaceValidator(),
+      ]),
+      notes: new FormControl('', [
+        Validators.maxLength(500),
+        noOnlyWhitespaceValidator(),
+      ]),
     });
   }
 

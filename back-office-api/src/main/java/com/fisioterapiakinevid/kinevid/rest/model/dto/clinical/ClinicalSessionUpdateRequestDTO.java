@@ -16,6 +16,11 @@ public class ClinicalSessionUpdateRequestDTO {
     private String reasonForConsultation;
     private String relevantBackground;
     private String kinesiologicalEvaluation;
+    private String actualIllnessHistory;
+    private String gait;
+    private String functionalTests;
+    private String complementaryExams;
+    private String kinesiologicalDiagnosis;
     private String treatmentApplied;
     private String observations;
     private String evolution;
