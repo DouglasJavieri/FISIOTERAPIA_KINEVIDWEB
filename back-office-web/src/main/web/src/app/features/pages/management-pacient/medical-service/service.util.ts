@@ -13,13 +13,15 @@ export const serviceStatusOptions = [
 ];
 
 export const serviceCategoryFilterOptions = [
-  { value: 'REHABILITATION',              label: 'Rehabilitación' },
-  { value: 'SPORTS_KINESIOLOGY',          label: 'Kinesiología Deportiva' },
-  { value: 'MASSOTHERAPY',               label: 'Masoterapia' },
-  { value: 'POSTURAL_ANALYSIS',           label: 'Análisis Postural' },
-  { value: 'PEDIATRIC_KINESIOLOGY',       label: 'Kinesiología Pediátrica' },
-  { value: 'NEUROLOGICAL_REHABILITATION', label: 'Rehabilitación Neurológica' },
-  { value: 'OTHER',                       label: 'Otro' },
+  { value: 'REHABILITATION',        label: 'Rehabilitación' },
+  { value: 'ELECTROTHERAPY',        label: 'Electroterapia' },
+  { value: 'SPORTS_KINESIOLOGY',    label: 'Kinesiología Deportiva' },
+  { value: 'THERAPEUTIC_GYMNASIUM', label: 'Gimnasio Terapéutico' },
+  { value: 'POSTURAL_ANALYSIS',     label: 'Análisis Postural' },
+  { value: 'THERMOTHERAPY',         label: 'Termoterapia' },
+  { value: 'MANUAL_THERAPY',        label: 'Terapia Manual' },
+  { value: 'KINESIOTHERAPY',        label: 'Kinesioterapia' },
+  { value: 'OTHER',                 label: 'Otro' },
 ];
 
 export const serviceTableColumns: ITableColumn[] = [
