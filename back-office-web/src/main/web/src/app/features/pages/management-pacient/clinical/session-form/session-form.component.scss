@@ -38,8 +38,12 @@
 }
 
 .add-service-actions {
-  margin: 4px 0 16px;
+  margin: 16px 0 8px;
   padding: 0 8px;
+
+  button {
+    min-width: 140px;
+  }
 }
 
 .status-bar {
@@ -93,3 +97,29 @@
   mat-icon { font-size: 40px; width: 40px; height: 40px; margin-bottom: 8px; }
   p { margin: 0; font-size: 14px; }
 }
+
+.postural-analysis-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 8px;
+  padding: 12px 16px;
+  background: #e3f2fd;
+  border-left: 4px solid #1976d2;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #0d47a1;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #1976d2;
+  }
+
+  span {
+    line-height: 1.4;
+  }
+}
+

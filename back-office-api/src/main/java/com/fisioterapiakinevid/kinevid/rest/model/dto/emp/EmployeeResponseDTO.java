@@ -21,7 +21,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class EmployeeResponseDTO {
 
-    // --- Datos del Empleado ---
     private Long id;
     private String firstName;
     private String paternalSurname;
@@ -36,25 +35,24 @@ public class EmployeeResponseDTO {
     private LocalDate admissionDate;
     private EmployeeStatus status;
 
-    // --- Datos del Usuario asignado (proyecciÃ³n plana, sin contraseÃ±a) ---
     private Long userId;
     private String username;
     private String email;
 
     public EmployeeResponseDTO(Employee employee) {
-        this.id               = employee.getId();
-        this.firstName        = employee.getFirstName();
-        this.paternalSurname  = employee.getPaternalSurname();
-        this.maternalSurname  = employee.getMaternalSurname();
-        this.ci               = employee.getCi();
-        this.expedition       = employee.getExpedition();
-        this.specialty        = employee.getSpecialty();
-        this.phone            = employee.getPhone();
-        this.address          = employee.getAddress();
-        this.department       = employee.getDepartment();
+        this.id = employee.getId();
+        this.firstName = employee.getFirstName();
+        this.paternalSurname = employee.getPaternalSurname();
+        this.maternalSurname = employee.getMaternalSurname();
+        this.ci = employee.getCi();
+        this.expedition = employee.getExpedition();
+        this.specialty = employee.getSpecialty();
+        this.phone = employee.getPhone();
+        this.address = employee.getAddress();
+        this.department = employee.getDepartment();
         this.professionalEmail = employee.getProfessionalEmail();
-        this.admissionDate    = employee.getAdmissionDate();
-        this.status           = employee.getStatus();
+        this.admissionDate = employee.getAdmissionDate();
+        this.status = employee.getStatus();
 
         if (employee.getUser() != null) {
             this.userId   = employee.getUser().getId();

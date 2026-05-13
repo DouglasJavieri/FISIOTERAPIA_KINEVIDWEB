@@ -60,29 +60,34 @@ Análisis Biomecánico (BiomechanicalAnalysis)
     └── Marcha (VARCHAR 50)
 ```
 
-### 1.3 Evaluación de Huella Plantar (Tabla Relacionada)
+### 1.3 Evaluación de Huella Plantar (Tabla Relacionada) — ⭐ GENÉRICA
 
-Clasificación del tipo de pie según **índice de huella**:
+Clasificación del tipo de pie según **índice de huella** — **REGISTRADA UNA SOLA VEZ, NO POR PIE**:
 
 ```
 Evaluación de Huella Plantar (FootPrintAnalysis)
 ├── Foot Analysis (relación 1:1)
-├── Pie Izquierdo (seleccionar UNO)
-│   ├── índice_normal (BOOLEAN)
-│   ├── índice_pie_plano (BOOLEAN)
-│   ├── índice_pie_cavo (BOOLEAN)
-│   ├── pie_plano (BOOLEAN)
-│   ├── pie_plano_normal (BOOLEAN)
-│   ├── pie_normal (BOOLEAN)
-│   ├── pie_normal_cavo (BOOLEAN)
-│   ├── pie_cavo (BOOLEAN)
-│   ├── pie_cavo_fuerte (BOOLEAN)
-│   └── pie_cavo_extremo (BOOLEAN)
-└── Pie Derecho
-    └── [Los mismos campos que Pie Izquierdo]
+├── Tipo de Huella (VARCHAR 50 - seleccionar UNO)
+│   ├── ÍNDICE_NORMAL
+│   ├── ÍNDICE_PIE_PLANO
+│   ├── ÍNDICE_PIE_CAVO
+│   ├── PIE_PLANO
+│   ├── PIE_PLANO_NORMAL
+│   ├── PIE_NORMAL
+│   ├── PIE_NORMAL_CAVO
+│   ├── PIE_CAVO
+│   ├── PIE_CAVO_FUERTE
+│   └── PIE_CAVO_EXTREMO
+├── Notas Adicionales (TEXT - opcional)
+└── Fecha de Evaluación (TIMESTAMP)
 ```
 
-**⚠️ Regla de negocio:** Solo UNO de estos campos puede ser `true` por pie.
+**✅ Cambio importante (Rev.2):** 
+- ❌ **ANTES:** Se registraba POR PIE (izquierdo + derecho)
+- ✅ **AHORA:** Se registra UNA SOLA VEZ de forma genérica (aplica al paciente/sesión general)
+- 📊 **Ventaja:** Menos complejidad, más claridad, el fisioterapeuta evalúa el patrón general
+
+**⚠️ Regla de negocio:** Solo UNO de estos tipos puede ser seleccionado.
 
 ### 1.4 Datos de Imagen y Anotaciones
 
@@ -275,72 +280,74 @@ El análisis de pisada **solo se activa** si en la sesión clínica se seleccion
 
 En `clinical_session`, el campo `has_foot_analysis` cambia a `true`.
 
-### 4.2 Flujo completo (Lineal y Paso a Paso)
+### 4.2 Flujo completo (Optimizado con Modal)
 
 ```
-[SESIÓN CLÍNICA ABIERTA]
-  └── Llenar: Motivo, Evaluación, Servicios
+[SESIÓN CLÍNICA ABIERTA - PASO 1]
+  └── Llenar: Motivo, Fisioterapeuta, Servicios
       └── ¿Se selecciona "Análisis de Pisada"?
           │
-          ├─ NO → Cerrar sesión normalmente
+          ├─ NO → Avanzar a Paso 2 normalmente
           │
-          └─ SÍ → [MÓDULO DE ANÁLISIS DE IMAGEN]
+          └─ SÍ → Botón: "Ir a Análisis de Imagen"
                │
-               └─ PASO 1: CAPTURA DE IMÁGENES
-                   ├── Abrir cámara o subir fotos
-                   ├── Máximo 6 fotos
-                   ├── Preview miniaturas
-                   └── Guardar fotos temporalmente
-                   
-                   └─ PASO 2: SELECCIONAR Y VISUALIZAR
-                       ├── Click en miniatura → imagen ampliada en canvas
-                       ├── Visualización clara para análisis
-                       └── Opciones de edición/reemplazo
-                       
-                       └─ PASO 3: ANÁLISIS DE TRAZOS (Canvas)
-                           ├── Dibujar trazo vertical pie izquierdo (línea 1)
-                           ├── Marcar punto de ángulo → genera triángulo + ángulo interno/externo
-                           ├── Dibujar trazo vertical pie derecho (línea 2)
-                           ├── Marcar punto de ángulo → genera triángulo + ángulo interno/externo
-                           ├── Ver ángulos en tiempo real (grados)
-                           ├── Guardar anotaciones JSON
-                           └── Seleccionar fotos a guardar para reporte (max 6)
-                           
-                           └─ PASO 4: COMPLETAR DATOS DE ANÁLISIS
-                               ├── Antecedentes Relevantes
-                               ├── Evaluación Kinésica
-                               ├── Observaciones
-                               ├── Distancia Intermaleolar
-                               ├── Distancia Intercondílea
-                               ├── Seleccionar Diagnóstico (NORMAL / PRONACIÓN / SUPINACIÓN)
-                               ├── ANÁLISIS BIOMECÁNICO
-                               │   ├── PIE IZQUIERDO
-                               │   │   ├── Regla Maleolo Tibial (select)
-                               │   │   ├── Desgaste de Calzado
-                               │   │   ├── Palpación Tibial
-                               │   │   └── Marcha (select)
-                               │   └── PIE DERECHO
-                               │       ├── [idem]
-                               │       
-                               └── EVALUACIÓN DE HUELLA PLANTAR
-                                   ├── PIE IZQUIERDO
-                                   │   └── Seleccionar SOLO UNO
-                                   │       ├── Índice Normal
-                                   │       ├── Índice Pie Plano
-                                   │       ├── ... (resto de opciones)
-                                   │       └── [Validación: solo 1 true]
-                                   └── PIE DERECHO
-                                       └── [idem]
+               └─ ABRE MODAL CON 5 SUB-PASOS:
+                │
+                ├─ SUB-PASO 1: CAPTURA DE IMÁGENES
+                │  ├── Abrir cámara o subir fotos
+                │  ├── Máximo 6 fotos
+                │  ├── Preview miniaturas
+                │  └── Guardar fotos temporalmente
+                │    
+                ├─ SUB-PASO 2: SELECCIONAR Y VISUALIZAR
+                │  ├── Click en miniatura → imagen ampliada en canvas
+                │  ├── Visualización clara para análisis
+                │  └── Opciones de edición/reemplazo
+                │    
+                ├─ SUB-PASO 3: ANÁLISIS DE TRAZOS (Canvas)
+                │  ├── Dibujar trazo vertical pie izquierdo (línea 1)
+                │  ├── Marcar punto de ángulo → genera triángulo + ángulo interno/externo
+                │  ├── Dibujar trazo vertical pie derecho (línea 2)
+                │  ├── Marcar punto de ángulo → genera triángulo + ángulo interno/externo
+                │  ├── Ver ángulos en tiempo real (grados)
+                │  ├── Guardar anotaciones JSON
+                │  └── Seleccionar fotos a guardar para reporte (max 6)
+                │    
+                ├─ SUB-PASO 4: ANÁLISIS BIOMECÁNICO + HUELLA PLANTAR
+                │  ├── Datos por pie (LEFT/RIGHT)
+                │  │   ├── Regla Maleolo Tibial
+                │  │   ├── Desgaste de Calzado
+                │  │   ├── Palpación Tibial
+                │  │   └── Marcha
+                │  │
+                │  └── Evaluación de Huella Plantar
+                │      └── Seleccionar SOLO UNO por pie
+                │    
+                ├─ SUB-PASO 5: RESUMEN + GENERAR PDF
+                │  ├── Antecedentes, Evaluación, Observaciones
+                │  ├── Diagnóstico (NORMAL / PRONACIÓN / SUPINACIÓN)
+                │  ├── Distancia Intermaleolar / Intercondílea
+                │  ├── Botón: "Generar Reporte PDF"
+                │  │   └── Backend genera PDF con imágenes + datos
+                │  │   └── Sube a Cloudinary → Retorna URL
+                │  └── Botón: "Cerrar Modal" → Retorna a Paso 1
+                │      (sesión actualizada con has_foot_analysis=true)
+                │    
+                └─ RETORNA A PASO 1:
+                   ├── Sesión guardada con análisis
+                   └── Avanzar a Paso 2 normalmente
 
-                               └─ PASO 5: GUARDAR Y GENERAR REPORTE
-                                   ├── Guardar todo en BD
-                                   ├── ✅ Datos guardados → "Análisis completado"
-                                   ├── Botón: "Generar Reporte PDF"
-                                   ├── [Backend genera PDF con imágenes + datos]
-                                   ├── ✅ PDF guardado en Cloudinary
-                                   ├── Mostrar URL o link de descarga
-                                   └── Cerrar sesión → CLOSED
+[SESIÓN CLÍNICA - PASO 2]
+  └── Llenar: Evaluación, Tratamiento, Observaciones
+      └── Botón: Cerrar sesión → CLOSED
+          (Si tiene análisis de pisada, puede generar/descargar PDF)
 ```
+
+**Cambios clave:**
+- ✅ Modal NO interrumpe el flujo principal del stepper
+- ✅ Decisión de servicios se hace en Paso 1
+- ✅ Análisis es **opcional** y **aislado**
+- ✅ Historia clínica funciona con o sin análisis
 
 ### 4.3 Edición posterior
 
@@ -692,25 +699,35 @@ export interface FootAnalysisResponse {
 }
 ```
 
-### 7.2 Flujo en Stepper Existente
+### 7.2 Flujo en Stepper Existente (Rediseñado)
 
-**Sin agregar pasos nuevos al stepper**, se modifica el paso 3:
+**Stepper optimizado: 2 pasos base + análisis postural en modal (NUEVO)**
 
 ```
-Paso 1: Datos básicos
-├── [Fecha, Motivo, Fisioterapeuta, etc.] ← existente
+PASO 1: Datos Básicos + Servicios
+├── Fecha, Motivo, Fisioterapeuta
+├── Multiselect de servicios
+│   └── ✅ SI se selecciona "Análisis de Pisada"
+│       └── Botón: "Ir a Análisis de Imagen" 🔵 NUEVO (abre modal)
+│           └── Modal con 5 sub-pasos (no afecta stepper principal)
+│               ├── Sub-paso 1: Captura de Fotos
+│               ├── Sub-paso 2: Canvas de Trazos
+│               ├── Sub-paso 3: Análisis Biomecánico
+│               ├── Sub-paso 4: Evaluación de Huella Plantar
+│               └── Sub-paso 5: Resumen + Generar PDF
+│           └── Cierra modal → retorna a Paso 1
+│               (sesión marcada con has_foot_analysis=true)
 
-Paso 2: Evaluación clínica
-├── [Evaluación kinésica, Tratamiento, Observaciones] ← existente
-
-Paso 3: Servicios aplicados
-├── [Tabla de servicios multiselect] ← existente
-├── ✅ SI se selecciona "Análisis de Pisada"
-│       └── Botón: "Ir a Análisis de Imagen" 🔵 NUEVO
-│           └── Abre modal/pantalla overlay con toda la lógica de análisis
-│
-└── [Guardar / Cerrar sesión]
+PASO 2: Evaluación Clínica + Cierre
+├── [Antecedentes, Evaluación, Tratamiento, Observaciones, Evolución] ← existente
+└── [Botón: Cerrar sesión → CLOSED]
 ```
+
+**Ventajas:**
+- ✅ Flujo normal (2 pasos) si NO hay análisis postural
+- ✅ Decisión de servicios UPFRONT (paso 1)
+- ✅ Análisis postural en modal aislado (no interrumpe stepper)
+- ✅ UX más limpia y predecible
 
 ### 7.3 Impacto Mínimo
 
@@ -770,7 +787,30 @@ Si no se requiere el módulo de análisis de imagen:
 [ 6 ] Crear controladores REST (endpoints)
 [ 7 ] Agregar permisos en DataLoader
 [ 8 ] Crear migración Flyway
-      ALTER TABLE clinical_session ADD COLUMN has_foot_analysis BOOLEAN DEFAULT FALSE;
+       ALTER TABLE clinical_session ADD COLUMN has_foot_analysis BOOLEAN DEFAULT FALSE;
+```
+
+### Fase 7 — Backend: Generación de PDF (iText 7) (1-2 días)
+
+```
+[ 1 ] Agregar dependencia iText 7 en pom.xml
+[ 2 ] Crear ReportService
+       - Método: generateFootAnalysisReport(Long analysisId)
+       - Inserta: logo, paciente, datos clínicos, fotos + trazos, diagnóstico
+       - Sube PDF a Cloudinary (NO persiste en BD, solo URL)
+[ 3 ] Crear endpoint POST /api/foot-analysis/{id}/report/generate
+[ 4 ] Crear endpoint GET /api/foot-analysis/{id}/report
+[ 5 ] Pruebas de generación
+```
+
+### Fase 8 — Frontend: Vista Previa y Descarga (1 día)
+
+```
+[ 1 ] Crear componente report-preview (opcional)
+[ 2 ] Agregar botón "Generar / Descargar Reporte PDF" en análisis
+[ 3 ] Link para descargar desde Cloudinary URL
+[ 4 ] Indicador visual en tabla (si sesión tiene reporte)
+[ 5 ] Historial de reportes por sesión
 ```
 
 ### Fase 6B — Frontend: Módulo de Imagen (3-4 días)
@@ -843,6 +883,17 @@ Si no se requiere el módulo de análisis de imagen:
 |-------|--------|-------|
 | `clinical_session` | +1 columna boolean | Control de estado |
 
+### Gestión de Reportes
+
+| Aspecto | Decisión |
+|--------|----------|
+| Almacenamiento PDF | ❌ **NO** en BD, ✅ Solo URL en `foot_analysis.report_url` |
+| Almacenamiento Físico | ✅ Cloudinary (proveedor externo) |
+| Descarga | ✅ Bajo demanda desde URL Cloudinary |
+| Regeneración | ✅ Permitida (sobrescribe en `report_url`) |
+| Persistencia | ✅ Solo el link (URL), no el archivo |
+| Eliminación Lógica | ✅ Si se borra análisis, se borra URL también |
+
 ### Pantallas Frontend
 
 | Pantalla | Tipo | Propósito |
@@ -864,30 +915,40 @@ Si no se requiere el módulo de análisis de imagen:
 
 ## 🎯 Recomendación Final
 
-**Opción Recomendada: Implementación Modular en Fases Cortas**
+**Opción Recomendada: Implementación Modular Integrada en Modal**
 
 ```
-SEMANA 1: Fase 6A Backend
+✅ VENTAJAS del diseño optimizado (2 pasos + modal):
+  ├── UX más limpia: flujo normal sin análisis postural (2 pasos)
+  ├── Decisión de servicios UPFRONT (paso 1)
+  ├── Análisis aislado en modal (no interrumpe stepper)
+  ├── Historia clínica funcional al 100% sin análisis
+  ├── Reportes bajo demanda (sin persistencia de archivos)
+  └── Bajo riesgo de ruptura en lo existente
+
+SEMANA 1: Fase 6 Backend
   └─ Entidades + Servicios + API REST
 
-SEMANA 2: Fase 6B Frontend
-  └─ Módulos + Canvas + Integración
+SEMANA 2: Fase 6 Frontend (Modal integrado)
+  └─ Módulos + Canvas + Integración en stepper
 
 SEMANA 3: Fase 7-8 Reportes
-  └─ PDF + Vista previa
+  └─ PDF bajo demanda + Vista previa
 
 RESULTADO: Sistema robusto, escalable y sin afectar Historia Clínica existente
 ```
 
-**Ventajas:**
-- ✅ Bajo riesgo de ruptura en lo existente
-- ✅ Testing progresivo
-- ✅ Feedback temprano
-- ✅ Facilita correcciones
 
 ---
 
 **Documento preparado por:** Sistema de Planificación KineVid  
-**Próximo paso:** Aprobación y comenzar Fase 6A  
+**Próximo paso:** Aprobación y comenzar Fase 6 (Backend)
+
+---
+
+**Nota de actualización — 11/05/2026:**
+- ✅ Stepper optimizado: 2 pasos base + análisis postular en modal (no 3 pasos + 5 sub-pasos)
+- ✅ Reportes: descarga bajo demanda desde Cloudinary (sin persistencia de archivos en BD)
+- ✅ Historia clínica completamente funcional sin análisis de pisada  
 
 

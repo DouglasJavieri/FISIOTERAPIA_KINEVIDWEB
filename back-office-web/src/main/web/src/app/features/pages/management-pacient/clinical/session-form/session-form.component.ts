@@ -52,11 +52,12 @@ export class SessionFormComponent implements OnInit {
 
   step2!: FormGroup;
 
-  step3!: FormGroup;
-
   canUpdate = false;
   sessionLocked = false;
   sessionStatusOptions = sessionStatusOptions;
+
+  // Flag para detectar si se seleccionó Análisis Postural
+  hasPosturalAnalysisService = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -90,12 +91,12 @@ export class SessionFormComponent implements OnInit {
     this.step1 = new FormGroup({
       employeeId: new FormControl(null, [Validators.required]),
       sessionDate: new FormControl(null, [Validators.required]),
-      reasonForConsultation: new FormControl('', [
-        Validators.required, Validators.maxLength(500), noWhitespaceValidator(),
-      ]),
-      relevantBackground: new FormControl('', [
-        Validators.maxLength(1000), noOnlyWhitespaceValidator(),
-      ]),
+      reasonForConsultation: new FormControl('', [Validators.required, Validators.maxLength(500), noWhitespaceValidator(),]),
+      relevantBackground: new FormControl('', [Validators.maxLength(1000), noOnlyWhitespaceValidator(),]),
+      medicalServiceId: new FormControl(null, [Validators.required]),
+      quantity: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(99)]),
+      unitPrice: new FormControl(null, [Validators.min(0)]),
+      notes: new FormControl('', [Validators.maxLength(500), noOnlyWhitespaceValidator()]),
     });
 
     this.step2 = new FormGroup({
@@ -108,13 +109,6 @@ export class SessionFormComponent implements OnInit {
       treatmentApplied: new FormControl('', [noOnlyWhitespaceValidator()]),
       observations: new FormControl('', [noOnlyWhitespaceValidator()]),
       evolution: new FormControl('', [noOnlyWhitespaceValidator()]),
-    });
-
-    this.step3 = new FormGroup({
-      medicalServiceId: new FormControl(null, [Validators.required]),
-      quantity: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(99)]),
-      unitPrice: new FormControl(null, [Validators.min(0)]),
-      notes: new FormControl('', [Validators.maxLength(500), noOnlyWhitespaceValidator()]),
     });
   }
 
@@ -149,17 +143,17 @@ export class SessionFormComponent implements OnInit {
           reasonForConsultation: s.reasonForConsultation,
           relevantBackground: s.relevantBackground ?? '',
         });
-         this.step2.patchValue({
-           kinesiologicalEvaluation: s.kinesiologicalEvaluation ?? '',
-           actualIllnessHistory: s.actualIllnessHistory ?? '',
-           gait: s.gait ?? '',
-           functionalTests: s.functionalTests ?? '',
-           complementaryExams: s.complementaryExams ?? '',
-           kinesiologicalDiagnosis: s.kinesiologicalDiagnosis ?? '',
-           treatmentApplied: s.treatmentApplied ?? '',
-           observations: s.observations ?? '',
-           evolution: s.evolution ?? '',
-         });
+        this.step2.patchValue({
+          kinesiologicalEvaluation: s.kinesiologicalEvaluation ?? '',
+          actualIllnessHistory: s.actualIllnessHistory ?? '',
+          gait: s.gait ?? '',
+          functionalTests: s.functionalTests ?? '',
+          complementaryExams: s.complementaryExams ?? '',
+          kinesiologicalDiagnosis: s.kinesiologicalDiagnosis ?? '',
+          treatmentApplied: s.treatmentApplied ?? '',
+          observations: s.observations ?? '',
+          evolution: s.evolution ?? '',
+        });
 
         if (this.sessionLocked || !this.canUpdate) {
           this.step1.disable();
@@ -179,12 +173,15 @@ export class SessionFormComponent implements OnInit {
   private loadAppliedServices(): void {
     if (!this.sessionId) return;
     this.sessionService.getServices(this.sessionId).subscribe({
-      next: list => this.appliedServices = list,
+      next: list => {
+        this.appliedServices = list;
+        this.checkForPosturalAnalysisService();
+      },
       error: () => {},
     });
   }
 
-  // ─── Paso 1: guardar datos básicos ─────────────────────────────────────────
+  // ─── Paso 1: guardar datos básicos y crear servicios ──────────────────────────
 
   saveStep1(): void {
     if (this.step1.invalid) {
@@ -194,7 +191,7 @@ export class SessionFormComponent implements OnInit {
     if (this.isNew) {
       this.createSession();
     } else {
-      this.updateSession();
+      this.updateSessionStep1();
     }
   }
 
@@ -214,7 +211,8 @@ export class SessionFormComponent implements OnInit {
         this.session = s;
         this.sessionId = s.id;
         this.isNew = false;
-        this.stepper.next();
+        // Agregar el servicio seleccionado
+        this.addService(() => this.stepper.next());
       },
       error: err => {
         Notiflix.Loading.remove(300);
@@ -223,54 +221,51 @@ export class SessionFormComponent implements OnInit {
     });
   }
 
-   private updateSession(): void {
-     const v1 = this.step1.value;
-     const v2 = this.step2.value;
-     const body: ClinicalSessionUpdateRequest = {
-       employeeId: v1.employeeId,
-       reasonForConsultation: v1.reasonForConsultation?.trim(),
-       relevantBackground: v1.relevantBackground?.trim() || null,
-       kinesiologicalEvaluation: v2.kinesiologicalEvaluation?.trim() || null,
-       actualIllnessHistory: v2.actualIllnessHistory?.trim() || null,
-       gait: v2.gait?.trim() || null,
-       functionalTests: v2.functionalTests?.trim() || null,
-       complementaryExams: v2.complementaryExams?.trim() || null,
-       kinesiologicalDiagnosis: v2.kinesiologicalDiagnosis?.trim() || null,
-       treatmentApplied: v2.treatmentApplied?.trim() || null,
-       observations: v2.observations?.trim() || null,
-       evolution: v2.evolution?.trim() || null,
-     };
-     Notiflix.Loading.pulse('Guardando cambios...');
-     this.sessionService.update(this.sessionId!, body).subscribe({
-       next: s => {
-         Notiflix.Loading.remove(300);
-         this.session = s;
-         Notiflix.Notify.success('Sesión actualizada correctamente.');
-         this.stepper.next();
-       },
-       error: err => {
-         Notiflix.Loading.remove(300);
-         Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo actualizar la sesión.', 'OK');
-       },
-     });
-   }
-
+  private updateSessionStep1(): void {
+    const v1 = this.step1.value;
+    const v2 = this.step2.value;
+    const body: ClinicalSessionUpdateRequest = {
+      employeeId: v1.employeeId,
+      reasonForConsultation: v1.reasonForConsultation?.trim(),
+      relevantBackground: v1.relevantBackground?.trim() || null,
+      kinesiologicalEvaluation: v2.kinesiologicalEvaluation?.trim() || null,
+      actualIllnessHistory: v2.actualIllnessHistory?.trim() || null,
+      gait: v2.gait?.trim() || null,
+      functionalTests: v2.functionalTests?.trim() || null,
+      complementaryExams: v2.complementaryExams?.trim() || null,
+      kinesiologicalDiagnosis: v2.kinesiologicalDiagnosis?.trim() || null,
+      treatmentApplied: v2.treatmentApplied?.trim() || null,
+      observations: v2.observations?.trim() || null,
+      evolution: v2.evolution?.trim() || null,
+    };
+    Notiflix.Loading.pulse('Guardando cambios...');
+    this.sessionService.update(this.sessionId!, body).subscribe({
+      next: s => {
+        Notiflix.Loading.remove(300);
+        this.session = s;
+        Notiflix.Notify.success('Sesión actualizada correctamente.');
+        this.stepper.next();
+      },
+      error: err => {
+        Notiflix.Loading.remove(300);
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo actualizar la sesión.', 'OK');
+      },
+    });
+  }
 
   saveStep2(): void {
     if (this.sessionLocked || !this.canUpdate) {
-      this.stepper.next();
+      this.finalize();
       return;
     }
-    this.updateSession();
+    this.updateSessionStep1();
   }
 
-
-  addService(): void {
-    if (this.step3.invalid) {
-      this.step3.markAllAsTouched();
+  addService(callback?: () => void): void {
+    if (this.step1.invalid) {
+      this.step1.markAllAsTouched();
       return;
     }
-
 
     if (!this.sessionId) {
       console.error('sessionId es null/undefined. Estado actual:', {
@@ -282,7 +277,7 @@ export class SessionFormComponent implements OnInit {
       return;
     }
 
-    const v = this.step3.value;
+    const v = this.step1.value;
     const body: SessionServiceRequest = {
       medicalServiceId: v.medicalServiceId,
       quantity: v.quantity,
@@ -293,9 +288,15 @@ export class SessionFormComponent implements OnInit {
     this.sessionService.addService(this.sessionId!, body).subscribe({
       next: () => {
         this.isSavingService = false;
-        this.step3.reset({ quantity: 1 });
+        this.step1.patchValue({
+          medicalServiceId: null,
+          quantity: 1,
+          unitPrice: null,
+          notes: ''
+        });
         this.loadAppliedServices();
         Notiflix.Notify.success('Servicio agregado.');
+        if (callback) callback();
       },
       error: err => {
         this.isSavingService = false;
@@ -321,10 +322,24 @@ export class SessionFormComponent implements OnInit {
     );
   }
 
+  // ─── Detectar servicio de Análisis Postural ──────────────────────────────────
+
+  checkForPosturalAnalysisService(): void {
+    const hasPostural = this.appliedServices.some(
+      s => s.medicalServiceCategory === 'POSTURAL_ANALYSIS'
+    );
+    this.hasPosturalAnalysisService = hasPostural;
+  }
+
+  onServiceSelected(serviceId: number): void {
+    const svc = this.serviceList.find(s => s.id === serviceId);
+    if (svc?.price) {
+      this.step1.get('unitPrice')?.setValue(svc.price);
+    }
+  }
 
   f1(name: string) { return this.step1.get(name); }
   f2(name: string) { return this.step2.get(name); }
-  f3(name: string) { return this.step3.get(name); }
 
   private formatDate(date: any): string {
     if (!date) return '';
@@ -346,12 +361,6 @@ export class SessionFormComponent implements OnInit {
     return svc ? svc.name : String(id);
   }
 
-  onServiceSelected(serviceId: number): void {
-    const svc = this.serviceList.find(s => s.id === serviceId);
-    if (svc?.price) {
-      this.step3.get('unitPrice')?.setValue(svc.price);
-    }
-  }
 
   finalize(): void {
     Notiflix.Report.success(
