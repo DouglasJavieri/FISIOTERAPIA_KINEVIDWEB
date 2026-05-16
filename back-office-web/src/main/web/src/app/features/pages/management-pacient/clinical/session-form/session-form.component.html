@@ -202,10 +202,10 @@
                 <mat-row *matRowDef="let row; columns: ['name','category','quantity','unitPrice','total','notes','actions']"></mat-row>
               </mat-table>
 
-              <!-- Indicador de Análisis Postural -->
-              <div *ngIf="hasPosturalAnalysisService" class="postural-analysis-alert">
-                <mat-icon>info</mat-icon>
-                <span>✓ Se ha detectado "Análisis Postural". Después de completar esta sesión, se activará el flujo de captura de imágenes.</span>
+              <!-- Indicador de Análisis de Pisada (solo si está registrado) -->
+              <div *ngIf="hasPosturalAnalysisService" class="postural-analysis-alert" fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon style="color: #2196F3; margin-right: 12px;">info</mat-icon>
+                <span>✓ Se ha detectado "Análisis de Pisada". Después de completar esta sesión, se activará el flujo de captura de imágenes.</span>
               </div>
 
               <div fxLayout="row" fxLayoutAlign="end center" class="step-actions">

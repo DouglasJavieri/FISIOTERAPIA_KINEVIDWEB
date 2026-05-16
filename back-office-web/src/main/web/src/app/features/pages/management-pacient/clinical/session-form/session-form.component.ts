@@ -323,6 +323,9 @@ export class SessionFormComponent implements OnInit {
   }
 
   // ─── Detectar servicio de Análisis Postural ──────────────────────────────────
+  // Este método se ejecuta cada vez que se carga o se agrega un servicio.
+  // Verifica si algún servicio aplicado tiene la categoría 'POSTURAL_ANALYSIS'
+  // y actualiza el flag para mostrar/ocultar el botón de análisis de pisada
 
   checkForPosturalAnalysisService(): void {
     const hasPostural = this.appliedServices.some(
@@ -331,6 +334,8 @@ export class SessionFormComponent implements OnInit {
     this.hasPosturalAnalysisService = hasPostural;
   }
 
+  // Este método se ejecuta cuando el usuario selecciona un servicio en el dropdown
+  // Autogestiona el precio unitario basado en el precio del servicio seleccionado
   onServiceSelected(serviceId: number): void {
     const svc = this.serviceList.find(s => s.id === serviceId);
     if (svc?.price) {

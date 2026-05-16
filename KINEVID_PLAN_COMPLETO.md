@@ -398,7 +398,7 @@ Tiempo después → paciente regresa:
 
 #### Nuevas características de Stepper (Fase 5.1 — Optimización)
 
-**Stepper rediseñado: De 3 a 2 pasos base (+ análisis postural opcional)**
+**Stepper rediseñado: De 3 a 2 pasos base (+ análisis postural opcional en pantalla separada)**
 
 ```
 PASO 1: Datos Básicos + Servicios
@@ -406,15 +406,15 @@ PASO 1: Datos Básicos + Servicios
 ├── Motivo de consulta
 ├── Seleccionar fisioterapeuta
 ├── Seleccionar servicios (multiselect)
-│   └── ⚠️ SI se selecciona "Análisis Postural"
+│   └── ⚠️ SI se selecciona "Análisis de Pisada" (servicio médico)
 │       └── Botón: "Ir a Análisis de Imagen" 🔵 NUEVO
-│           └── Modal/Drawer con:
-│               ├── Paso A: Captura de Fotos (1-6 fotos)
-│               ├── Paso B: Canvas HTML5 (trazos + ángulos)
-│               ├── Paso C: Análisis Biomecánico (LEFT/RIGHT)
-│               ├── Paso D: Evaluación de Huella Plantar (LEFT/RIGHT)
-│               └── Paso E: Resumen + Generar PDF
-│           └── Retorna a Paso 1 (sesión actualizada con has_foot_analysis=true)
+│           └── Redirige a PANTALLA SEPARADA con 5 sub-pasos:
+│               ├── Sub-paso 1: Captura de Fotos (1-6 fotos)
+│               ├── Sub-paso 2: Canvas HTML5 (trazos + ángulos, pie LEFT + RIGHT)
+│               ├── Sub-paso 3: Análisis Biomecánico (LEFT/RIGHT con datos específicos)
+│               ├── Sub-paso 4: Evaluación de Huella Plantar (⭐ GENÉRICA - UNA SOLA VEZ, aplica al paciente/sesión)
+│               └── Sub-paso 5: Resumen + Generar PDF + Retornar a Paso 1
+│           └── Vuelve a Paso 1 (sesión actualizada con has_foot_analysis=true)
 
 PASO 2: Evaluación Clínica + Cierre
 ├── Antecedentes relevantes
@@ -425,14 +425,20 @@ PASO 2: Evaluación Clínica + Cierre
 └── Botón: Cerrar sesión → CLOSED
 ```
 
+**⭐ Cambio Importante — Evaluación de Huella Plantar:**
+- ❌ **ANTES:** Se registraba POR PIE (izquierdo + derecho como registros separados)
+- ✅ **AHORA:** Se registra UNA SOLA VEZ de forma genérica (aplica a la sesión general)
+- **Motivo:** Simplifica el flujo; el fisioterapeuta evalúa el patrón general del paciente, no por separado por pie
+- **Implementación:** Una tabla `footprint_analysis` con un único registro por análisis de pisada
+
 **Ventajas:**
 - ✅ Si NO hay análisis postural: 2 pasos rápidos
-- ✅ Si SÍ hay análisis: flujo completo (5 sub-pasos en modal)
+- ✅ Si SÍ hay análisis: flujo completo (5 sub-pasos en pantalla dedicada con más espacio)
 - ✅ UX más limpia, sin pasos innecesarios
 - ✅ Decisión de servicios UPFRONT (paso 1)
 - ✅ `mat-stepper` lineal: Datos básicos + Servicios → Evaluación clínica
-- ✅ **Si se selecciona "Análisis Postural":** botón "Ir a Análisis de Imagen" abre canvas + fotos (Fase 6B)
-- ✅ **Si NO se selecciona "Análisis Postural":** flujo normal de sesión (2 pasos)
+- ✅ **Si se selecciona "Análisis de Pisada":** botón "Ir a Análisis de Imagen" abre pantalla separada (Fase 6B)
+- ✅ **Si NO se selecciona "Análisis de Pisada":** flujo normal de sesión (2 pasos)
 - ✅ Creación de sesión en paso 1 antes de avanzar (modo lineal para nueva sesión)
 - ✅ Modo solo lectura si sesión CLOSED/CANCELLED (formularios deshabilitados + badge de estado)
 - ✅ Tabla de servicios aplicados en sesión (agregar, eliminar con validación de estado)
@@ -452,14 +458,14 @@ PASO 2: Evaluación Clínica + Cierre
 
 ---
 
-### 🔵 FASE 6 — Frontend: Análisis de Imagen (Modal HTML5)
+### 🔵 FASE 6 — Frontend: Análisis de Imagen (Pantalla Separada)
 
 **Flujo integrado:**
-- ✅ Botón en Paso 1 del stepper: "Ir a Análisis de Imagen" (solo si servicio="Análisis Postural" seleccionado)
-- ✅ Abre modal/drawer con 5 sub-pasos (no afecta el flujo principal)
-- ✅ Captura fotos, trazos, ángulos, evaluaciones biomecánicas, huella plantar
+- ✅ Botón en Paso 1 del stepper: "Ir a Análisis de Imagen" (solo si servicio="Análisis de Pisada" seleccionado)
+- ✅ Redirige a PANTALLA SEPARADA (no modal) con 5 sub-pasos
+- ✅ Captura fotos, trazos, ángulos, evaluaciones biomecánicas, huella plantar (genérica)
 - ✅ Guarda datos en `foot_analysis` + `biomechanical_analysis` + `footprint_analysis`
-- ✅ Retorna al stepper Paso 1 (sesión marcada con `has_foot_analysis=true`)
+- ✅ Botón retornar lleva de vuelta al Paso 1 (sesión marcada con `has_foot_analysis=true`)
 
 **Estructura del módulo:**
 ```
@@ -470,8 +476,13 @@ src/app/features/pages/management-pacient/patient/clinical/imaging/
 ├── photo-canvas/
 ├── biomechanical-form/
 ├── footprint-form/
-└── foot-analysis/ (orquestador)
+└── foot-analysis/ (orquestador con 5 sub-pasos)
 ```
+
+**Cambio clave (vs. modal):**
+- ✅ PANTALLA SEPARADA: Mejor UX, más espacio para dibujar trazos, mejor experiencia visual
+- ✅ RUTA: `/management-pacient/episodes/:episodeId/sessions/:sessionId/imaging`
+- ✅ NAVEGACIÓN: Botón en Paso 1 redirige + botón "Volver" retorna al Paso 1
 
 ---
 
@@ -736,8 +747,10 @@ PACIENTE (patient)
 
 ---
 
-*Plan actualizado el 11/05/2026 — Revisión 4.0*  
+*Plan actualizado el 13/05/2026 — Revisión 5.0*  
 *Cambios principales:*
-- *Stepper optimizado: 2 pasos base + análisis postural opcional en modal*
+- *Stepper optimizado: 2 pasos base + análisis postural en PANTALLA SEPARADA (no modal)*
+- *Evaluación de Huella Plantar: GENÉRICA (UNA SOLA VEZ), no por pie*
+- *Mejor UX y más espacio disponible para análisis de imagen*
 - *Reportes bajo demanda (sin persistencia de archivos, solo URLs)*
 - *Integración mejorada del análisis de imagen dentro del flujo de sesión*

@@ -82,12 +82,16 @@ Evaluación de Huella Plantar (FootPrintAnalysis)
 └── Fecha de Evaluación (TIMESTAMP)
 ```
 
-**✅ Cambio importante (Rev.2):** 
-- ❌ **ANTES:** Se registraba POR PIE (izquierdo + derecho)
-- ✅ **AHORA:** Se registra UNA SOLA VEZ de forma genérica (aplica al paciente/sesión general)
-- 📊 **Ventaja:** Menos complejidad, más claridad, el fisioterapeuta evalúa el patrón general
+**✅ Decisión de Diseño — Huella Plantar Genérica:** 
+- ❌ **ANTES:** Se registraba POR PIE (izquierdo + derecho como registros separados)
+- ✅ **AHORA:** Se registra UNA SOLA VEZ de forma genérica (aplica al análisis general de la sesión)
+- 📊 **Ventaja:** 
+  - Menos complejidad en BD (1 registro vs 2)
+  - Mejor UX (el fisioterapeuta evalúa el patrón general, no separado)
+  - Cumple con 3FN sin redundancia
+  - El evaluador clasifica al paciente en UNA CATEGORÍA única
 
-**⚠️ Regla de negocio:** Solo UNO de estos tipos puede ser seleccionado.
+**⚠️ Regla de negocio:** Solo UNO de estos tipos puede ser seleccionado por análisis.
 
 ### 1.4 Datos de Imagen y Anotaciones
 
@@ -209,29 +213,25 @@ Evaluación biomecánica por pie (derecho e izquierdo).
 
 ### 3.3 Tabla: `footprint_analysis` ⭐ NUEVA
 
-Clasificación de huella plantar (índices de Staheli).
+Clasificación de huella plantar (índices de Staheli) — **GENÉRICA, UNA SOLA VEZ POR ANÁLISIS**.
 
 | Columna | Tipo | Restricción | Descripción |
 |---|---|---|---|
 | id | BIGINT | PK, NOT NULL | Secuencia `SEQ_FOOTPRINT_ANALYSIS_ID` |
 | foot_analysis_id | BIGINT | FK → foot_analysis.id, NOT NULL | Análisis padre |
-| foot_side | VARCHAR(10) | NOT NULL | `LEFT` / `RIGHT` |
-| index_normal | BOOLEAN | NOT NULL, DEFAULT FALSE | Índice normal |
-| index_flat_foot | BOOLEAN | NOT NULL, DEFAULT FALSE | Índice pie plano |
-| index_cavus_foot | BOOLEAN | NOT NULL, DEFAULT FALSE | Índice pie cavo |
-| flat_foot | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie plano |
-| flat_foot_normal | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie plano-normal |
-| normal_foot | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie normal |
-| normal_cavus_foot | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie normal-cavo |
-| cavus_foot | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie cavo |
-| cavus_foot_strong | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie cavo fuerte |
-| cavus_foot_extreme | BOOLEAN | NOT NULL, DEFAULT FALSE | Pie cavo extremo |
+| footprint_type | VARCHAR(50) | NOT NULL | Tipo seleccionado: ÍNDICE_NORMAL / ÍNDICE_PIE_PLANO / ÍNDICE_PIE_CAVO / PIE_PLANO / PIE_PLANO_NORMAL / PIE_NORMAL / PIE_NORMAL_CAVO / PIE_CAVO / PIE_CAVO_FUERTE / PIE_CAVO_EXTREMO |
+| notes | TEXT | NULL | Notas adicionales del evaluador |
 | created_at | TIMESTAMP | NOT NULL | Auditoría |
 | updated_at | TIMESTAMP | NOT NULL | Auditoría |
 
 **Constraints:**
-- `UNIQUE (foot_analysis_id, foot_side)`
-- **Regla de negocio:** Exactamente UNO de los campos booleanos debe ser `true` (validado en servicio)
+- `UNIQUE (foot_analysis_id)` — **UNA SOLA evaluación genérica por análisis de pisada**
+- `CHECK (footprint_type IN (...))`
+
+**⭐ Cambio importante (Rev.3):**
+- ❌ **ANTES:** Tabla con booleanos por pie (LEFT + RIGHT con 10 campos cada uno = 20 booleans)
+- ✅ **AHORA:** Un campo VARCHAR simple con el tipo seleccionado + notas (más simple, más limpio)
+- **Razón:** El fisioterapeuta selecciona UNA clasificación que aplica al paciente general, no por pie
 
 ---
 
@@ -249,9 +249,9 @@ Agregar campos de control:
 ### 3.5 ERD Actualizado
 
 ```
-clinical_session
+clinical_session (sesión clínica)
     │
-    ├── session_service ──► medical_service
+    ├── session_service ──► medical_service (servicios aplicados)
     │
     └── foot_analysis ◄────────────────────────┐
             │                                  │
@@ -259,13 +259,13 @@ clinical_session
             │     └── annotations_json       
             │     (trazos + ángulos JSON)    
             │                                │
-            ├── biomechanical_analysis ────┤
-            │   ├── pie LEFT                │
+            ├── biomechanical_analysis ────┤ (LEFT + RIGHT)
+            │   ├── pie LEFT                │ (datos específicos por pie)
             │   └── pie RIGHT               │
             │                                │
-            └── footprint_analysis ────────┤
-                ├── pie LEFT                 │
-                └── pie RIGHT                │
+            └── footprint_analysis ────────┤ (⭐ GENÉRICA - UNA SOLA VEZ)
+                └── tipo seleccionado       
+                (aplica al análisis general)
 ```
 
 ---
@@ -280,7 +280,7 @@ El análisis de pisada **solo se activa** si en la sesión clínica se seleccion
 
 En `clinical_session`, el campo `has_foot_analysis` cambia a `true`.
 
-### 4.2 Flujo completo (Optimizado con Modal)
+### 4.2 Flujo completo (Optimizado con Pantalla Separada)
 
 ```
 [SESIÓN CLÍNICA ABIERTA - PASO 1]
@@ -291,7 +291,7 @@ En `clinical_session`, el campo `has_foot_analysis` cambia a `true`.
           │
           └─ SÍ → Botón: "Ir a Análisis de Imagen"
                │
-               └─ ABRE MODAL CON 5 SUB-PASOS:
+               └─ REDIRIGE A PANTALLA SEPARADA CON 5 SUB-PASOS:
                 │
                 ├─ SUB-PASO 1: CAPTURA DE IMÁGENES
                 │  ├── Abrir cámara o subir fotos
@@ -313,15 +313,15 @@ En `clinical_session`, el campo `has_foot_analysis` cambia a `true`.
                 │  ├── Guardar anotaciones JSON
                 │  └── Seleccionar fotos a guardar para reporte (max 6)
                 │    
-                ├─ SUB-PASO 4: ANÁLISIS BIOMECÁNICO + HUELLA PLANTAR
-                │  ├── Datos por pie (LEFT/RIGHT)
+                ├─ SUB-PASO 4: ANÁLISIS BIOMECÁNICO + EVALUACIÓN HUELLA PLANTAR
+                │  ├── Análisis Biomecánico (por pie LEFT/RIGHT)
                 │  │   ├── Regla Maleolo Tibial
                 │  │   ├── Desgaste de Calzado
                 │  │   ├── Palpación Tibial
                 │  │   └── Marcha
                 │  │
-                │  └── Evaluación de Huella Plantar
-                │      └── Seleccionar SOLO UNO por pie
+                │  └── Evaluación de Huella Plantar (⭐ GENÉRICA - UNA SOLA VEZ)
+                │      └── Seleccionar SOLO UN TIPO que aplique al paciente
                 │    
                 ├─ SUB-PASO 5: RESUMEN + GENERAR PDF
                 │  ├── Antecedentes, Evaluación, Observaciones
@@ -330,7 +330,7 @@ En `clinical_session`, el campo `has_foot_analysis` cambia a `true`.
                 │  ├── Botón: "Generar Reporte PDF"
                 │  │   └── Backend genera PDF con imágenes + datos
                 │  │   └── Sube a Cloudinary → Retorna URL
-                │  └── Botón: "Cerrar Modal" → Retorna a Paso 1
+                │  └── Botón: "Volver a Sesión" → Retorna a Paso 1
                 │      (sesión actualizada con has_foot_analysis=true)
                 │    
                 └─ RETORNA A PASO 1:
@@ -343,11 +343,13 @@ En `clinical_session`, el campo `has_foot_analysis` cambia a `true`.
           (Si tiene análisis de pisada, puede generar/descargar PDF)
 ```
 
-**Cambios clave:**
-- ✅ Modal NO interrumpe el flujo principal del stepper
-- ✅ Decisión de servicios se hace en Paso 1
-- ✅ Análisis es **opcional** y **aislado**
-- ✅ Historia clínica funciona con o sin análisis
+**Cambios clave (vs. modal):**
+- ✅ PANTALLA SEPARADA: Mejor UX, más espacio disponible
+- ✅ Ruta dedicada: `/management-pacient/episodes/{id}/sessions/{sessionId}/imaging`
+- ✅ Botón "Volver a Sesión" retorna al flujo principal (Paso 1)
+- ✅ No interrumpe el stepper principal
+- ✅ Más espacio para canvas de trazos
+- ✅ Mejor navegación entre sub-pasos
 
 ### 4.3 Edición posterior
 
@@ -368,43 +370,47 @@ src/app/features/pages/management-pacient/
 ├── patient/
 │   ├── clinical/
 │   │   ├── session/
-│   │   │   ├── clinical-session.component.ts    ← Stepper existente (agregar paso 4)
+│   │   │   ├── clinical-session.component.ts    ← Stepper existente (agregar botón condicional)
 │   │   │   └── clinical-session.component.html
 │   │   │
 │   │   ├── imaging/                            ← NUEVO MÓDULO
 │   │   │   ├── imaging.module.ts               ← NUEVO
 │   │   │   ├── imaging-routing.module.ts       ← NUEVO
 │   │   │   │
-│   │   │   ├── foot-analysis/                 ← NUEVO
+│   │   │   ├── foot-analysis/                 ← NUEVO (orquestador - 5 sub-pasos)
 │   │   │   │   ├── foot-analysis.component.ts
 │   │   │   │   ├── foot-analysis.component.html
 │   │   │   │   └── foot-analysis.component.scss
 │   │   │   │
-│   │   │   ├── photo-gallery/                 ← NUEVO
+│   │   │   ├── photo-gallery/                 ← NUEVO (Sub-paso 1 - Captura)
 │   │   │   │   ├── photo-gallery.component.ts
 │   │   │   │   ├── photo-gallery.component.html
 │   │   │   │   └── photo-gallery.component.scss
 │   │   │   │
-│   │   │   ├── photo-canvas/                  ← NUEVO
+│   │   │   ├── photo-canvas/                  ← NUEVO (Sub-paso 3 - Trazos)
 │   │   │   │   ├── photo-canvas.component.ts  ← Lógica de canvas + trazos
 │   │   │   │   ├── photo-canvas.component.html
 │   │   │   │   └── photo-canvas.component.scss
 │   │   │   │
-│   │   │   ├── biomechanical-form/            ← NUEVO
+│   │   │   ├── biomechanical-form/            ← NUEVO (Sub-paso 4 - Análisis Biomecánico)
 │   │   │   │   ├── biomechanical-form.component.ts
 │   │   │   │   ├── biomechanical-form.component.html
 │   │   │   │   └── biomechanical-form.component.scss
 │   │   │   │
-│   │   │   └── footprint-form/                ← NUEVO
+│   │   │   └── footprint-form/                ← NUEVO (Sub-paso 4 - Huella Plantar GENÉRICA)
 │   │   │       ├── footprint-form.component.ts
 │   │   │       ├── footprint-form.component.html
 │   │   │       └── footprint-form.component.scss
 │   │   │
-│   │   └── report/                            ← NUEVO (Fase 8)
+│   │   └── report/                            ← NUEVO (Fase 8 - Descarga)
 │   │       ├── report-preview.component.ts
 │   │       ├── report-preview.component.html
 │   │       └── report-preview.component.scss
 ```
+
+**Rutas:**
+- `/management-pacient/episodes/:episodeId/sessions/:sessionId/imaging` ← Pantalla principal (foot-analysis component)
+- Sub-componentes integrados dentro del orquestador
 
 ### 5.2 Pantallas Detalladas
 
@@ -500,15 +506,16 @@ src/app/features/pages/management-pacient/
 └──────────────────────────────────────────┘
 ```
 
-#### 📱 Pantalla 4: Evaluación de Huella Plantar
+#### 📱 Pantalla 4: Evaluación de Huella Plantar (⭐ GENÉRICA - UNA SOLA VEZ)
 
 ```
 ┌──────────────────────────────────────────┐
 │ Evaluación de Huella Plantar             │
 ├──────────────────────────────────────────┤
 │                                          │
-│  PIE IZQUIERDO                           │
-│  Seleccione UNO:                         │
+│  Seleccione el tipo de huella que aplica │
+│  al paciente (UNA SOLA OPCIÓN):          │
+│                                          │
 │  ◯ Índice Normal                         │
 │  ◯ Índice Pie Plano                      │
 │  ◯ Índice Pie Cavo                       │
@@ -520,12 +527,18 @@ src/app/features/pages/management-pacient/
 │  ◯ Pie Cavo Fuerte                       │
 │  ◯ Pie Cavo Extremo                      │
 │                                          │
-│  ────────────────────────────────────    │
-│  PIE DERECHO [igual estructura]         │
+│  Notas Adicionales (opcional):           │
+│  [Texto libre.....................]      │
 │                                          │
-│  [Atrás] [Guardar Análisis]             │
+│  [Atrás] [Siguiente]                    │
 └──────────────────────────────────────────┘
 ```
+
+**⭐ Nota importante (Cambio respecto a diseño anterior):**
+- ✅ **ANTES:** Evaluación POR PIE (izquierdo + derecho como secciones separadas)
+- ✅ **AHORA:** Evaluación GENÉRICA (UNA SOLA VEZ, aplica al análisis general)
+- **Razón:** El fisioterapeuta evalúa el PATRÓN GENERAL del paciente, no clasificaciones separadas por pie
+- **Ventaja:** Interfaz más simple, menos confusión, mejor UX
 
 #### 📱 Pantalla 5: Resumen y Datos Generales
 
@@ -556,9 +569,16 @@ src/app/features/pages/management-pacient/
 │                                          │
 │  Fotos seleccionadas para reporte: 3/6  │
 │                                          │
+│  ✅ Huella Plantar: [Tipo seleccionado] │
+│                                          │
 │  [Atrás] [Generar Reporte PDF]          │
+│          [Volver a Sesión]               │
 └──────────────────────────────────────────┘
 ```
+
+**Botones:**
+- ✅ **Generar Reporte PDF:** Crea el PDF con imágenes + datos, lo sube a Cloudinary
+- ✅ **Volver a Sesión:** Retorna al Paso 1 del stepper (sesión actualizada con `has_foot_analysis=true`)
 
 ---
 
@@ -701,22 +721,21 @@ export interface FootAnalysisResponse {
 
 ### 7.2 Flujo en Stepper Existente (Rediseñado)
 
-**Stepper optimizado: 2 pasos base + análisis postural en modal (NUEVO)**
+**Stepper optimizado: 2 pasos base + análisis postural en pantalla separada (NUEVO)**
 
 ```
 PASO 1: Datos Básicos + Servicios
 ├── Fecha, Motivo, Fisioterapeuta
 ├── Multiselect de servicios
 │   └── ✅ SI se selecciona "Análisis de Pisada"
-│       └── Botón: "Ir a Análisis de Imagen" 🔵 NUEVO (abre modal)
-│           └── Modal con 5 sub-pasos (no afecta stepper principal)
+│       └── Botón: "Ir a Análisis de Imagen" 🔵 NUEVO (redirige a pantalla)
+│           └── PANTALLA SEPARADA con 5 sub-pasos (mejor UX, más espacio)
 │               ├── Sub-paso 1: Captura de Fotos
 │               ├── Sub-paso 2: Canvas de Trazos
-│               ├── Sub-paso 3: Análisis Biomecánico
-│               ├── Sub-paso 4: Evaluación de Huella Plantar
-│               └── Sub-paso 5: Resumen + Generar PDF
-│           └── Cierra modal → retorna a Paso 1
-│               (sesión marcada con has_foot_analysis=true)
+│               ├── Sub-paso 3: Análisis Biomecánico (LEFT/RIGHT)
+│               ├── Sub-paso 4: Evaluación de Huella Plantar (⭐ GENÉRICA - UNA SOLA VEZ)
+│               └── Sub-paso 5: Resumen + Generar PDF + Botón "Volver"
+│           └── Retorna a Paso 1 (sesión marcada con has_foot_analysis=true)
 
 PASO 2: Evaluación Clínica + Cierre
 ├── [Antecedentes, Evaluación, Tratamiento, Observaciones, Evolución] ← existente
@@ -726,7 +745,8 @@ PASO 2: Evaluación Clínica + Cierre
 **Ventajas:**
 - ✅ Flujo normal (2 pasos) si NO hay análisis postural
 - ✅ Decisión de servicios UPFRONT (paso 1)
-- ✅ Análisis postural en modal aislado (no interrumpe stepper)
+- ✅ Análisis postural en PANTALLA SEPARADA (no modal, mejor UX)
+- ✅ Más espacio para canvas de trazos y evaluaciones
 - ✅ UX más limpia y predecible
 
 ### 7.3 Impacto Mínimo
@@ -760,7 +780,9 @@ PASO 2: Evaluación Clínica + Cierre
 | BD | Agregar columna | `clinical_session` | +1 |
 | Backend | Inyectar servicio | `ClinicalSessionServiceImpl` | +1 |
 | Frontend | Agregar botón | `clinical-session.component.html` | +3 |
-| Frontend | Lógica botón | `clinical-session.component.ts` | +5 |
+| Frontend | Lógica botón condicional | `clinical-session.component.ts` | +5 |
+| Frontend | Crear módulo imaging | Nuevo módulo | ~200 líneas |
+| Frontend | Crear componentes (5) | imaging/ | ~400 líneas |
 
 ### 8.3 Rollback Fácil
 
@@ -870,12 +892,12 @@ Si no se requiere el módulo de análisis de imagen:
 
 ### Tablas Nuevas
 
-| Tabla | Relación | Impacto |
-|-------|----------|--------|
-| `foot_analysis` | 1:1 con `clinical_session` | Principal |
-| `biomechanical_analysis` | 1:2 (LEFT + RIGHT) | Secundaria |
-| `footprint_analysis` | 1:2 (LEFT + RIGHT) | Secundaria |
-| *`analysis_photo`* | *Ya existente* | *Reutilizada* |
+| Tabla | Relación | Campos | Impacto |
+|-------|----------|--------|--------|
+| `foot_analysis` | 1:1 con `clinical_session` | 13 campos | Principal |
+| `biomechanical_analysis` | 1:2 (LEFT + RIGHT) | 7 campos | Secundaria (datos por pie) |
+| `footprint_analysis` | 1:1 con `foot_analysis` ⭐ | 3 campos | ⭐ Genérica (UNA SOLA VEZ) |
+| *`analysis_photo`* | *Ya existente* | *7 campos* | *Reutilizada* |
 
 ### Cambios en Existentes
 
@@ -915,27 +937,30 @@ Si no se requiere el módulo de análisis de imagen:
 
 ## 🎯 Recomendación Final
 
-**Opción Recomendada: Implementación Modular Integrada en Modal**
+**Opción Recomendada: Implementación Modular Integrada en Pantalla Separada**
 
 ```
-✅ VENTAJAS del diseño optimizado (2 pasos + modal):
+✅ VENTAJAS del diseño optimizado (2 pasos + pantalla separada):
   ├── UX más limpia: flujo normal sin análisis postural (2 pasos)
   ├── Decisión de servicios UPFRONT (paso 1)
-  ├── Análisis aislado en modal (no interrumpe stepper)
+  ├── Análisis en PANTALLA SEPARADA (mejor UX que modal, más espacio)
   ├── Historia clínica funcional al 100% sin análisis
   ├── Reportes bajo demanda (sin persistencia de archivos)
+  ├── Evaluación de Huella Plantar GENÉRICA (UNA SOLA VEZ, más simple)
   └── Bajo riesgo de ruptura en lo existente
 
 SEMANA 1: Fase 6 Backend
   └─ Entidades + Servicios + API REST
+  └─ Cambio importante: footprint_analysis simplificada (1 registro genérico)
 
-SEMANA 2: Fase 6 Frontend (Modal integrado)
+SEMANA 2: Fase 6B Frontend (Pantalla separada integrada)
   └─ Módulos + Canvas + Integración en stepper
+  └─ Ruta: /management-pacient/episodes/:episodeId/sessions/:sessionId/imaging
 
 SEMANA 3: Fase 7-8 Reportes
   └─ PDF bajo demanda + Vista previa
 
-RESULTADO: Sistema robusto, escalable y sin afectar Historia Clínica existente
+RESULTADO: Sistema robusto, escalable, mejor UX y sin afectar Historia Clínica existente
 ```
 
 
@@ -946,8 +971,10 @@ RESULTADO: Sistema robusto, escalable y sin afectar Historia Clínica existente
 
 ---
 
-**Nota de actualización — 11/05/2026:**
-- ✅ Stepper optimizado: 2 pasos base + análisis postular en modal (no 3 pasos + 5 sub-pasos)
+**Nota de actualización — 13/05/2026:**
+- ✅ Stepper optimizado: 2 pasos base + análisis postular en PANTALLA SEPARADA (mejor que modal)
+- ✅ Evaluación de Huella Plantar: GENÉRICA (UNA SOLA VEZ), no por pie
+- ✅ Tabla footprint_analysis simplificada: campo `footprint_type` VARCHAR + `notes` (más simple)
 - ✅ Reportes: descarga bajo demanda desde Cloudinary (sin persistencia de archivos en BD)
 - ✅ Historia clínica completamente funcional sin análisis de pisada  
 
