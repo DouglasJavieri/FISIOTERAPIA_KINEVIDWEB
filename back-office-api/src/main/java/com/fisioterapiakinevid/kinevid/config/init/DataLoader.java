@@ -144,6 +144,13 @@ public class DataLoader implements CommandLineRunner {
                 {"DELETE_CLINICAL_SESSION", "Eliminar sesión clínica"},
                 {"LIST_CLINICAL_SESSION", "Listar sesiones clínicas"},
                 {"MANAGE_SESSION_SERVICES", "Gestionar servicios de una sesión"},
+                // Análisis de pisada (imaging)
+                {"CREATE_FOOT_ANALYSIS", "Crear análisis de pisada"},
+                {"VIEW_FOOT_ANALYSIS", "Ver análisis de pisada"},
+                {"UPDATE_FOOT_ANALYSIS", "Actualizar análisis de pisada"},
+                {"DELETE_FOOT_ANALYSIS", "Eliminar análisis de pisada"},
+                {"MANAGE_ANALYSIS_PHOTOS", "Gestionar fotos del análisis de pisada"},
+                {"ANNOTATE_PHOTO", "Guardar trazos y ángulos en fotos"},
         };
 
         for (String[] permData : permissionsData) {
@@ -276,6 +283,9 @@ public class DataLoader implements CommandLineRunner {
                     // Sesiones clínicas
                     "CREATE_CLINICAL_SESSION", "VIEW_CLINICAL_SESSION", "UPDATE_CLINICAL_SESSION",
                     "DELETE_CLINICAL_SESSION", "LIST_CLINICAL_SESSION", "MANAGE_SESSION_SERVICES",
+                    // Análisis de pisada (sin DELETE)
+                    "CREATE_FOOT_ANALYSIS", "VIEW_FOOT_ANALYSIS", "UPDATE_FOOT_ANALYSIS",
+                    "MANAGE_ANALYSIS_PHOTOS", "ANNOTATE_PHOTO",
             };
             for (String permName : fisioPerms) {
                 permissionRepository.findByName(permName).ifPresent(permission -> {
@@ -365,6 +375,9 @@ public class DataLoader implements CommandLineRunner {
                 "CREATE_EPISODE", "VIEW_EPISODE", "CLOSE_EPISODE", "LIST_EPISODE",
                 "CREATE_CLINICAL_SESSION", "VIEW_CLINICAL_SESSION", "UPDATE_CLINICAL_SESSION",
                 "DELETE_CLINICAL_SESSION", "LIST_CLINICAL_SESSION", "MANAGE_SESSION_SERVICES",
+                // Análisis de pisada (sin DELETE)
+                "CREATE_FOOT_ANALYSIS", "VIEW_FOOT_ANALYSIS", "UPDATE_FOOT_ANALYSIS",
+                "MANAGE_ANALYSIS_PHOTOS", "ANNOTATE_PHOTO",
         };
         syncPermissionsToRole(ROLE_FISIOTERAPEUTA, fisioPerms);
     }
