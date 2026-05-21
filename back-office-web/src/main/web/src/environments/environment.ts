@@ -22,6 +22,7 @@ export const environment = {
     medicalService: '/medical-service',
     clinicalEpisode: '/clinical-episode',
     clinicalSession: '/clinical-session',
+    footAnalysis:    '/foot-analysis',
   }
 };
 

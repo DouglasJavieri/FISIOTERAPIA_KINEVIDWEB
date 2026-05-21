@@ -58,6 +58,7 @@ export class SessionFormComponent implements OnInit {
 
   // Flag para detectar si se seleccionó Análisis Postural
   hasPosturalAnalysisService = false;
+  canViewFootAnalysis = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -75,7 +76,8 @@ export class SessionFormComponent implements OnInit {
     this.sessionId = sid && sid !== 'new' ? Number(sid) : null;
     this.isNew = !this.sessionId;
 
-    this.canUpdate = this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION);
+    this.canUpdate          = this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION);
+    this.canViewFootAnalysis = this.authService.hasPermission(AppPermission.VIEW_FOOT_ANALYSIS);
 
     this.buildForms();
     this.loadCatalogues();
@@ -91,7 +93,7 @@ export class SessionFormComponent implements OnInit {
     this.step1 = new FormGroup({
       employeeId: new FormControl(null, [Validators.required]),
       sessionDate: new FormControl(null, [Validators.required]),
-      reasonForConsultation: new FormControl('', [Validators.required, Validators.maxLength(500), noWhitespaceValidator(),]),
+      reasonForConsultation: new FormControl('', [Validators.maxLength(500), noWhitespaceValidator(),]),
       relevantBackground: new FormControl('', [Validators.maxLength(1000), noOnlyWhitespaceValidator(),]),
       medicalServiceId: new FormControl(null, [Validators.required]),
       quantity: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(99)]),
@@ -206,17 +208,37 @@ export class SessionFormComponent implements OnInit {
     };
     Notiflix.Loading.pulse('Creando sesión...');
     this.sessionService.create(body).subscribe({
-      next: s => {
+      next: (sessionData: ClinicalSessionResponse) => {
         Notiflix.Loading.remove(300);
-        this.session = s;
-        this.sessionId = s.id;
+
+        // Validar respuesta
+        if (!sessionData || !sessionData.id) {
+          console.error('Respuesta inválida del servidor:', sessionData);
+          Notiflix.Report.failure(
+            'Error',
+            'El servidor retornó una respuesta inválida. Por favor, recargue la página.',
+            'OK'
+          );
+          return;
+        }
+
+        this.session = sessionData;
+        this.sessionId = sessionData.id;
         this.isNew = false;
+
+        console.log('✓ Sesión creada correctamente. ID:', this.sessionId);
+
         // Agregar el servicio seleccionado
         this.addService(() => this.stepper.next());
       },
       error: err => {
         Notiflix.Loading.remove(300);
-        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear la sesión.', 'OK');
+        console.error('Error al crear sesión:', err);
+        Notiflix.Report.failure(
+          'Error',
+          err?.error?.message ?? 'No se pudo crear la sesión.',
+          'OK'
+        );
       },
     });
   }
@@ -262,20 +284,86 @@ export class SessionFormComponent implements OnInit {
   }
 
   addService(callback?: () => void): void {
-    if (this.step1.invalid) {
+    // Si es nueva sesión, primero guardar la sesión
+    if (this.isNew && !this.sessionId) {
+      // Validar datos básicos requeridos
+      if (this.step1.get('employeeId')?.invalid ||
+          this.step1.get('sessionDate')?.invalid ||
+          this.step1.get('reasonForConsultation')?.invalid) {
+        this.step1.markAllAsTouched();
+        Notiflix.Report.failure('Error', 'Completa los datos requeridos antes de agregar un servicio.', 'OK');
+        return;
+      }
+
+      // Crear sesión primero
+      this.createSessionAndAddService(callback);
+      return;
+    }
+
+    // Si ya existe la sesión, proceder normalmente
+    this.addServiceToExistingSession(callback);
+  }
+
+  private createSessionAndAddService(callback?: () => void): void {
+    const v = this.step1.value;
+    const body: ClinicalSessionRequest = {
+      episodeId: this.episodeId,
+      employeeId: v.employeeId,
+      sessionDate: this.formatDate(v.sessionDate),
+      reasonForConsultation: v.reasonForConsultation.trim(),
+      relevantBackground: v.relevantBackground?.trim() || null,
+    };
+
+    console.log('Creando sesión para agregar servicio...');
+    Notiflix.Loading.pulse('Creando sesión...');
+
+    this.sessionService.create(body).subscribe({
+      next: (sessionData: ClinicalSessionResponse) => {
+        Notiflix.Loading.remove(300);
+
+        if (!sessionData || !sessionData.id) {
+          console.error('Respuesta inválida del servidor:', sessionData);
+          Notiflix.Report.failure('Error', 'El servidor retornó una respuesta inválida.', 'OK');
+          return;
+        }
+
+        this.session = sessionData;
+        this.sessionId = sessionData.id;
+        this.isNew = false;
+
+        console.log('Sesión creada. ID:', this.sessionId);
+
+        // Ahora agregar el servicio
+        this.addServiceToExistingSession(callback);
+      },
+      error: err => {
+        Notiflix.Loading.remove(300);
+        console.error('Error al crear sesión:', err);
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear la sesión.', 'OK');
+      },
+    });
+  }
+
+  private addServiceToExistingSession(callback?: () => void): void {
+    // Validar servicio seleccionado
+    if (this.step1.get('medicalServiceId')?.invalid || this.step1.get('quantity')?.invalid) {
       this.step1.markAllAsTouched();
       return;
     }
 
-    if (!this.sessionId) {
-      console.error('sessionId es null/undefined. Estado actual:', {
+    const effectiveSessionId = this.sessionId ?? this.session?.id;
+
+    if (!effectiveSessionId) {
+      console.error('No hay sessionId disponible:', {
         sessionId: this.sessionId,
+        sessionFromObject: this.session?.id,
         isNew: this.isNew,
-        session: this.session?.id
       });
-      Notiflix.Report.failure('Error', 'La sesión no ha sido guardada correctamente. Por favor, recargue la página.', 'OK');
+      Notiflix.Report.failure('Error', 'Error interno: No se pudo identificar la sesión.', 'OK');
       return;
     }
+
+    console.log('Agregando servicio a sesión ID:', effectiveSessionId);
 
     const v = this.step1.value;
     const body: SessionServiceRequest = {
@@ -284,22 +372,28 @@ export class SessionFormComponent implements OnInit {
       unitPrice: v.unitPrice || null,
       notes: v.notes?.trim() || null,
     };
+
     this.isSavingService = true;
-    this.sessionService.addService(this.sessionId!, body).subscribe({
+    this.sessionService.addService(effectiveSessionId, body).subscribe({
       next: () => {
         this.isSavingService = false;
+        console.log('Servicio agregado correctamente');
+
         this.step1.patchValue({
           medicalServiceId: null,
           quantity: 1,
           unitPrice: null,
           notes: ''
         });
+
         this.loadAppliedServices();
         Notiflix.Notify.success('Servicio agregado.');
+
         if (callback) callback();
       },
       error: err => {
         this.isSavingService = false;
+        console.error('Error al agregar servicio:', err);
         Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo agregar el servicio.', 'OK');
       },
     });
@@ -380,6 +474,13 @@ export class SessionFormComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/management-pacient/episodes', this.episodeId, 'sessions']);
+  }
+
+  goToImaging(): void {
+    this.router.navigate([
+      '/management-pacient/episodes', this.episodeId,
+      'sessions', this.sessionId, 'imaging',
+    ]);
   }
 
   get statusLabel(): string {

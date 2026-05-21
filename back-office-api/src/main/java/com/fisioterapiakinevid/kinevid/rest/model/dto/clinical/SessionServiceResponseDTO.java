@@ -35,7 +35,7 @@ public class SessionServiceResponseDTO {
         this.medicalServiceId = ss.getMedicalService().getId();
         this.medicalServiceName = ss.getMedicalService().getName();
         this.medicalServiceCategory = ss.getMedicalService().getCategory() != null
-                ? ss.getMedicalService().getCategory().name() : null;
+                ? ss.getMedicalService().getCategory().getDescription() : null;
         this.quantity = ss.getQuantity();
         this.unitPrice = ss.getUnitPrice();
         this.totalPrice = (ss.getUnitPrice() != null && ss.getQuantity() != null)

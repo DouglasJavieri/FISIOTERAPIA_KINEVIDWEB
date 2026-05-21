@@ -1,0 +1,140 @@
+<div class="step-container">
+  <h3 class="step-title">Paso 5 — Resumen del Análisis</h3>
+  <p class="step-subtitle">
+    Completa los datos generales del análisis de pisada.
+    El diagnóstico es obligatorio para guardar.
+  </p>
+
+  <form [formGroup]="form" class="summary-form">
+
+    <!-- Datos clínicos -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Datos Clínicos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Antecedentes Relevantes</mat-label>
+          <textarea matInput formControlName="relevantBackground" rows="3"
+                    placeholder="Antecedentes del paciente relevantes para el análisis..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Evaluación Kinésica</mat-label>
+          <textarea matInput formControlName="kinesiologicalEvaluation" rows="3"
+                    placeholder="Resultados de la evaluación kinésica..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput formControlName="observations" rows="2"
+                    placeholder="Observaciones adicionales..."></textarea>
+        </mat-form-field>
+
+        <!-- Diagnóstico (obligatorio) -->
+        <div class="diagnosis-group">
+          <label class="diagnosis-label">
+            Diagnóstico <span class="required">*</span>
+          </label>
+          <mat-radio-group formControlName="diagnosis" class="diagnosis-options">
+            <mat-radio-button
+              *ngFor="let opt of diagnosisOptions"
+              [value]="opt.value">
+              {{ opt.label }}
+            </mat-radio-button>
+          </mat-radio-group>
+          <mat-error *ngIf="f('diagnosis')?.touched && f('diagnosis')?.hasError('required')">
+            El diagnóstico es requerido.
+          </mat-error>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Mediciones -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Mediciones</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+
+        <div class="fields-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Distancia Intermaleolar (cm)</mat-label>
+            <input matInput type="number" formControlName="distanceIntermaleolar"
+                   placeholder="0.00" step="0.01" />
+            <mat-error *ngIf="f('distanceIntermaleolar')?.hasError('min')">
+              El valor debe ser mayor a 0.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Distancia Intercondílea (cm)</mat-label>
+            <input matInput type="number" formControlName="distanceIntercondylar"
+                   placeholder="0.00" step="0.01" />
+            <mat-error *ngIf="f('distanceIntercondylar')?.hasError('min')">
+              El valor debe ser mayor a 0.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-divider class="divider"></mat-divider>
+
+        <p class="section-subtitle">Ángulos (grados)</p>
+        <div class="fields-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Ángulo Interno — Pie Izquierdo</mat-label>
+            <input matInput type="number" formControlName="angleLeftInternal"
+                   placeholder="0.00" step="0.01" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ángulo Externo — Pie Izquierdo</mat-label>
+            <input matInput type="number" formControlName="angleLeftExternal"
+                   placeholder="0.00" step="0.01" />
+          </mat-form-field>
+        </div>
+
+        <div class="fields-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Ángulo Interno — Pie Derecho</mat-label>
+            <input matInput type="number" formControlName="angleRightInternal"
+                   placeholder="0.00" step="0.01" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Ángulo Externo — Pie Derecho</mat-label>
+            <input matInput type="number" formControlName="angleRightExternal"
+                   placeholder="0.00" step="0.01" />
+          </mat-form-field>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </form>
+
+  <!-- Acciones del paso -->
+  <div class="step-actions">
+    <button mat-stroked-button (click)="goPrev()">
+      <mat-icon>chevron_left</mat-icon> Anterior
+    </button>
+
+    <div class="right-actions">
+      <button mat-raised-button color="accent"
+              [disabled]="isSaving"
+              (click)="save()">
+        <mat-icon>save</mat-icon>
+        {{ footAnalysis ? 'Guardar cambios' : 'Crear análisis' }}
+      </button>
+
+      <button mat-raised-button color="primary"
+              (click)="goFinish()">
+        <mat-icon>check_circle</mat-icon>
+        Volver a la sesión
+      </button>
+    </div>
+  </div>
+
+</div>

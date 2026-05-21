@@ -43,7 +43,7 @@ public class ClinicalSession extends AuditableEntity implements Serializable {
     @Column(name = "session_number", nullable = false)
     private Integer sessionNumber;
 
-    @Column(name = "reason_for_consultation", length = 500, nullable = false)
+    @Column(name = "reason_for_consultation", length = 500)
     private String reasonForConsultation;
 
     @Column(name = "relevant_background", columnDefinition = "TEXT")

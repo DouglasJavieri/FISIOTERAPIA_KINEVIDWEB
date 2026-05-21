@@ -6,6 +6,9 @@ import com.fisioterapiakinevid.kinevid.rest.model.enums.emp.EmployeeStatus;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Douglas Cristhian Javieri Vino
@@ -22,6 +25,7 @@ import java.time.LocalDate;
 public class EmployeeResponseDTO {
 
     private Long id;
+    private String fullNameTotal;
     private String firstName;
     private String paternalSurname;
     private String maternalSurname;
@@ -44,6 +48,9 @@ public class EmployeeResponseDTO {
         this.firstName = employee.getFirstName();
         this.paternalSurname = employee.getPaternalSurname();
         this.maternalSurname = employee.getMaternalSurname();
+        this.fullNameTotal = Stream.of(employee.getFirstName(), employee.getPaternalSurname(), employee.getMaternalSurname())
+                .filter(Objects::nonNull).map(String::trim)
+                .filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
         this.ci = employee.getCi();
         this.expedition = employee.getExpedition();
         this.specialty = employee.getSpecialty();

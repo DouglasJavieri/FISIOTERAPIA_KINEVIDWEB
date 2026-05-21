@@ -78,10 +78,19 @@ public class ClinicalSessionServiceImpl implements ClinicalSessionService {
                     .build();
 
             sessionRepository.save(session);
-            log.info("Sesión {} creada para episodio ID={}", nextSessionNumber, request.getEpisodeId());
+            sessionRepository.flush(); // Asegurar que el ID se genere antes de continuar
+            Long sessionId = session.getId();
+            log.info("Sesión {} creada para episodio ID={} - SessionID={}", nextSessionNumber, request.getEpisodeId(), sessionId);
+
+            // Validar que el ID fue asignado
+            if (sessionId == null) {
+                log.error("ERROR CRÍTICO: sessionId es null después del flush. Session Object: {}", session);
+                throw new OperationException("Error al generar el ID de la sesión. Por favor, intente nuevamente.");
+            }
 
             // Recargar con relaciones para armar el DTO completo
-            return new ClinicalSessionResponseDTO(loadSessionWithRelations(session.getId()));
+            ClinicalSession loadedSession = loadSessionWithRelations(sessionId);
+            return new ClinicalSessionResponseDTO(loadedSession);
 
         } catch (OperationException e) {
             log.error("Error al crear sesión: {}", e.getMessage());

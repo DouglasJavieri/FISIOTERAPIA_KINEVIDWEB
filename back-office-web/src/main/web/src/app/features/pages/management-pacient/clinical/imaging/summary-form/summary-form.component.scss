@@ -1,0 +1,58 @@
+.step-container  { padding: 24px 0; }
+.step-title      { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.step-subtitle   { margin: 0 0 24px; color: #666; }
+.section-card    { margin-bottom: 16px; }
+.section-subtitle { font-size: 13px; color: #757575; margin: 0 0 8px; }
+.full-width      { width: 100%; }
+.divider         { margin: 16px 0; }
+.required        { color: #f44336; }
+
+.summary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 24px;
+}
+
+.diagnosis-group {
+  margin-top: 8px;
+}
+
+.diagnosis-label {
+  font-size: 14px;
+  color: rgba(0,0,0,0.6);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.diagnosis-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.right-actions {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .fields-row  { grid-template-columns: 1fr; }
+  .step-actions { flex-direction: column; align-items: stretch; }
+  .right-actions { flex-direction: column; }
+}

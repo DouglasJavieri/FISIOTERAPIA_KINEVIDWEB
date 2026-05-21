@@ -1,0 +1,72 @@
+<knv-page-layout>
+  <knv-breadcrumbs
+    [current]="'Análisis de Pisada'"
+    [crumbs]="[{ name: 'Episodios', link: '/management-pacient/episodes' },
+    { name: 'Sesiones', link: '/management-pacient/episodes/' + episodeId + '/sessions' }]">
+  </knv-breadcrumbs>
+
+  <mat-card class="imaging-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>directions_walk</mat-icon>
+        Análisis de Pisada
+      </mat-card-title>
+      <mat-card-subtitle *ngIf="footAnalysis">
+        Sesión #{{ footAnalysis.sessionNumber }} — {{ footAnalysis.patientFullName }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-stepper #stepper linear orientation="horizontal" class="imaging-stepper">
+
+        <!-- Sub-paso 1: Galería de fotos -->
+        <mat-step label="Fotos">
+          <knv-photo-gallery
+            [footAnalysis]="footAnalysis"
+            (next)="nextStep()">
+          </knv-photo-gallery>
+        </mat-step>
+
+        <!-- Sub-paso 2: Canvas de trazos -->
+        <mat-step label="Trazos">
+          <knv-photo-canvas
+            [footAnalysis]="footAnalysis"
+            (prev)="prevStep()"
+            (next)="nextStep()">
+          </knv-photo-canvas>
+        </mat-step>
+
+        <!-- Sub-paso 3: Análisis biomecánico -->
+        <mat-step label="Biomecánico">
+          <knv-biomechanical-form
+            [footAnalysis]="footAnalysis"
+            (prev)="prevStep()"
+            (next)="nextStep()">
+          </knv-biomechanical-form>
+        </mat-step>
+
+        <!-- Sub-paso 4: Valoración de Hernández Corvo -->
+        <mat-step label="Huella Plantar">
+          <knv-footprint-form
+            [footAnalysis]="footAnalysis"
+            (prev)="prevStep()"
+            (next)="nextStep()">
+          </knv-footprint-form>
+        </mat-step>
+
+        <!-- Sub-paso 5: Resumen y datos generales -->
+        <mat-step label="Resumen">
+          <knv-summary-form
+            [sessionId]="sessionId"
+            [footAnalysis]="footAnalysis"
+            (analysisUpdated)="onAnalysisUpdated($event)"
+            (prev)="prevStep()"
+            (finish)="goBackToSession()">
+          </knv-summary-form>
+        </mat-step>
+
+      </mat-stepper>
+    </mat-card-content>
+  </mat-card>
+
+</knv-page-layout>

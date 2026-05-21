@@ -1,0 +1,53 @@
+<div class="step-container">
+  <h3 class="step-title">Paso 2 — Trazos y Anotaciones</h3>
+  <p class="step-subtitle">Selecciona una foto y dibuja los trazos de análisis.</p>
+
+  <div *ngIf="photos.length === 0" class="empty-state">
+    <mat-icon>image_not_supported</mat-icon>
+    <p>No hay fotos subidas. Regresa al paso anterior y sube al menos una foto.</p>
+  </div>
+
+  <div *ngIf="photos.length > 0" class="canvas-layout">
+    <!-- Miniaturas -->
+    <div class="thumbnails">
+      <div class="thumb"
+           *ngFor="let photo of photos"
+           [class.active]="selectedPhoto?.id === photo.id"
+           (click)="selectPhoto(photo)">
+        <img [src]="photo.photoUrl" [alt]="'Foto ' + photo.photoOrder" />
+        <div class="thumb-badges">
+          <mat-chip-list>
+            <mat-chip *ngIf="photo.isSelected" color="primary" selected>Reporte</mat-chip>
+            <mat-chip *ngIf="photo.hasAnnotations">Anotado</mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área principal -->
+    <div class="canvas-main" *ngIf="selectedPhoto">
+      <img class="canvas-image" [src]="selectedPhoto.photoUrl" alt="Foto seleccionada" />
+      <!-- TODO Fase 6B: canvas HTML5 superpuesto para trazos y ángulos -->
+      <div class="canvas-placeholder">
+        <mat-icon>draw</mat-icon>
+        <p>Canvas de trazos — Implementación Fase 6B</p>
+      </div>
+
+      <div class="canvas-actions">
+        <button mat-stroked-button (click)="toggleSelection(selectedPhoto)">
+          <mat-icon>{{ selectedPhoto.isSelected ? 'bookmark_remove' : 'bookmark_add' }}</mat-icon>
+          {{ selectedPhoto.isSelected ? 'Quitar del reporte' : 'Agregar al reporte' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-actions">
+    <button mat-stroked-button (click)="goPrev()">
+      <mat-icon>chevron_left</mat-icon> Anterior
+    </button>
+    <button mat-raised-button color="primary" (click)="goNext()">
+      Siguiente <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>

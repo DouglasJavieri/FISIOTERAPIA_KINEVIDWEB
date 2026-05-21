@@ -42,7 +42,17 @@ public class ClinicalSessionResponseDTO {
     private SessionStatus sessionStatus;
 
     public ClinicalSessionResponseDTO(ClinicalSession session) {
+        if (session == null) {
+            throw new IllegalArgumentException("ClinicalSession no puede ser null");
+        }
+
         this.id = session.getId();
+
+        // Si el ID es null, error crítico
+        if (this.id == null) {
+            throw new IllegalArgumentException("ClinicalSession.id es null. Verifique que la sesión fue guardada correctamente en la BD.");
+        }
+
         this.episodeId = session.getEpisode() != null ? session.getEpisode().getId() : null;
         this.episodeNumber = session.getEpisode() != null ? session.getEpisode().getEpisodeNumber() : null;
         this.patientId = session.getEpisode() != null && session.getEpisode().getPatient() != null
@@ -64,7 +74,7 @@ public class ClinicalSessionResponseDTO {
         this.treatmentApplied = session.getTreatmentApplied();
         this.observations = session.getObservations();
         this.evolution = session.getEvolution();
-        this.hasImageAnalysis = session.getHasImageAnalysis();
+        this.hasImageAnalysis = session.getHasImageAnalysis() != null ? session.getHasImageAnalysis() : false;
         this.sessionStatus = session.getSessionStatus();
     }
 

@@ -1,0 +1,13 @@
+.imaging-card {
+  margin: 16px;
+
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.imaging-stepper {
+  margin-top: 16px;
+}
