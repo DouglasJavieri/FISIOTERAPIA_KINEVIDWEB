@@ -9,6 +9,13 @@ const routes: Routes = [
   { path: ':episodeId/sessions', component: SessionListComponent },
   { path: ':episodeId/sessions/new', component: SessionFormComponent },
   { path: ':episodeId/sessions/:sessionId', component: SessionFormComponent },
+  {
+    // Pantalla separada de análisis de pisada
+    // /management-pacient/episodes/:episodeId/sessions/:sessionId/imaging
+    path: ':episodeId/sessions/:sessionId/imaging',
+    loadChildren: () =>
+      import('./imaging/imaging.module').then(m => m.ImagingModule),
+  },
 ];
 
 @NgModule({

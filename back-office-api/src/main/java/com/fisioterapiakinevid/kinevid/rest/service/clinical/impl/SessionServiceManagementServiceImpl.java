@@ -44,20 +44,22 @@ public class SessionServiceManagementServiceImpl implements SessionServiceManage
                         + sessionDTO.getSessionStatus().getDescription());
             }
 
-            // Validar que el servicio médico existe y está activo
             var medicalServiceDTO = medicalServiceService.getServiceById(request.getMedicalServiceId());
 
-            // Si ya existe ese servicio en la sesión → actualizar (upsert)
-            var existing = sessionServiceRepository.findBySessionIdAndMedicalServiceId(
+            var existing = sessionServiceRepository.findBySessionIdAndMedicalServiceIdIncludingDeleted(
                     sessionId, request.getMedicalServiceId());
 
             SessionService entity;
             if (existing.isPresent()) {
                 entity = existing.get();
+                // Si estaba eliminado, reactivarlo
+                if (entity.isDeleted()) {
+                    entity.setDeleted(false);
+                }
                 entity.setQuantity(request.getQuantity());
                 entity.setUnitPrice(request.getUnitPrice());
                 entity.setNotes(request.getNotes() != null ? request.getNotes().trim() : null);
-                log.info("Servicio ID={} actualizado en sesión ID={}", request.getMedicalServiceId(), sessionId);
+                log.info("Servicio ID={} actualizado/reactivado en sesión ID={}", request.getMedicalServiceId(), sessionId);
             } else {
                 // Proxy JPA para las FKs
                 ClinicalSession sessionRef = new ClinicalSession();
@@ -78,14 +80,12 @@ public class SessionServiceManagementServiceImpl implements SessionServiceManage
 
             sessionServiceRepository.save(entity);
 
-            // Recargar con relaciones para construir el DTO
-            return new SessionServiceResponseDTO(
-                    sessionServiceRepository.findAllBySessionId(sessionId)
-                            .stream()
-                            .filter(ss -> ss.getMedicalService().getId().equals(request.getMedicalServiceId()))
-                            .findFirst()
-                            .orElse(entity)
-            );
+            // Recargar explícitamente desde BD con relaciones para construir el DTO
+            SessionService reloaded = sessionServiceRepository.findByIdWithRelations(entity.getId())
+                    .orElseThrow(() -> new OperationException(
+                            "No se pudo recargar el servicio después de guardarlo."));
+
+            return new SessionServiceResponseDTO(reloaded);
 
         } catch (OperationException e) {
             log.error("Error al agregar servicio a sesión ID={}: {}", sessionId, e.getMessage());
@@ -118,7 +118,8 @@ public class SessionServiceManagementServiceImpl implements SessionServiceManage
     @Transactional
     public void removeServiceFromSession(Long sessionServiceId) throws OperationException {
         try {
-            SessionService ss = sessionServiceRepository.findById(sessionServiceId)
+            // Usar findByIdWithRelations para asegurar que la sesión esté cargada
+            SessionService ss = sessionServiceRepository.findByIdWithRelations(sessionServiceId)
                     .orElseThrow(() -> new OperationException(
                             FormatUtil.noRegistrado("Servicio de sesión", sessionServiceId)));
 
@@ -126,8 +127,14 @@ public class SessionServiceManagementServiceImpl implements SessionServiceManage
                 throw new OperationException(FormatUtil.noRegistrado("Servicio de sesión", sessionServiceId));
             }
 
+            // Extraer sessionId ANTES de cualquier operación que pueda afectar la transacción
+            Long sessionId = ss.getSession() != null ? ss.getSession().getId() : null;
+            if (sessionId == null) {
+                throw new OperationException("No se puede determinar la sesión asociada al servicio.");
+            }
+
             // Verificar que la sesión sigue OPEN
-            var sessionDTO = clinicalSessionService.getSessionById(ss.getSession().getId());
+            var sessionDTO = clinicalSessionService.getSessionById(sessionId);
             if (sessionDTO.getSessionStatus() != SessionStatus.OPEN) {
                 throw new OperationException(
                         "No se puede eliminar un servicio de una sesión que no está en estado ABIERTA.");

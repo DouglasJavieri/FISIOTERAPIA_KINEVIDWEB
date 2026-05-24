@@ -25,6 +25,7 @@ export const bolivianDepartmentOptions: { value: BolivianDepartment; label: stri
 /** Respuesta del backend para un empleado */
 export interface EmployeeResponse {
   id: number;
+  fullNameTotal: string;
   firstName: string;
   paternalSurname: string;
   maternalSurname: string | null;

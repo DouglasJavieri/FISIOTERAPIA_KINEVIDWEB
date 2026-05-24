@@ -19,8 +19,8 @@ import java.util.Optional;
 public interface ClinicalSessionRepository extends JpaRepository<ClinicalSession, Long> {
 
     @Query("SELECT s FROM ClinicalSession s " +
-           "JOIN FETCH s.episode e " +
-           "JOIN FETCH e.patient " +
+           "LEFT JOIN FETCH s.episode e " +
+           "LEFT JOIN FETCH e.patient " +
            "JOIN FETCH s.employee " +
            "WHERE s.id = :sessionId AND s.deleted = false")
     Optional<ClinicalSession> findByIdWithRelations(@Param("sessionId") Long sessionId);

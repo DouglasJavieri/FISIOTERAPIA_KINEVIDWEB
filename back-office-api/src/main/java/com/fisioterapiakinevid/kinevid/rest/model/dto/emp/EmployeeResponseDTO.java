@@ -6,6 +6,9 @@ import com.fisioterapiakinevid.kinevid.rest.model.enums.emp.EmployeeStatus;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Douglas Cristhian Javieri Vino
@@ -21,8 +24,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class EmployeeResponseDTO {
 
-    // --- Datos del Empleado ---
     private Long id;
+    private String fullNameTotal;
     private String firstName;
     private String paternalSurname;
     private String maternalSurname;
@@ -36,25 +39,27 @@ public class EmployeeResponseDTO {
     private LocalDate admissionDate;
     private EmployeeStatus status;
 
-    // --- Datos del Usuario asignado (proyecciÃ³n plana, sin contraseÃ±a) ---
     private Long userId;
     private String username;
     private String email;
 
     public EmployeeResponseDTO(Employee employee) {
-        this.id               = employee.getId();
-        this.firstName        = employee.getFirstName();
-        this.paternalSurname  = employee.getPaternalSurname();
-        this.maternalSurname  = employee.getMaternalSurname();
-        this.ci               = employee.getCi();
-        this.expedition       = employee.getExpedition();
-        this.specialty        = employee.getSpecialty();
-        this.phone            = employee.getPhone();
-        this.address          = employee.getAddress();
-        this.department       = employee.getDepartment();
+        this.id = employee.getId();
+        this.firstName = employee.getFirstName();
+        this.paternalSurname = employee.getPaternalSurname();
+        this.maternalSurname = employee.getMaternalSurname();
+        this.fullNameTotal = Stream.of(employee.getFirstName(), employee.getPaternalSurname(), employee.getMaternalSurname())
+                .filter(Objects::nonNull).map(String::trim)
+                .filter(s -> !s.isEmpty()).collect(Collectors.joining(" "));
+        this.ci = employee.getCi();
+        this.expedition = employee.getExpedition();
+        this.specialty = employee.getSpecialty();
+        this.phone = employee.getPhone();
+        this.address = employee.getAddress();
+        this.department = employee.getDepartment();
         this.professionalEmail = employee.getProfessionalEmail();
-        this.admissionDate    = employee.getAdmissionDate();
-        this.status           = employee.getStatus();
+        this.admissionDate = employee.getAdmissionDate();
+        this.status = employee.getStatus();
 
         if (employee.getUser() != null) {
             this.userId   = employee.getUser().getId();

@@ -1,0 +1,59 @@
+<div class="step-container">
+  <h3 class="step-title">Paso 4 — Valoración de Hernández Corvo</h3>
+  <p class="step-subtitle">
+    Selecciona el tipo de huella plantar que aplica al paciente.
+    Solo una opción puede ser seleccionada.
+  </p>
+
+  <mat-card class="footprint-card" [formGroup]="form">
+
+    <mat-card-content>
+
+      <!-- Opciones de tipo de huella (radio buttons) -->
+      <mat-radio-group formControlName="footprintType" class="footprint-options">
+        <mat-radio-button
+          *ngFor="let opt of footprintTypeOptions"
+          [value]="opt.value"
+          class="footprint-option">
+          {{ opt.label }}
+        </mat-radio-button>
+      </mat-radio-group>
+
+      <mat-error *ngIf="form.get('footprintType')?.touched && form.get('footprintType')?.hasError('required')">
+        Debe seleccionar un tipo de huella plantar.
+      </mat-error>
+
+      <!-- Selección actual -->
+      <div class="selected-chip" *ngIf="existing">
+        <mat-chip color="primary" selected>
+          <mat-icon>check_circle</mat-icon>
+          Guardado: {{ existing.footprintTypeDescription }}
+        </mat-chip>
+      </div>
+
+      <mat-divider class="divider"></mat-divider>
+
+      <!-- Notas adicionales -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notas adicionales (opcional)</mat-label>
+        <textarea matInput formControlName="notes" rows="3"
+                  placeholder="Observaciones sobre la clasificación..."></textarea>
+      </mat-form-field>
+
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-raised-button color="accent"
+              [disabled]="isSaving || !footAnalysis"
+              (click)="save()">
+        <mat-icon>save</mat-icon> Guardar valoración
+      </button>
+    </mat-card-actions>
+
+  </mat-card>
+
+  <div class="step-actions">
+    <button mat-stroked-button (click)="goPrev()"><mat-icon>chevron_left</mat-icon> Anterior</button>
+    <button mat-raised-button color="primary" (click)="goNext()">Siguiente <mat-icon>chevron_right</mat-icon></button>
+  </div>
+</div>

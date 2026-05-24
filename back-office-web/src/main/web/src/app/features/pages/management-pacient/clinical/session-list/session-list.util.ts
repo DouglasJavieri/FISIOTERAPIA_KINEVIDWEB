@@ -9,6 +9,14 @@ export const sessionActionsCode = {
 
 export const sessionTableColumns: ITableColumn[] = [
   {
+    name: '',
+    property: 's',
+    visible: true,
+    isModelProperty: true,
+    isSort: false,
+    width: '10px',
+  },
+  {
     name: 'Sesión #',
     property: 'sessionNumber',
     visible: true,

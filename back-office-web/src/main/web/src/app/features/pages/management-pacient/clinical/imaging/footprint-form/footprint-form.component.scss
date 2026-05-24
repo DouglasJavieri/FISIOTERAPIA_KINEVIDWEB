@@ -1,0 +1,25 @@
+.step-container { padding: 24px 0; }
+.step-title     { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.step-subtitle  { margin: 0 0 24px; color: #666; }
+.footprint-card { margin-bottom: 24px; }
+.full-width     { width: 100%; }
+.divider        { margin: 16px 0; }
+.step-actions   { display: flex; justify-content: space-between; gap: 12px; }
+
+.footprint-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.footprint-option { display: block; }
+
+.selected-chip {
+  margin-bottom: 16px;
+  mat-chip { display: flex; align-items: center; gap: 4px; }
+}
+
+@media (max-width: 480px) {
+  .footprint-options { grid-template-columns: 1fr; }
+}

@@ -75,25 +75,33 @@ export class PatientComponent implements OnInit {
 
   protected buildRowActions = (): ITableRowAction[] => {
     const actions: ITableRowAction[] = [];
-    if (this.actions['viewProfileAction']) {
-      actions.push({ action: 'Ver perfil',
-        actionCode: patientActionsCode.viewProfileAction,
-        icon: 'folder_open' });
-    }
     if (this.actions['updateAction']) {
-      actions.push({ action: 'Actualizar',
+      actions.push({
+        action: 'Actualizar',
         actionCode: patientActionsCode.updateAction,
-        icon: 'edit' });
+        icon: 'edit',
+      });
+    }
+    if (this.actions['viewProfileAction']) {
+      actions.push({
+        action: 'Ver perfil',
+        actionCode: patientActionsCode.viewProfileAction,
+        icon: 'folder_open',
+      });
     }
     if (this.actions['changeStatusAction']) {
-      actions.push({ action: 'Cambiar estado',
+      actions.push({
+        action: 'Cambiar estado',
         actionCode: patientActionsCode.changeStatusAction,
-        icon: 'toggle_on' });
+        icon: 'toggle_on',
+      });
     }
     if (this.actions['deleteAction']) {
-      actions.push({ action: 'Eliminar',
+      actions.push({
+        action: 'Eliminar',
         actionCode: patientActionsCode.deleteAction,
-        icon: 'delete' });
+        icon: 'delete',
+      });
     }
     return actions;
   };
@@ -106,9 +114,10 @@ export class PatientComponent implements OnInit {
   itemPatientFormatterFn = (content: PatientPageResponse[]): PatientPageResponse[] =>
     content.map(item => ({
       ...item,
-      fullName: `${item.firstName} ${item.paternalSurname}${item.maternalSurname ? ' ' + item.maternalSurname : ''}`,
+      fullName: `${item.firstName} ${item.paternalSurname}${
+        item.maternalSurname ? ' ' + item.maternalSurname : ''
+      }`,
       genderLabel: genderOptions.find(g => g.value === item.gender)?.label ?? item.gender,
-      statusLabel: patientStatusOptions.find(s => s.value === item.status)?.label ?? item.status,
       phone: item.phone ?? '—',
     }));
 
@@ -139,6 +148,7 @@ export class PatientComponent implements OnInit {
   }
 
   changePatientStatus(item: PatientPageResponse): void {
+    // Ciclo de estados: ACTIVE → INACTIVE → DISCHARGE → ACTIVE
     const statusCycle: { [key: string]: string } = {
       ACTIVE:    'INACTIVE',
       INACTIVE:  'DISCHARGE',
@@ -203,5 +213,8 @@ export class PatientComponent implements OnInit {
     Notiflix.Report.failure('Error', error?.error?.message ?? 'Ocurrió un error inesperado.', 'OK');
   };
 }
+
+
+
 
 

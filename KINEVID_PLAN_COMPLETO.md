@@ -1,6 +1,6 @@
 # 📋 KINEVID APP — Plan Maestro de Desarrollo
 > **Stack:** Angular 13 · Spring Boot 3 · Java 17 · PostgreSQL  
-> **Fecha de última actualización:** Abril 2026 — Revisión 3.0  
+> **Fecha de última actualización:** Abril 2026 — Revisión 3.0
 > **Autor:** Douglas Cristhian Javieri Vino  
 > **Arquitectura:** Monolito Modular (preparado para extracción futura a microservicios)
 
@@ -34,7 +34,7 @@
 | **Episodios Clínicos** (CRUD + paginación + cierre + reactivación) | ✅ | ✅ |
 | **Sesiones Clínicas** (CRUD + paginación + cambio de estado) | ✅ | ✅ |
 | **Servicios por sesión** (N:M session ↔ medical_service, upsert) | ✅ | ✅ |
-| **Formulario de sesión** (mat-stepper 3 pasos: datos → evaluación → servicios) | — | ✅ |
+| **Formulario de sesión** (mat-stepper 2 pasos: datos+servicios → evaluación + detección Análisis Postural) | — | ✅ |
 
 ### 🔄 Siguiente fase
 
@@ -45,8 +45,8 @@
 | FASE 8 | Backend: Generación de Reportes PDF (iText 7) | ⏳ Pendiente |
 | FASE 9 | Frontend: Descarga y visualización de reportes | ⏳ Pendiente |
 
-> ✅ **Nota importante:** Si el paciente no requiere el módulo de análisis de imagen,  
-> el flujo de Historia Clínica (Episodios → Sesiones → Servicios) está **completamente funcional**  
+> ✅ **Nota importante:** Si el paciente no requiere el módulo de análisis de imagen,
+> el flujo de Historia Clínica (Episodios → Sesiones → Servicios) está **completamente funcional**
 > de manera independiente. Las fases 6-9 son un módulo opcional adicional.
 
 ### 🏗️ Infraestructura implementada
@@ -393,11 +393,52 @@ Tiempo después → paciente regresa:
 | Perfil del Paciente | `/management-pacient/patients/:id` | ✅ Card + acordeón episodios + acceso rápido a sesiones activas |
 | Episodios Clínicos | `/management-pacient/episodes` | ✅ Lista global paginada + filtros (paciente, estado) |
 | Sesiones del Episodio | `/management-pacient/episodes/:episodeId/sessions` | ✅ Tabla paginada + cambio de estado |
-| Nueva Sesión | `/management-pacient/episodes/:episodeId/sessions/new` | ✅ mat-stepper 3 pasos |
+| Nueva Sesión | `/management-pacient/episodes/:episodeId/sessions/new` | ✅ mat-stepper 2 pasos (dinámico: +3 pasos si Análisis Postural) |
 | Detalle/Editar Sesión | `/management-pacient/episodes/:episodeId/sessions/:sessionId` | ✅ Mismo stepper, modo edición |
 
-#### Características implementadas
-- ✅ `mat-stepper` lineal: Datos básicos → Evaluación clínica → Servicios aplicados
+#### Nuevas características de Stepper (Fase 5.1 — Optimización)
+
+**Stepper rediseñado: De 3 a 2 pasos base (+ análisis postural opcional en pantalla separada)**
+
+```
+PASO 1: Datos Básicos + Servicios
+├── Fecha (auto: hoy)
+├── Motivo de consulta
+├── Seleccionar fisioterapeuta
+├── Seleccionar servicios (multiselect)
+│   └── ⚠️ SI se selecciona "Análisis de Pisada" (servicio médico)
+│       └── Botón: "Ir a Análisis de Imagen" 🔵 NUEVO
+│           └── Redirige a PANTALLA SEPARADA con 5 sub-pasos:
+│               ├── Sub-paso 1: Captura de Fotos (1-6 fotos)
+│               ├── Sub-paso 2: Canvas HTML5 (trazos + ángulos, pie LEFT + RIGHT)
+│               ├── Sub-paso 3: Análisis Biomecánico (LEFT/RIGHT con datos específicos)
+│               ├── Sub-paso 4: Evaluación de Huella Plantar (⭐ GENÉRICA - UNA SOLA VEZ, aplica al paciente/sesión)
+│               └── Sub-paso 5: Resumen + Generar PDF + Retornar a Paso 1
+│           └── Vuelve a Paso 1 (sesión actualizada con has_foot_analysis=true)
+
+PASO 2: Evaluación Clínica + Cierre
+├── Antecedentes relevantes
+├── Evaluación kinesiológica
+├── Tratamiento aplicado
+├── Observaciones
+├── Evolución
+└── Botón: Cerrar sesión → CLOSED
+```
+
+**⭐ Cambio Importante — Evaluación de Huella Plantar:**
+- ❌ **ANTES:** Se registraba POR PIE (izquierdo + derecho como registros separados)
+- ✅ **AHORA:** Se registra UNA SOLA VEZ de forma genérica (aplica a la sesión general)
+- **Motivo:** Simplifica el flujo; el fisioterapeuta evalúa el patrón general del paciente, no por separado por pie
+- **Implementación:** Una tabla `footprint_analysis` con un único registro por análisis de pisada
+
+**Ventajas:**
+- ✅ Si NO hay análisis postural: 2 pasos rápidos
+- ✅ Si SÍ hay análisis: flujo completo (5 sub-pasos en pantalla dedicada con más espacio)
+- ✅ UX más limpia, sin pasos innecesarios
+- ✅ Decisión de servicios UPFRONT (paso 1)
+- ✅ `mat-stepper` lineal: Datos básicos + Servicios → Evaluación clínica
+- ✅ **Si se selecciona "Análisis de Pisada":** botón "Ir a Análisis de Imagen" abre pantalla separada (Fase 6B)
+- ✅ **Si NO se selecciona "Análisis de Pisada":** flujo normal de sesión (2 pasos)
 - ✅ Creación de sesión en paso 1 antes de avanzar (modo lineal para nueva sesión)
 - ✅ Modo solo lectura si sesión CLOSED/CANCELLED (formularios deshabilitados + badge de estado)
 - ✅ Tabla de servicios aplicados en sesión (agregar, eliminar con validación de estado)
@@ -410,97 +451,132 @@ Tiempo después → paciente regresa:
 - ✅ Dos flujos de navegación hacia las mismas pantallas (desde Pacientes y desde Episodios)
 - ✅ Sidebar con `Episodios Clínicos` para roles con permiso `LIST_EPISODE`
 
-> ✅ **El flujo de Historia Clínica está completo y funcional sin el módulo de imagen.**  
+> ✅ **El flujo de Historia Clínica está completo y funcional sin el módulo de imagen.**
+> Si el paciente no requiere análisis postural, la sesión se registra normalmente con los datos clínicos.
 > Las FASES 6-9 (análisis de imagen y reportes PDF) son completamente opcionales.
+> **Los reportes generados (PDF) se descargan bajo demanda; NO se guardan en BD.**
 
 ---
 
-### 🔵 FASE 6 — Backend: Análisis de Imagen
+### 🔵 FASE 6 — Frontend: Análisis de Imagen (Pantalla Separada)
 
-**Nuevas entidades:**
-- [ ] `ImageAnalysis` + enums `FootSide` (LEFT / RIGHT / BOTH), `Diagnosis` (NORMAL / PRONATION / SUPINATION)
-- [ ] `AnalysisPhoto` con `annotations_json` (TEXT)
-- [ ] `StorageService` interfaz + implementación Cloudinary
+**Flujo integrado:**
+- ✅ Botón en Paso 1 del stepper: "Ir a Análisis de Imagen" (solo si servicio="Análisis de Pisada" seleccionado)
+- ✅ Redirige a PANTALLA SEPARADA (no modal) con 5 sub-pasos
+- ✅ Captura fotos, trazos, ángulos, evaluaciones biomecánicas, huella plantar (genérica)
+- ✅ Guarda datos en `foot_analysis` + `biomechanical_analysis` + `footprint_analysis`
+- ✅ Botón retornar lleva de vuelta al Paso 1 (sesión marcada con `has_foot_analysis=true`)
+
+**Estructura del módulo:**
+```
+src/app/features/pages/management-pacient/patient/clinical/imaging/
+├── imaging.module.ts
+├── imaging-routing.module.ts
+├── photo-gallery/
+├── photo-canvas/
+├── biomechanical-form/
+├── footprint-form/
+└── foot-analysis/ (orquestador con 5 sub-pasos)
+```
+
+**Cambio clave (vs. modal):**
+- ✅ PANTALLA SEPARADA: Mejor UX, más espacio para dibujar trazos, mejor experiencia visual
+- ✅ RUTA: `/management-pacient/episodes/:episodeId/sessions/:sessionId/imaging`
+- ✅ NAVEGACIÓN: Botón en Paso 1 redirige + botón "Volver" retorna al Paso 1
+
+---
+
+### 🔵 FASE 7 — Backend: Análisis de Imagen + Servicios REST
+
+**Entidades nuevas:**
+- ✅ `FootAnalysis` con enum `Diagnosis` (NORMAL / PRONATION / SUPINATION)
+- ✅ `BiomechanicalAnalysis` con enum `FootSide` (LEFT / RIGHT) y `Gait` (NORMAL / PRONATOR / SUPINATOR / MIXED)
+- ✅ `FootprintAnalysis` con enums para índices de Staheli
+- ✅ `AnalysisPhoto` con `annotations_json` (trazos + ángulos)
 
 **Endpoints REST:**
-- `POST   /api/image-analysis/create`
-- `GET    /api/image-analysis/session/{sessionId}`
-- `GET    /api/image-analysis/{id}`
-- `PUT    /api/image-analysis/update/{id}`
-- `POST   /api/image-analysis/{id}/photos`                    — subir foto (multipart)
-- `DELETE /api/image-analysis/{id}/photos/{photoId}`
-- `PATCH  /api/image-analysis/{id}/photos/{photoId}/select`   — marcar foto principal
-- `PUT    /api/image-analysis/{id}/photos/{photoId}/annotations` — guardar trazos JSON
+- `POST   /api/foot-analysis/create`
+- `GET    /api/clinical-session/{sessionId}/foot-analysis`
+- `GET    /api/foot-analysis/{id}`
+- `PUT    /api/foot-analysis/update/{id}`
+- `POST   /api/foot-analysis/{analysisId}/biomechanical`
+- `POST   /api/foot-analysis/{analysisId}/footprint`
+- `POST   /api/foot-analysis/{analysisId}/photos` — subir foto (multipart)
+- `PUT    /api/foot-analysis/{analysisId}/photos/{photoId}/annotations` — guardar trazos JSON
+- `PATCH  /api/foot-analysis/{analysisId}/photos/{photoId}/select` — marcar para reporte
+- `DELETE /api/foot-analysis/{analysisId}/photos/{photoId}`
 
 **Nuevos permisos:**
 ```
-CREATE_IMAGE_ANALYSIS, VIEW_IMAGE_ANALYSIS
-UPDATE_IMAGE_ANALYSIS, DELETE_IMAGE_ANALYSIS
-MANAGE_PHOTOS, ANNOTATE_PHOTO
+CREATE_FOOT_ANALYSIS, VIEW_FOOT_ANALYSIS
+UPDATE_FOOT_ANALYSIS, DELETE_FOOT_ANALYSIS
+MANAGE_ANALYSIS_PHOTOS, ANNOTATE_PHOTO
 ```
-
----
-
-### 🔵 FASE 7 — Frontend: Análisis de Imagen (Canvas HTML5)
-
-**Estructura:**
-```
-clinical/
-└── imaging/
-    ├── imaging.module.ts
-    ├── imaging-routing.module.ts
-    ├── image-analysis/
-    │   ├── image-analysis.component.ts     ← Grilla 6 fotos + panel diagnóstico
-    │   ├── image-analysis.component.html
-    │   └── image-analysis.component.scss
-    ├── photo-canvas/                        ← Canvas interactivo
-    │   ├── photo-canvas.component.ts        ← Trazos + ángulos + anotaciones
-    │   ├── photo-canvas.component.html
-    │   └── photo-canvas.component.scss
-    └── report-preview/                      ← Vista previa antes de generar PDF
-        └── ...
-```
-
-**Funcionalidades Canvas:**
-- Cargar/tomar foto (input file o cámara web si disponible)
-- Grilla de miniaturas (hasta 6); click activa la foto en el canvas
-- Hasta 2 trazos verticales con drag
-- Herramienta de ángulo: marcar 3 puntos → calcula y muestra grados
-- Serialización automática de anotaciones a JSON → guardado en backend
-- Modo de diagnóstico visual: highlight por resultado (verde/naranja/rojo)
 
 ---
 
 ### 🔵 FASE 8 — Backend: Generación de Reportes PDF (iText 7)
 
+> 📄 **Documentación completa:** Ver `FASE6_ANALISIS_IMAGEN_PLANIFICACION.md`
+
 **Implementación:**
 - [ ] Dependencia `itext7-core` en `pom.xml`
-- [ ] `ReportService.generateAnalysisReport(Long analysisId)` → devuelve `byte[]`
+- [ ] `ReportService.generateFootAnalysisReport(Long analysisId)` → devuelve URL
 - [ ] Sube el PDF a Cloudinary (misma interfaz `StorageService`)
-- [ ] Guarda URL en `image_analysis.report_url`
+- [ ] Guarda URL en `foot_analysis.report_url`
 
-**Contenido del PDF:**
+> 📄 **Documentación completa:** Ver `FASE6_ANALISIS_IMAGEN_PLANIFICACION.md`
+
+**Implementación:**
+- [ ] Dependencia `itext7-core` en `pom.xml`
+- [ ] `ReportService.generateFootAnalysisReport(Long analysisId)` → devuelve URL
+- [ ] Sube el PDF a Cloudinary (misma interfaz `StorageService`)
+- [ ] Guarda URL en `foot_analysis.report_url` (solo URL, no PDF en BD)
+
+**Contenido del PDF (descargable bajo demanda):**
 1. Encabezado: logo del consultorio, fecha, número de reporte
 2. Datos del paciente (nombre, CI, edad, género)
 3. Datos del fisioterapeuta
 4. Episodio y número de sesión
 5. Servicios aplicados en la sesión
-6. Historia clínica de la sesión (evaluación, tratamiento, observaciones, evolución)
-7. Imagen(es) seleccionada(s) con trazos y ángulos
-8. Diagnóstico: NORMAL / PRONACIÓN / SUPINACIÓN
-9. Pie de página: fecha de generación y espacio para firma
+6. Historia clínica de la sesión (evaluación, tratamiento, observaciones)
+7. **Datos del Análisis de Pisada:**
+   - Antecedentes relevantes
+   - Evaluación kinésica
+   - Observaciones
+   - Análisis biomecánico (pie izquierdo y derecho)
+   - Clasificación de huella plantar
+   - Distancia intermaleolar y intercondílea
+8. **Imágenes seleccionadas** con trazos y ángulos visualizados
+9. Diagnóstico: NORMAL / PRONACIÓN / SUPINACIÓN
+10. Pie de página: fecha de generación y espacio para firma
 
 **Endpoint:**
-- `GET /api/image-analysis/{id}/report` → genera (si no existe) o devuelve URL del PDF
+- `POST /api/foot-analysis/{id}/report/generate` → genera (si no existe) o devuelve URL del PDF
+- `GET /api/foot-analysis/{id}/report` → obtiene URL del PDF existente
+
+**Nota importante:**
+> ⚠️ El PDF se genera bajo demanda y se almacena en **Cloudinary**, no en BD.  
+> Solo se guarda la URL en `foot_analysis.report_url` para referencia.
+> El usuario puede descargar el PDF múltiples veces desde el mismo link.
 
 ---
 
 ### 🔵 FASE 9 — Frontend: Descarga y Visualización de Reportes
 
-- [ ] Botón "Generar / Descargar Reporte PDF" en la sesión y en el análisis
+> 📄 **Documentación completa:** Ver `FASE6_ANALISIS_IMAGEN_PLANIFICACION.md`
+
+**Características:**
+- [ ] Botón "Generar / Descargar Reporte PDF" en el análisis de pisada
 - [ ] Vista previa del PDF en modal (iframe con URL de Cloudinary)
-- [ ] Indicador visual en la tabla de sesiones si la sesión tiene reporte generado
-- [ ] Historial de reportes por paciente (lista de URLs descargables)
+- [ ] Indicador visual en la tabla de sesiones si tiene análisis completo
+- [ ] Link de descarga del PDF (disponible **bajo demanda** después de generarse)
+- [ ] Historial de reportes por paciente (lista de URLs descargables en episodio cerrado)
+
+**Nota importante:**
+> ⚠️ Los reportes se descargan bajo demanda desde la URL de Cloudinary.  
+> Cada paciente puede solicitar múltiples descargas del mismo PDF sin restricción.  
+> Los reportes **NO se guardan como archivos** en el servidor; solo la URL se persiste en BD.
 
 ---
 
@@ -619,23 +695,30 @@ kinevid/
 ## 📅 Hoja de ruta actualizada
 
 ```
-✅ FASE 1  → Backend: Pacientes + Servicios                          COMPLETADO
-✅ FASE 2  → Frontend: Módulo Servicios                              COMPLETADO
-✅ FASE 3  → Frontend: Módulo Pacientes                              COMPLETADO
-✅ FASE 4  → Backend: Episodios + Historia Clínica + N:M sesión-svc  COMPLETADO
-✅ FASE 5  → Frontend: Episodios + Sesiones + mat-stepper + servicios COMPLETADO
-🔵 FASE 6  → Backend: Análisis de Imagen + Cloudinary                PRÓXIMA
-🔵 FASE 7  → Frontend: Canvas HTML5 + Anotaciones                    PENDIENTE
-🔵 FASE 8  → Backend: Generación PDF (iText 7)                       PENDIENTE
-🔵 FASE 9  → Frontend: Descarga + Vista previa de reportes           PENDIENTE
+✅ FASE 1  → Backend: Pacientes + Servicios                                      COMPLETADO
+✅ FASE 2  → Frontend: Módulo Servicios                                          COMPLETADO
+✅ FASE 3  → Frontend: Módulo Pacientes                                          COMPLETADO
+✅ FASE 4  → Backend: Episodios + Historia Clínica + N:M sesión-svc             COMPLETADO
+✅ FASE 5  → Frontend: Episodios + Sesiones + mat-stepper (2 pasos base)        COMPLETADO
+🔵 FASE 6  → Frontend: Modal Análisis de Imagen (5 sub-pasos integrados)        PRÓXIMA
+🔵 FASE 7  → Backend: Entidades + APIs REST de Análisis de Pisada              PRÓXIMA
+🔵 FASE 8  → Backend: Generación PDF (iText 7) — bajo demanda, sin persistencia PENDIENTE
+🔵 FASE 9  → Frontend: Descarga + Vista previa de reportes                     PENDIENTE
 ```
 
-> **Nota:** El sistema de Historia Clínica (Fases 1-5) es completamente funcional de forma  
+**Cambios clave en esta revisión:**
+- ✅ Stepper optimizado: 2 pasos base + análisis postural opcional (modal)
+- ✅ Reportes generados bajo demanda (sin almacenamiento de archivos en BD)
+- ✅ URLs de PDF persistidas solo en `foot_analysis.report_url` para referencia
+- ✅ Historia clínica completamente funcional sin análisis postural
+
+> **Nota:** El sistema de Historia Clínica (Fases 1-5) es completamente funcional de forma
 > independiente. Las Fases 6-9 son el módulo opcional de análisis de imagen con reportes PDF.
+> Si el paciente no requiere análisis postural, puede cerrarse la sesión normalmente sin estos pasos.
 
 ---
 
-*Plan actualizado el 24/04/2026 — Revisión 3.0*  
+*Plan actualizado el 24/04/2026 — Revisión 3.0*
 *Fases 4 y 5 marcadas como COMPLETADAS. Próxima: Fase 6 (Análisis de Imagen)*
 ```
 PACIENTE (patient)
@@ -662,5 +745,12 @@ PACIENTE (patient)
 
 ---
 
-*Plan actualizado el 23/04/2026 — Revisión 2.0*  
-*Cambio principal: arquitectura de episodios clínicos para soporte de múltiples etapas de atención por paciente*
+---
+
+*Plan actualizado el 13/05/2026 — Revisión 5.0*  
+*Cambios principales:*
+- *Stepper optimizado: 2 pasos base + análisis postural en PANTALLA SEPARADA (no modal)*
+- *Evaluación de Huella Plantar: GENÉRICA (UNA SOLA VEZ), no por pie*
+- *Mejor UX y más espacio disponible para análisis de imagen*
+- *Reportes bajo demanda (sin persistencia de archivos, solo URLs)*
+- *Integración mejorada del análisis de imagen dentro del flujo de sesión*

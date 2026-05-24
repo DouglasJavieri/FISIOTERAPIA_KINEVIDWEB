@@ -146,8 +146,8 @@ export class SessionListComponent implements OnInit {
     // Diálogo para elegir CLOSED o CANCELLED
     Notiflix.Confirm.show(
       `Cambiar estado — Sesión #${item.sessionNumber}`,
-      '¿Cómo desea cerrar esta sesión?',
-      'Cerrar (CLOSED)',
+      '¿Cómo desea cambiar el estado de esta sesión?',
+      'Cerrar sesión',
       'Cancelar sesión',
       () => this.applyStatusChange(item, 'CLOSED'),
       () => this.applyStatusChange(item, 'CANCELLED'),

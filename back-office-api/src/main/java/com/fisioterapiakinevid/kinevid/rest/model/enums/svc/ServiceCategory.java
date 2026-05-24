@@ -11,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ServiceCategory {
     REHABILITATION("REHABILITACION", "Rehabilitación"),
+    ELECTROTHERAPY("ELECTROTERAPIA", "Electroterapia"),
     SPORTS_KINESIOLOGY("KINESIOLOGIA_DEPORTIVA", "Kinesiología Deportiva"),
-    MASSOTHERAPY("MASOTERAPIA", "Masoterapia"),
+    THERAPEUTIC_GYMNASIUM("GIMNASIO_TERAPEUTICO", "Gimnasio Terapéutico"),
     POSTURAL_ANALYSIS("ANALISIS_POSTURAL", "Análisis Postural"),
-    PEDIATRIC_KINESIOLOGY("KINESIOLOGIA_PEDIATRICA", "Kinesiología Pediátrica"),
-    NEUROLOGICAL_REHABILITATION("REHABILITACION_NEUROLOGICA", "Rehabilitación Neurológica"),
+    THERMOTHERAPY("TERMOTERAPIA", "Termoterapia"),
+    MANUAL_THERAPY("TERAPIA_MANUAL", "Terapia Manual"),
+    KINESIOTHERAPY("KINESIOTERAPIA", "Kinesioterapia "),
     OTHER("OTRO", "Otro");
 
     private final String value;

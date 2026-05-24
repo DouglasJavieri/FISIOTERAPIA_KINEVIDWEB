@@ -47,19 +47,18 @@ export class SessionFormComponent implements OnInit {
   serviceList: MedicalServiceResponse[] = [];
   appliedServices: SessionServiceResponse[] = [];
 
-  // Paso 1 — Datos básicos
   step1!: FormGroup;
   maxDate = new Date();
 
-  // Paso 2 — Evaluación clínica
   step2!: FormGroup;
-
-  // Paso 3 — Servicio a agregar
-  step3!: FormGroup;
 
   canUpdate = false;
   sessionLocked = false;
   sessionStatusOptions = sessionStatusOptions;
+
+  // Flag para detectar si se seleccionó Análisis Postural
+  hasPosturalAnalysisService = false;
+  canViewFootAnalysis = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -77,7 +76,8 @@ export class SessionFormComponent implements OnInit {
     this.sessionId = sid && sid !== 'new' ? Number(sid) : null;
     this.isNew = !this.sessionId;
 
-    this.canUpdate = this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION);
+    this.canUpdate          = this.authService.hasPermission(AppPermission.UPDATE_CLINICAL_SESSION);
+    this.canViewFootAnalysis = this.authService.hasPermission(AppPermission.VIEW_FOOT_ANALYSIS);
 
     this.buildForms();
     this.loadCatalogues();
@@ -93,26 +93,24 @@ export class SessionFormComponent implements OnInit {
     this.step1 = new FormGroup({
       employeeId: new FormControl(null, [Validators.required]),
       sessionDate: new FormControl(null, [Validators.required]),
-      reasonForConsultation: new FormControl('', [
-        Validators.required, Validators.maxLength(500), noWhitespaceValidator(),
-      ]),
-      relevantBackground: new FormControl('', [
-        Validators.maxLength(1000), noOnlyWhitespaceValidator(),
-      ]),
-    });
-
-    this.step2 = new FormGroup({
-      kinesiologicalEvaluation: new FormControl('', [noOnlyWhitespaceValidator()]),
-      treatmentApplied: new FormControl('', [noOnlyWhitespaceValidator()]),
-      observations: new FormControl('', [noOnlyWhitespaceValidator()]),
-      evolution: new FormControl('', [noOnlyWhitespaceValidator()]),
-    });
-
-    this.step3 = new FormGroup({
+      reasonForConsultation: new FormControl('', [Validators.maxLength(500), noWhitespaceValidator(),]),
+      relevantBackground: new FormControl('', [Validators.maxLength(1000), noOnlyWhitespaceValidator(),]),
       medicalServiceId: new FormControl(null, [Validators.required]),
       quantity: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(99)]),
       unitPrice: new FormControl(null, [Validators.min(0)]),
       notes: new FormControl('', [Validators.maxLength(500), noOnlyWhitespaceValidator()]),
+    });
+
+    this.step2 = new FormGroup({
+      kinesiologicalEvaluation: new FormControl('', [noOnlyWhitespaceValidator()]),
+      actualIllnessHistory: new FormControl('', [noOnlyWhitespaceValidator()]),
+      gait: new FormControl('', [noOnlyWhitespaceValidator()]),
+      functionalTests: new FormControl('', [noOnlyWhitespaceValidator()]),
+      complementaryExams: new FormControl('', [noOnlyWhitespaceValidator()]),
+      kinesiologicalDiagnosis: new FormControl('', [noOnlyWhitespaceValidator()]),
+      treatmentApplied: new FormControl('', [noOnlyWhitespaceValidator()]),
+      observations: new FormControl('', [noOnlyWhitespaceValidator()]),
+      evolution: new FormControl('', [noOnlyWhitespaceValidator()]),
     });
   }
 
@@ -149,6 +147,11 @@ export class SessionFormComponent implements OnInit {
         });
         this.step2.patchValue({
           kinesiologicalEvaluation: s.kinesiologicalEvaluation ?? '',
+          actualIllnessHistory: s.actualIllnessHistory ?? '',
+          gait: s.gait ?? '',
+          functionalTests: s.functionalTests ?? '',
+          complementaryExams: s.complementaryExams ?? '',
+          kinesiologicalDiagnosis: s.kinesiologicalDiagnosis ?? '',
           treatmentApplied: s.treatmentApplied ?? '',
           observations: s.observations ?? '',
           evolution: s.evolution ?? '',
@@ -172,12 +175,15 @@ export class SessionFormComponent implements OnInit {
   private loadAppliedServices(): void {
     if (!this.sessionId) return;
     this.sessionService.getServices(this.sessionId).subscribe({
-      next: list => this.appliedServices = list,
+      next: list => {
+        this.appliedServices = list;
+        this.checkForPosturalAnalysisService();
+      },
       error: () => {},
     });
   }
 
-  // ─── Paso 1: guardar datos básicos ─────────────────────────────────────────
+  // ─── Paso 1: guardar datos básicos y crear servicios ──────────────────────────
 
   saveStep1(): void {
     if (this.step1.invalid) {
@@ -187,7 +193,7 @@ export class SessionFormComponent implements OnInit {
     if (this.isNew) {
       this.createSession();
     } else {
-      this.updateSession();
+      this.updateSessionStep1();
     }
   }
 
@@ -202,21 +208,42 @@ export class SessionFormComponent implements OnInit {
     };
     Notiflix.Loading.pulse('Creando sesión...');
     this.sessionService.create(body).subscribe({
-      next: s => {
+      next: (sessionData: ClinicalSessionResponse) => {
         Notiflix.Loading.remove(300);
-        this.session = s;
-        this.sessionId = s.id;
+
+        // Validar respuesta
+        if (!sessionData || !sessionData.id) {
+          console.error('Respuesta inválida del servidor:', sessionData);
+          Notiflix.Report.failure(
+            'Error',
+            'El servidor retornó una respuesta inválida. Por favor, recargue la página.',
+            'OK'
+          );
+          return;
+        }
+
+        this.session = sessionData;
+        this.sessionId = sessionData.id;
         this.isNew = false;
-        this.stepper.next();
+
+        console.log('✓ Sesión creada correctamente. ID:', this.sessionId);
+
+        // Agregar el servicio seleccionado
+        this.addService(() => this.stepper.next());
       },
       error: err => {
         Notiflix.Loading.remove(300);
-        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear la sesión.', 'OK');
+        console.error('Error al crear sesión:', err);
+        Notiflix.Report.failure(
+          'Error',
+          err?.error?.message ?? 'No se pudo crear la sesión.',
+          'OK'
+        );
       },
     });
   }
 
-  private updateSession(): void {
+  private updateSessionStep1(): void {
     const v1 = this.step1.value;
     const v2 = this.step2.value;
     const body: ClinicalSessionUpdateRequest = {
@@ -224,6 +251,11 @@ export class SessionFormComponent implements OnInit {
       reasonForConsultation: v1.reasonForConsultation?.trim(),
       relevantBackground: v1.relevantBackground?.trim() || null,
       kinesiologicalEvaluation: v2.kinesiologicalEvaluation?.trim() || null,
+      actualIllnessHistory: v2.actualIllnessHistory?.trim() || null,
+      gait: v2.gait?.trim() || null,
+      functionalTests: v2.functionalTests?.trim() || null,
+      complementaryExams: v2.complementaryExams?.trim() || null,
+      kinesiologicalDiagnosis: v2.kinesiologicalDiagnosis?.trim() || null,
       treatmentApplied: v2.treatmentApplied?.trim() || null,
       observations: v2.observations?.trim() || null,
       evolution: v2.evolution?.trim() || null,
@@ -243,40 +275,125 @@ export class SessionFormComponent implements OnInit {
     });
   }
 
-  // ─── Paso 2: evaluación clínica ────────────────────────────────────────────
-
   saveStep2(): void {
     if (this.sessionLocked || !this.canUpdate) {
-      this.stepper.next();
+      this.finalize();
       return;
     }
-    this.updateSession();
+    this.updateSessionStep1();
   }
 
-  // ─── Paso 3: servicios aplicados ───────────────────────────────────────────
+  addService(callback?: () => void): void {
+    // Si es nueva sesión, primero guardar la sesión
+    if (this.isNew && !this.sessionId) {
+      // Validar datos básicos requeridos
+      if (this.step1.get('employeeId')?.invalid ||
+          this.step1.get('sessionDate')?.invalid ||
+          this.step1.get('reasonForConsultation')?.invalid) {
+        this.step1.markAllAsTouched();
+        Notiflix.Report.failure('Error', 'Completa los datos requeridos antes de agregar un servicio.', 'OK');
+        return;
+      }
 
-  addService(): void {
-    if (this.step3.invalid) {
-      this.step3.markAllAsTouched();
+      // Crear sesión primero
+      this.createSessionAndAddService(callback);
       return;
     }
-    const v = this.step3.value;
+
+    // Si ya existe la sesión, proceder normalmente
+    this.addServiceToExistingSession(callback);
+  }
+
+  private createSessionAndAddService(callback?: () => void): void {
+    const v = this.step1.value;
+    const body: ClinicalSessionRequest = {
+      episodeId: this.episodeId,
+      employeeId: v.employeeId,
+      sessionDate: this.formatDate(v.sessionDate),
+      reasonForConsultation: v.reasonForConsultation.trim(),
+      relevantBackground: v.relevantBackground?.trim() || null,
+    };
+
+    console.log('Creando sesión para agregar servicio...');
+    Notiflix.Loading.pulse('Creando sesión...');
+
+    this.sessionService.create(body).subscribe({
+      next: (sessionData: ClinicalSessionResponse) => {
+        Notiflix.Loading.remove(300);
+
+        if (!sessionData || !sessionData.id) {
+          console.error('Respuesta inválida del servidor:', sessionData);
+          Notiflix.Report.failure('Error', 'El servidor retornó una respuesta inválida.', 'OK');
+          return;
+        }
+
+        this.session = sessionData;
+        this.sessionId = sessionData.id;
+        this.isNew = false;
+
+        console.log('Sesión creada. ID:', this.sessionId);
+
+        // Ahora agregar el servicio
+        this.addServiceToExistingSession(callback);
+      },
+      error: err => {
+        Notiflix.Loading.remove(300);
+        console.error('Error al crear sesión:', err);
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear la sesión.', 'OK');
+      },
+    });
+  }
+
+  private addServiceToExistingSession(callback?: () => void): void {
+    // Validar servicio seleccionado
+    if (this.step1.get('medicalServiceId')?.invalid || this.step1.get('quantity')?.invalid) {
+      this.step1.markAllAsTouched();
+      return;
+    }
+
+    const effectiveSessionId = this.sessionId ?? this.session?.id;
+
+    if (!effectiveSessionId) {
+      console.error('No hay sessionId disponible:', {
+        sessionId: this.sessionId,
+        sessionFromObject: this.session?.id,
+        isNew: this.isNew,
+      });
+      Notiflix.Report.failure('Error', 'Error interno: No se pudo identificar la sesión.', 'OK');
+      return;
+    }
+
+    console.log('Agregando servicio a sesión ID:', effectiveSessionId);
+
+    const v = this.step1.value;
     const body: SessionServiceRequest = {
       medicalServiceId: v.medicalServiceId,
       quantity: v.quantity,
       unitPrice: v.unitPrice || null,
       notes: v.notes?.trim() || null,
     };
+
     this.isSavingService = true;
-    this.sessionService.addService(this.sessionId!, body).subscribe({
+    this.sessionService.addService(effectiveSessionId, body).subscribe({
       next: () => {
         this.isSavingService = false;
-        this.step3.reset({ quantity: 1 });
+        console.log('Servicio agregado correctamente');
+
+        this.step1.patchValue({
+          medicalServiceId: null,
+          quantity: 1,
+          unitPrice: null,
+          notes: ''
+        });
+
         this.loadAppliedServices();
         Notiflix.Notify.success('Servicio agregado.');
+
+        if (callback) callback();
       },
       error: err => {
         this.isSavingService = false;
+        console.error('Error al agregar servicio:', err);
         Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo agregar el servicio.', 'OK');
       },
     });
@@ -299,11 +416,29 @@ export class SessionFormComponent implements OnInit {
     );
   }
 
-  // ─── Utilidades ────────────────────────────────────────────────────────────
+  // ─── Detectar servicio de Análisis Postural ──────────────────────────────────
+  // Este método se ejecuta cada vez que se carga o se agrega un servicio.
+  // Verifica si algún servicio aplicado tiene la categoría 'POSTURAL_ANALYSIS'
+  // y actualiza el flag para mostrar/ocultar el botón de análisis de pisada
+
+  checkForPosturalAnalysisService(): void {
+    const hasPostural = this.appliedServices.some(
+      s => s.medicalServiceCategory === 'POSTURAL_ANALYSIS'
+    );
+    this.hasPosturalAnalysisService = hasPostural;
+  }
+
+  // Este método se ejecuta cuando el usuario selecciona un servicio en el dropdown
+  // Autogestiona el precio unitario basado en el precio del servicio seleccionado
+  onServiceSelected(serviceId: number): void {
+    const svc = this.serviceList.find(s => s.id === serviceId);
+    if (svc?.price) {
+      this.step1.get('unitPrice')?.setValue(svc.price);
+    }
+  }
 
   f1(name: string) { return this.step1.get(name); }
   f2(name: string) { return this.step2.get(name); }
-  f3(name: string) { return this.step3.get(name); }
 
   private formatDate(date: any): string {
     if (!date) return '';
@@ -325,12 +460,6 @@ export class SessionFormComponent implements OnInit {
     return svc ? svc.name : String(id);
   }
 
-  onServiceSelected(serviceId: number): void {
-    const svc = this.serviceList.find(s => s.id === serviceId);
-    if (svc?.price) {
-      this.step3.get('unitPrice')?.setValue(svc.price);
-    }
-  }
 
   finalize(): void {
     Notiflix.Report.success(
@@ -345,6 +474,13 @@ export class SessionFormComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/management-pacient/episodes', this.episodeId, 'sessions']);
+  }
+
+  goToImaging(): void {
+    this.router.navigate([
+      '/management-pacient/episodes', this.episodeId,
+      'sessions', this.sessionId, 'imaging',
+    ]);
   }
 
   get statusLabel(): string {

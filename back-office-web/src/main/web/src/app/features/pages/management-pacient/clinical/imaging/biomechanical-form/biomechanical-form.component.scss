@@ -1,0 +1,11 @@
+.step-container { padding: 24px 0; }
+.step-title     { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.step-subtitle  { margin: 0 0 24px; color: #666; }
+.feet-grid      { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.foot-card      { height: 100%; }
+.full-width     { width: 100%; }
+.step-actions   { display: flex; justify-content: space-between; gap: 12px; }
+
+@media (max-width: 720px) {
+  .feet-grid { grid-template-columns: 1fr; }
+}

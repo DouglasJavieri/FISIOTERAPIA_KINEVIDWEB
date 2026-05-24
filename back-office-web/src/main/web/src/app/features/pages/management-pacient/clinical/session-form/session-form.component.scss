@@ -38,8 +38,12 @@
 }
 
 .add-service-actions {
-  margin: 4px 0 16px;
+  margin: 16px 0 8px;
   padding: 0 8px;
+
+  button {
+    min-width: 140px;
+  }
 }
 
 .status-bar {
@@ -93,3 +97,47 @@
   mat-icon { font-size: 40px; width: 40px; height: 40px; margin-bottom: 8px; }
   p { margin: 0; font-size: 14px; }
 }
+
+// Banner de Análisis de Pisada (reemplaza el antiguo postural-analysis-alert)
+.postural-analysis-banner {
+  margin: 16px 0 8px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
+  border-left: 4px solid #3f51b5;
+  border-radius: 6px;
+  gap: 16px;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: #3f51b5;
+    flex-shrink: 0;
+  }
+
+  .banner-title {
+    margin: 0 0 2px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a237e;
+  }
+
+  .banner-subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: #3949ab;
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+
+    button { width: 100%; }
+  }
+}
+

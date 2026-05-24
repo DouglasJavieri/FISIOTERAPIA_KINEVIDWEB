@@ -1,0 +1,40 @@
+<div class="step-container">
+
+  <h3 class="step-title">Paso 1 — Captura de Imágenes</h3>
+  <p class="step-subtitle">Sube hasta {{ MAX_PHOTOS }} fotos del análisis de pisada.</p>
+
+  <!-- Miniaturas -->
+  <div class="photo-grid">
+    <div class="photo-slot"
+         *ngFor="let photo of photos"
+         [class.selected]="photo.isSelected">
+      <img [src]="photo.photoUrl" [alt]="'Foto ' + photo.photoOrder" />
+      <div class="photo-overlay">
+        <span class="photo-order">#{{ photo.photoOrder }}</span>
+        <mat-icon *ngIf="photo.hasAnnotations" class="annotated-icon"
+                  matTooltip="Tiene anotaciones">draw</mat-icon>
+        <button mat-icon-button color="warn" (click)="deletePhoto(photo)"
+                matTooltip="Eliminar foto">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Slot para subir nueva foto -->
+    <label class="photo-slot upload-slot" *ngIf="canUpload" matTooltip="Subir foto">
+      <mat-icon>add_a_photo</mat-icon>
+      <span>Subir foto</span>
+      <input type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+    </label>
+  </div>
+
+  <p class="photo-count">{{ photos.length }} / {{ MAX_PHOTOS }} fotos subidas</p>
+
+  <!-- Acciones -->
+  <div class="step-actions">
+    <button mat-raised-button color="primary" (click)="goNext()">
+      Siguiente <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+</div>

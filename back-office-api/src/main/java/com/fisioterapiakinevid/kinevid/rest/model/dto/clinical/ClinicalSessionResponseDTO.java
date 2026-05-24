@@ -30,6 +30,11 @@ public class ClinicalSessionResponseDTO {
     private String reasonForConsultation;
     private String relevantBackground;
     private String kinesiologicalEvaluation;
+    private String actualIllnessHistory;
+    private String gait;
+    private String functionalTests;
+    private String complementaryExams;
+    private String kinesiologicalDiagnosis;
     private String treatmentApplied;
     private String observations;
     private String evolution;
@@ -37,7 +42,17 @@ public class ClinicalSessionResponseDTO {
     private SessionStatus sessionStatus;
 
     public ClinicalSessionResponseDTO(ClinicalSession session) {
+        if (session == null) {
+            throw new IllegalArgumentException("ClinicalSession no puede ser null");
+        }
+
         this.id = session.getId();
+
+        // Si el ID es null, error crítico
+        if (this.id == null) {
+            throw new IllegalArgumentException("ClinicalSession.id es null. Verifique que la sesión fue guardada correctamente en la BD.");
+        }
+
         this.episodeId = session.getEpisode() != null ? session.getEpisode().getId() : null;
         this.episodeNumber = session.getEpisode() != null ? session.getEpisode().getEpisodeNumber() : null;
         this.patientId = session.getEpisode() != null && session.getEpisode().getPatient() != null
@@ -51,10 +66,15 @@ public class ClinicalSessionResponseDTO {
         this.reasonForConsultation = session.getReasonForConsultation();
         this.relevantBackground = session.getRelevantBackground();
         this.kinesiologicalEvaluation = session.getKinesiologicalEvaluation();
+        this.actualIllnessHistory = session.getActualIllnessHistory();
+        this.gait = session.getGait();
+        this.functionalTests = session.getFunctionalTests();
+        this.complementaryExams = session.getComplementaryExams();
+        this.kinesiologicalDiagnosis = session.getKinesiologicalDiagnosis();
         this.treatmentApplied = session.getTreatmentApplied();
         this.observations = session.getObservations();
         this.evolution = session.getEvolution();
-        this.hasImageAnalysis = session.getHasImageAnalysis();
+        this.hasImageAnalysis = session.getHasImageAnalysis() != null ? session.getHasImageAnalysis() : false;
         this.sessionStatus = session.getSessionStatus();
     }
 

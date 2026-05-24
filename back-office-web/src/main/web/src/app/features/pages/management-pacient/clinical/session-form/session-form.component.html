@@ -29,22 +29,23 @@
           </span>
         </div>
 
-        <!-- STEPPER -->
+        <!-- STEPPER (2 PASOS) -->
         <mat-stepper #stepper [linear]="isNew" orientation="horizontal" class="session-stepper">
 
-          <!-- ── PASO 1: Datos básicos ─────────────────────────────────── -->
-          <mat-step [stepControl]="step1" label="Datos básicos" [editable]="!sessionLocked">
+          <!-- ── PASO 1: Información de sesión + Servicios ────────────────────── -->
+          <mat-step [stepControl]="step1" label="Información de sesión" [editable]="!sessionLocked">
             <form [formGroup]="step1" autocomplete="off">
 
-              <p class="section-title">Información de la sesión</p>
+              <!-- SECCIÓN: Datos básicos de la sesión -->
+              <p class="section-title">Datos de la sesión</p>
               <div fxLayout="row wrap">
 
-                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="50" class="form-col">
                   <knv-selects
                     formControlName="employeeId"
                     [data]="employeeList"
                     [keyAttr]="'id'"
-                    [displayAttr]="'firstName'"
+                    [displayAttr]="'fullNameTotal'"
                     [name]="'Fisioterapeuta'"
                     [placeholder]="'Seleccione fisioterapeuta'"
                     [multiple]="false"
@@ -53,7 +54,7 @@
                   </knv-selects>
                 </div>
 
-                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="50" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Fecha de sesión</mat-label>
                     <input matInput [matDatepicker]="pickerSession"
@@ -66,15 +67,67 @@
                   </mat-form-field>
                 </div>
 
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <knv-selects
+                    formControlName="medicalServiceId"
+                    [data]="serviceList"
+                    [keyAttr]="'id'"
+                    [displayAttr]="'name'"
+                    [name]="'Servicio'"
+                    [placeholder]="'Seleccione un servicio'"
+                    [multiple]="false"
+                    [isRequired]="true"
+                    [showAllOption]="false"
+                    (ngModelChange)="onServiceSelected($event)">
+                  </knv-selects>
+                </div>
+
               </div>
 
+              <div fxLayout="row wrap">
+                <div fxFlex="33.33" fxFlex.lt-md="50" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Cantidad</mat-label>
+                    <input matInput formControlName="quantity" type="number" min="1" max="99"/>
+                    <mat-error *ngIf="f1('quantity')?.hasError('required')">Requerido.</mat-error>
+                    <mat-error *ngIf="f1('quantity')?.hasError('min')">Mínimo 1.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="50" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Precio unitario (Bs.)</mat-label>
+                    <input matInput formControlName="unitPrice" type="number" min="0" step="0.01" placeholder="0.00"/>
+                    <mat-hint>Opcional</mat-hint>
+                    <mat-error *ngIf="f1('unitPrice')?.hasError('min')">Debe ser ≥ 0.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Notas del servicio</mat-label>
+                    <input matInput formControlName="notes" placeholder="Observación del servicio..." maxlength="500"/>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div fxLayout="row" fxLayoutAlign="end center" class="add-service-actions" *ngIf="!sessionLocked && canUpdate">
+                <button mat-flat-button color="accent" type="button"
+                        [disabled]="step1.get('medicalServiceId')?.invalid || step1.get('quantity')?.invalid || isSavingService"
+                        (click)="addService()">
+                  <mat-icon>add</mat-icon> Agregar servicio
+                </button>
+              </div>
+
+              <!-- SECCIÓN: Motivo y antecedentes -->
+              <p class="section-title">Detalles de la consulta</p>
               <div fxLayout="row wrap">
                 <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Motivo de consulta</mat-label>
                     <textarea matInput formControlName="reasonForConsultation"
                               placeholder="Describe el motivo principal de la sesión..."
-                              rows="3" maxlength="500" autocomplete="off"></textarea>
+                              rows="4" maxlength="500" autocomplete="off"></textarea>
                     <mat-hint align="end">{{ f1('reasonForConsultation')?.value?.length ?? 0 }}/500</mat-hint>
                     <mat-error *ngIf="f1('reasonForConsultation')?.hasError('required')">El motivo es requerido.</mat-error>
                     <mat-error *ngIf="f1('reasonForConsultation')?.hasError('onlyWhitespace') || f1('reasonForConsultation')?.hasError('leadingWhitespace')">No se permiten espacios en blanco.</mat-error>
@@ -86,32 +139,108 @@
                     <mat-label>Antecedentes relevantes</mat-label>
                     <textarea matInput formControlName="relevantBackground"
                               placeholder="Antecedentes médicos, alergias, cirugías previas..."
-                              rows="3" maxlength="1000" autocomplete="off"></textarea>
+                              rows="4" maxlength="1000" autocomplete="off"></textarea>
                     <mat-hint align="end">{{ f1('relevantBackground')?.value?.length ?? 0 }}/1000</mat-hint>
                     <mat-error *ngIf="f1('relevantBackground')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
                   </mat-form-field>
                 </div>
               </div>
 
+              <!-- SECCIÓN: Servicios registrados -->
+              <p class="section-title">Servicios registrados en esta sesión</p>
+
+              <div *ngIf="appliedServices.length === 0" class="empty-services">
+                <mat-icon>medical_services</mat-icon>
+                <p>No hay servicios registrados. Agregue uno usando el formulario anterior.</p>
+              </div>
+
+              <mat-table *ngIf="appliedServices.length > 0" [dataSource]="appliedServices" class="services-table mat-elevation-z1">
+
+                <ng-container matColumnDef="name">
+                  <mat-header-cell *matHeaderCellDef>Servicio</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.medicalServiceName }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="category">
+                  <mat-header-cell *matHeaderCellDef>Categoría</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.medicalServiceCategory ?? '—' }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="quantity">
+                  <mat-header-cell *matHeaderCellDef>Cant.</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.quantity }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="unitPrice">
+                  <mat-header-cell *matHeaderCellDef>P. Unit.</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.unitPrice != null ? (row.unitPrice | number:'1.2-2') + ' Bs.' : '—' }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="total">
+                  <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.totalPrice != null ? (row.totalPrice | number:'1.2-2') + ' Bs.' : '—' }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="notes">
+                  <mat-header-cell *matHeaderCellDef>Notas</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.notes ?? '—' }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <button *ngIf="!sessionLocked && canUpdate"
+                            mat-icon-button color="warn"
+                            matTooltip="Eliminar servicio"
+                            (click)="removeService(row)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="['name','category','quantity','unitPrice','total','notes','actions']"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: ['name','category','quantity','unitPrice','total','notes','actions']"></mat-row>
+              </mat-table>
+
+              <!-- Banner de Análisis de Pisada — visible cuando hay servicio POSTURAL_ANALYSIS -->
+              <div *ngIf="hasPosturalAnalysisService && !isNew"
+                   class="postural-analysis-banner"
+                   fxLayout="row" fxLayoutAlign="space-between center">
+                <div fxLayout="row" fxLayoutAlign="start center" style="gap: 12px;">
+                  <mat-icon>directions_walk</mat-icon>
+                  <div>
+                    <p class="banner-title">Análisis de Pisada detectado</p>
+                    <p class="banner-subtitle">Esta sesión incluye un servicio de análisis postural.</p>
+                  </div>
+                </div>
+                <button mat-raised-button color="primary"
+                        *ngIf="canViewFootAnalysis"
+                        (click)="goToImaging()"
+                        matTooltip="Ir a la pantalla de análisis de imagen">
+                  <mat-icon>open_in_new</mat-icon>
+                  Ir a Análisis de Imagen
+                </button>
+              </div>
+
               <div fxLayout="row" fxLayoutAlign="end center" class="step-actions">
                 <button mat-stroked-button type="button" (click)="goBack()">Cancelar</button>
                 <button mat-flat-button color="primary" type="button"
-                        [disabled]="step1.invalid || isLoading"
+                        [disabled]="step1.get('employeeId')?.invalid || step1.get('sessionDate')?.invalid || step1.get('reasonForConsultation')?.invalid || appliedServices.length === 0 || isLoading"
                         (click)="saveStep1()">
-                  {{ isNew ? 'Crear y continuar' : 'Guardar y continuar' }}
+                  Siguiente paso
                   <mat-icon>arrow_forward</mat-icon>
                 </button>
               </div>
             </form>
           </mat-step>
 
-          <!-- ── PASO 2: Evaluación clínica ────────────────────────────── -->
+          <!-- ── PASO 2: Evaluación clínica ────────────────────────────────── -->
           <mat-step [stepControl]="step2" label="Evaluación clínica" [editable]="!sessionLocked">
             <form [formGroup]="step2" autocomplete="off">
 
-              <p class="section-title">Evaluación kinesiológica</p>
+              <p class="section-title">Evaluación kinesiológica - Fila 1</p>
               <div fxLayout="row wrap">
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Evaluación kinesiológica</mat-label>
                     <textarea matInput formControlName="kinesiologicalEvaluation"
@@ -121,7 +250,63 @@
                   </mat-form-field>
                 </div>
 
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Antecedente actual de enfermedad</mat-label>
+                    <textarea matInput formControlName="actualIllnessHistory"
+                              placeholder="Historia de la enfermedad actual..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('actualIllnessHistory')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Marcha/Postura</mat-label>
+                    <textarea matInput formControlName="gait"
+                              placeholder="Descripción de la marcha y postura..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('gait')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <p class="section-title">Evaluación kinesiológica - Fila 2</p>
+              <div fxLayout="row wrap">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Pruebas funcionales</mat-label>
+                    <textarea matInput formControlName="functionalTests"
+                              placeholder="Resultados de pruebas funcionales..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('functionalTests')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Exámenes complementarios</mat-label>
+                    <textarea matInput formControlName="complementaryExams"
+                              placeholder="Resultado de exámenes (rayos X, resonancia, etc.)..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('complementaryExams')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Diagnóstico kinesiológico</mat-label>
+                    <textarea matInput formControlName="kinesiologicalDiagnosis"
+                              placeholder="Diagnóstico basado en la evaluación..."
+                              rows="4" autocomplete="off"></textarea>
+                    <mat-error *ngIf="f2('kinesiologicalDiagnosis')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <p class="section-title">Evaluación kinesiológica - Fila 3</p>
+              <div fxLayout="row wrap">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Tratamiento aplicado</mat-label>
                     <textarea matInput formControlName="treatmentApplied"
@@ -130,10 +315,8 @@
                     <mat-error *ngIf="f2('treatmentApplied')?.hasError('onlyWhitespace')">No se permiten solo espacios en blanco.</mat-error>
                   </mat-form-field>
                 </div>
-              </div>
 
-              <div fxLayout="row wrap">
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Observaciones</mat-label>
                     <textarea matInput formControlName="observations"
@@ -143,7 +326,7 @@
                   </mat-form-field>
                 </div>
 
-                <div fxFlex="50" fxFlex.lt-md="100" class="form-col">
+                <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Evolución del paciente</mat-label>
                     <textarea matInput formControlName="evolution"
@@ -156,145 +339,19 @@
 
               <div fxLayout="row" fxLayoutAlign="end center" class="step-actions">
                 <button mat-stroked-button type="button" matStepperPrevious>Anterior</button>
+                <button mat-stroked-button type="button" (click)="goBack()">
+                  <mat-icon>list</mat-icon> Ver sesiones
+                </button>
                 <button mat-flat-button color="primary" type="button"
-                        [disabled]="step2.invalid"
+                        [disabled]="sessionLocked && !canUpdate"
                         (click)="saveStep2()">
-                  {{ sessionLocked ? 'Continuar' : 'Guardar y continuar' }}
-                  <mat-icon>arrow_forward</mat-icon>
+                  {{ sessionLocked ? 'Finalizar' : 'Guardar y finalizar' }}
+                  <mat-icon>check_circle</mat-icon>
                 </button>
               </div>
             </form>
           </mat-step>
 
-          <!-- ── PASO 3: Servicios aplicados ───────────────────────────── -->
-          <mat-step label="Servicios aplicados">
-
-            <!-- Formulario para agregar servicio -->
-            <ng-container *ngIf="!sessionLocked && canUpdate">
-              <p class="section-title">Agregar servicio a la sesión</p>
-              <form [formGroup]="step3" autocomplete="off">
-                <div fxLayout="row wrap">
-
-                  <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
-                    <knv-selects
-                      formControlName="medicalServiceId"
-                      [data]="serviceList"
-                      [keyAttr]="'id'"
-                      [displayAttr]="'name'"
-                      [name]="'Servicio'"
-                      [placeholder]="'Seleccione un servicio'"
-                      [multiple]="false"
-                      [isRequired]="true"
-                      [showAllOption]="false"
-                      (ngModelChange)="onServiceSelected($event)">
-                    </knv-selects>
-                  </div>
-
-                  <div fxFlex="20" fxFlex.lt-md="50" class="form-col">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Cantidad</mat-label>
-                      <input matInput formControlName="quantity" type="number" min="1" max="99"/>
-                      <mat-error *ngIf="f3('quantity')?.hasError('required')">Requerido.</mat-error>
-                      <mat-error *ngIf="f3('quantity')?.hasError('min')">Mínimo 1.</mat-error>
-                    </mat-form-field>
-                  </div>
-
-                  <div fxFlex="20" fxFlex.lt-md="50" class="form-col">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Precio unitario (Bs.)</mat-label>
-                      <input matInput formControlName="unitPrice" type="number" min="0" step="0.01" placeholder="0.00"/>
-                      <mat-hint>Opcional</mat-hint>
-                      <mat-error *ngIf="f3('unitPrice')?.hasError('min')">Debe ser ≥ 0.</mat-error>
-                    </mat-form-field>
-                  </div>
-
-                  <div fxFlex="26.67" fxFlex.lt-md="100" class="form-col">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Notas</mat-label>
-                      <input matInput formControlName="notes" placeholder="Observación del servicio..." maxlength="500"/>
-                    </mat-form-field>
-                  </div>
-
-                </div>
-
-                <div fxLayout="row" fxLayoutAlign="end center" class="add-service-actions">
-                  <button mat-flat-button color="accent" type="button"
-                          [disabled]="step3.invalid || isSavingService"
-                          (click)="addService()">
-                    <mat-icon>add</mat-icon> Agregar servicio
-                  </button>
-                </div>
-              </form>
-            </ng-container>
-
-            <!-- Tabla de servicios aplicados -->
-            <p class="section-title">Servicios registrados en esta sesión</p>
-
-            <div *ngIf="appliedServices.length === 0" class="empty-services">
-              <mat-icon>medical_services</mat-icon>
-              <p>No hay servicios registrados en esta sesión.</p>
-            </div>
-
-            <mat-table *ngIf="appliedServices.length > 0" [dataSource]="appliedServices" class="services-table mat-elevation-z1">
-
-              <ng-container matColumnDef="name">
-                <mat-header-cell *matHeaderCellDef>Servicio</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{ row.medicalServiceName }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="category">
-                <mat-header-cell *matHeaderCellDef>Categoría</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{ row.medicalServiceCategory ?? '—' }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="quantity">
-                <mat-header-cell *matHeaderCellDef>Cant.</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{ row.quantity }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="unitPrice">
-                <mat-header-cell *matHeaderCellDef>P. Unit.</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{ row.unitPrice != null ? (row.unitPrice | number:'1.2-2') + ' Bs.' : '—' }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="total">
-                <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{ row.totalPrice != null ? (row.totalPrice | number:'1.2-2') + ' Bs.' : '—' }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="notes">
-                <mat-header-cell *matHeaderCellDef>Notas</mat-header-cell>
-                <mat-cell *matCellDef="let row">{{ row.notes ?? '—' }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <mat-header-cell *matHeaderCellDef></mat-header-cell>
-                <mat-cell *matCellDef="let row">
-                  <button *ngIf="!sessionLocked && canUpdate"
-                          mat-icon-button color="warn"
-                          matTooltip="Eliminar servicio"
-                          (click)="removeService(row)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </mat-cell>
-              </ng-container>
-
-              <mat-header-row *matHeaderRowDef="['name','category','quantity','unitPrice','total','notes','actions']"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: ['name','category','quantity','unitPrice','total','notes','actions']"></mat-row>
-            </mat-table>
-
-            <!-- Acciones finales -->
-            <div fxLayout="row" fxLayoutAlign="end center" class="step-actions">
-              <button mat-stroked-button type="button" matStepperPrevious>Anterior</button>
-              <button mat-stroked-button type="button" (click)="goBack()">
-                <mat-icon>list</mat-icon> Ver sesiones
-              </button>
-              <button mat-flat-button color="primary" type="button" (click)="finalize()">
-                <mat-icon>check_circle</mat-icon> Finalizar
-              </button>
-            </div>
-
-          </mat-step>
         </mat-stepper>
 
       </knv-card-content>

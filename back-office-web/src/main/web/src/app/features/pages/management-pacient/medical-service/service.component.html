@@ -35,26 +35,26 @@
 
             <!-- ── Filtros ──────────────────────────────────────────── -->
             <form [formGroup]="form" (ngSubmit)="applyFilter()">
-              <div fxLayout="row wrap">
+              <div fxLayout="row wrap" fxLayoutGap="10px">
 
-                <div fxFlex="25" fxFlex.lt-md="100" class="p5">
+                <div fxFlex="25" fxFlex.lt-md="100" class="p5 mr5">
                   <mat-form-field appearance="outline" style="width:100%">
-                    <mat-label>Estado</mat-label>
-                    <mat-select formControlName="status">
-                      <mat-option [value]="null">Todos</mat-option>
-                      <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
+                    <mat-label>Categoría</mat-label>
+                    <mat-select formControlName="category">
+                      <mat-option [value]="null">Todas</mat-option>
+                      <mat-option *ngFor="let opt of categoryOptions" [value]="opt.value">
                         {{ opt.label }}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>
 
-                <div fxFlex="25" fxFlex.lt-md="100" class="p5">
+                <div fxFlex="25" fxFlex.lt-md="100" class="p5 mr5">
                   <mat-form-field appearance="outline" style="width:100%">
-                    <mat-label>Categoría</mat-label>
-                    <mat-select formControlName="category">
-                      <mat-option [value]="null">Todas</mat-option>
-                      <mat-option *ngFor="let opt of categoryOptions" [value]="opt.value">
+                    <mat-label>Estado</mat-label>
+                    <mat-select formControlName="status">
+                      <mat-option [value]="null">Todos</mat-option>
+                      <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
                         {{ opt.label }}
                       </mat-option>
                     </mat-select>
