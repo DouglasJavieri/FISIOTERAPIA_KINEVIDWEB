@@ -51,8 +51,8 @@ export class SidebarComponent implements OnInit {
       },
     ];
 
-    // ── Gestión de Usuarios (solo ADMIN / ROOT) ──────────────────────────────
-    if (this.authService.hasAnyRole([AppRole.ADMIN, AppRole.ROOT])) {
+    // ── Gestión de Usuarios (basado en permisos) ──────────────────────────────
+    if (this.authService.hasPermission(AppPermission.LIST_USER)) {
       items.push({
         id: 'management-users',
         label: 'Gestión de Usuarios',
@@ -67,7 +67,7 @@ export class SidebarComponent implements OnInit {
       });
     }
 
-    // ── Gestión de Pacientes (ADMIN, ROOT, FISIOTERAPEUTA, RECEPCIONISTA) ───
+    // ── Gestión de Pacientes (basado en permisos) ──────────────────────────────
     if (this.authService.hasPermission(AppPermission.LIST_PATIENT)) {
       const patientChildren: MenuItem[] = [
         { id: 'patients', label: 'Pacientes', icon: 'personal_injury', route: '/management-pacient/patients' },

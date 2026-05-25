@@ -4,7 +4,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { MainLayoutComponent } from '../../layout/main-layout/main-layout.component';
 import { HomeComponent }       from './home/home.component';
 import { RoleGuard }           from '../../core/guards/role.guard';
-import { AppRole }             from '../../core/models/auth.model';
+import { PermissionGuard }     from '../../core/guards/permission.guard';
+import { AppPermission, AppRole } from '../../core/models/auth.model';
 
 const routes: Routes = [
   {
@@ -15,20 +16,20 @@ const routes: Routes = [
       // ── Home (all authenticated users) ───────────────────────────────
       { path: 'home', component: HomeComponent },
 
-      // ── Management Users (ADMIN / ROOT) ─────────────────────────────────
+      // ── Management Users ─────────────────────────────────
       {
         path: 'management-users',
-        canActivate: [RoleGuard],
-        data: { roles: [AppRole.ADMIN, AppRole.ROOT] },
+        canActivate: [PermissionGuard],
+        data: { permissions: [AppPermission.LIST_USER] },
         loadChildren: () =>
           import('./management-user/management-user.module').then(m => m.ManagementUserModule),
       },
 
-      // ── Management Pacient (ADMIN / ROOT / FISIOTERAPEUTA / RECEPCIONISTA) ─
+      // ── Management Pacient ─────────────────────────────────
       {
         path: 'management-pacient',
-        canActivate: [RoleGuard],
-        data: { roles: [AppRole.ADMIN, AppRole.ROOT, AppRole.FISIOTERAPEUTA, AppRole.RECEPCIONISTA] },
+        canActivate: [PermissionGuard],
+        data: { permissions: [AppPermission.LIST_PATIENT] },
         loadChildren: () =>
           import('./management-pacient/management-pacient.module').then(m => m.ManagementPacientModule),
       },
