@@ -26,6 +26,7 @@ export class FootAnalysisComponent implements OnInit {
   sessionId!: number;
   footAnalysis: FootAnalysisResponse | null = null;
   tempPhotos: { file: File, photoUrl: string }[] = []; // Almacén temporal de fotos
+  finalAngles: any = null; // Ángulos transferidos del paso 2 al 3
   isLoading = true;
 
   constructor(
@@ -45,6 +46,17 @@ export class FootAnalysisComponent implements OnInit {
     // Clonamos el array para forzar la detección de cambios en componentes hijos
     this.tempPhotos = [...photos];
     this.nextStep();
+  }
+
+  /** Recibe los ángulos confirmados en el paso 2 para pasarlos al paso 3 */
+  onAnglesConfirmed(angles: any): void {
+    this.finalAngles = angles;
+    this.nextStep();
+  }
+
+  onAnalysisSaved(): void {
+    Notiflix.Notify.success('Análisis de pisada completado y guardado.');
+    this.goBackToSession();
   }
 
   private loadOrCreateAnalysis(): void {

@@ -1,58 +1,140 @@
-.step-container  { padding: 24px 0; }
-.step-title      { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
-.step-subtitle   { margin: 0 0 24px; color: #666; }
-.section-card    { margin-bottom: 16px; }
-.section-subtitle { font-size: 13px; color: #757575; margin: 0 0 8px; }
-.full-width      { width: 100%; }
-.divider         { margin: 16px 0; }
-.required        { color: #f44336; }
+.step-container { padding: 24px 0; }
+.step-title     { margin: 0 0 4px; font-size: 22px; font-weight: 700; color: #000; } /* Estandarizado a Negro */
 
-.summary-form {
+.card-header-styled {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f4f8;
+  margin-bottom: 16px;
+  flex-wrap: wrap; /* Evita desbordamiento */
+
+  .header-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #28A7B5; /* Color primario teal */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .header-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0B1C30; /* Azul oscuro de botones */
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+}
+
+.section-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  border: 1px solid #e0e6ed;
+  overflow: hidden;
+  padding: 0 !important;
+  margin-bottom: 24px; /* Espaciado entre tarjetas */
   display: flex;
   flex-direction: column;
-  gap: 0;
-  margin-bottom: 24px;
+
+  mat-card-content {
+    padding: 20px;
+  }
 }
 
-.diagnosis-group {
-  margin-top: 8px;
+.vertical-divider {
+  height: 80px;
+  align-self: center;
 }
 
-.diagnosis-label {
-  font-size: 14px;
-  color: rgba(0,0,0,0.6);
-  display: block;
-  margin-bottom: 8px;
-}
-
-.diagnosis-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-
-.fields-row {
+.footprint-grid-v2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsivo automático */
+  gap: 16px 30px;
+  padding: 16px;
+  background: #fdfdfd;
+  border-radius: 8px;
+  border: 1px solid #f1f1f1;
+
+  mat-radio-button {
+    margin: 0;
+    white-space: normal;
+  }
+}
+
+.highlight-card {
+  background: #f1f4f9;
+  border: 1px solid #c5d2e0;
+
+  .leg-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #28A7B5; /* Teal */
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+}
+
+.diagnosis-box {
+  background: #EAF1FF; /* $color-surface */
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #c5d2e0;
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #0B1C30;
+  }
+
+  .diagnosis-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
 }
 
 .step-actions {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 2px solid #f0f4f8;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+
+  .big-btn {
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 30px;
+    background-color: #0B1C30 !important; /* Azul oscuro corporativo */
+    color: #FFFFFF !important; /* Texto claro */
+    cursor: pointer; /* Efecto manito */
+
+    &:hover {
+      background-color: #0d2240 !important;
+      transform: translateY(-1px);
+    }
+  }
 }
 
-.right-actions {
-  display: flex;
-  gap: 12px;
-}
+.required { color: #f44336; margin-left: 4px; }
+.section-instruction { color: #78909c; font-size: 13px; margin-top: -8px; margin-bottom: 12px; }
 
-@media (max-width: 600px) {
-  .fields-row  { grid-template-columns: 1fr; }
-  .step-actions { flex-direction: column; align-items: stretch; }
-  .right-actions { flex-direction: column; }
+@media (max-width: 768px) {
+  .step-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 16px;
+    button, .big-btn { width: 100%; }
+  }
+  .card-header-styled .header-text { font-size: 16px; }
+  .footprint-grid-v2 { grid-template-columns: 1fr; }
 }

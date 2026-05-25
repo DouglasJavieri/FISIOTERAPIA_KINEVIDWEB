@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Implementación del servicio de análisis de pisada.
@@ -105,13 +106,14 @@ public class FootAnalysisServiceImpl implements FootAnalysisService {
     @Transactional(readOnly = true)
     public FootAnalysisResponseDTO getFootAnalysisBySessionId(Long sessionId) throws OperationException {
         try {
-            FootAnalysis footAnalysis = footAnalysisRepository.findByClinicalSessionId(sessionId)
-                    .orElseThrow(() -> new OperationException(
-                            "No se encontró un análisis de pisada para la sesión clínica con ID '" + sessionId + "'."));
-            return mapToResponseDto(footAnalysis);
-        } catch (OperationException e) {
-            log.error("Error al obtener análisis por sesión ID={}: {}", sessionId, e.getMessage());
-            throw e;
+            Optional<FootAnalysis> footAnalysisOpt = footAnalysisRepository.findByClinicalSessionId(sessionId);
+            
+            if (footAnalysisOpt.isEmpty()) {
+                log.info("No se encontró análisis para la sesión ID: {}", sessionId);
+                return null;
+            }
+            
+            return mapToResponseDto(footAnalysisOpt.get());
         } catch (Exception e) {
             log.error("Error inesperado al obtener análisis por sesión ID={}", sessionId, e);
             throw new OperationException("Ocurrió un error inesperado al obtener el análisis de pisada");

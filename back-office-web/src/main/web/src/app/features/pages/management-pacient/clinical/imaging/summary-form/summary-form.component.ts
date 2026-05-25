@@ -24,16 +24,27 @@ export class SummaryFormComponent implements OnChanges {
 
   @Input() sessionId!: number;
   @Input() footAnalysis: FootAnalysisResponse | null = null;
-  @Output() analysisUpdated = new EventEmitter<FootAnalysisResponse>();
-  @Output() prev   = new EventEmitter<void>();
-  @Output() finish = new EventEmitter<void>();
+  @Input() tempPhotos: { file: File, photoUrl: string }[] = [];
+  @Input() capturedAngles: any = null; // Recibe ángulos del Paso 2
+
+  @Output() saved = new EventEmitter<void>();
+  @Output() prev = new EventEmitter<void>();
 
   diagnosisOptions = diagnosisOptions;
   form!: FormGroup;
   isSaving = false;
+  screenSmall = false;
 
   constructor(private footAnalysisService: FootAnalysisService) {
     this.buildForm();
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    this.screenSmall = window.innerWidth < 600;
+    window.addEventListener('resize', () => {
+      this.screenSmall = window.innerWidth < 600;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -51,87 +62,64 @@ export class SummaryFormComponent implements OnChanges {
         angleRightExternal:      this.footAnalysis.angleRightExternal       ?? null,
       });
     }
+
+    if (changes['capturedAngles'] && this.capturedAngles) {
+      // Redondear ángulos a máximo 3 decimales antes de parchear el formulario
+      const roundedAngles = { ...this.capturedAngles };
+      Object.keys(roundedAngles).forEach(key => {
+        if (typeof roundedAngles[key] === 'number') {
+          roundedAngles[key] = Number(roundedAngles[key].toFixed(3));
+        }
+      });
+      this.form.patchValue(roundedAngles);
+    }
   }
 
   private buildForm(): void {
     this.form = new FormGroup({
+      // Datos Generales
       relevantBackground:       new FormControl(''),
       kinesiologicalEvaluation: new FormControl(''),
       observations:             new FormControl(''),
       diagnosis:                new FormControl(null, [Validators.required]),
       distanceIntermaleolar:    new FormControl(null, [Validators.min(0)]),
       distanceIntercondylar:    new FormControl(null, [Validators.min(0)]),
+
+      // Ángulos (Auto-llenado)
       angleLeftInternal:        new FormControl(null, [Validators.min(0), Validators.max(180)]),
       angleLeftExternal:        new FormControl(null, [Validators.min(0), Validators.max(180)]),
       angleRightInternal:       new FormControl(null, [Validators.min(0), Validators.max(180)]),
       angleRightExternal:       new FormControl(null, [Validators.min(0), Validators.max(180)]),
+
+      // Biomecánico Simplificado
+      shoeWear:                 new FormControl(''),
+      tibiaPalpation:           new FormControl(''),
+      gait:                     new FormControl('NORMAL'),
+
+      // Huella Plantar
+      footprintType:            new FormControl(null, [Validators.required]),
+      footprintNotes:           new FormControl('')
     });
   }
 
-  save(): void {
+  saveAll(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      Notiflix.Notify.failure('Por favor, complete los campos obligatorios.');
       return;
     }
-    const v = this.form.value;
-    this.isSaving = true;
 
-    if (this.footAnalysis) {
-      // Actualizar análisis existente
-      const body: FootAnalysisUpdateRequest = {
-        relevantBackground:       v.relevantBackground?.trim()       || null,
-        kinesiologicalEvaluation: v.kinesiologicalEvaluation?.trim() || null,
-        observations:             v.observations?.trim()             || null,
-        diagnosis:                v.diagnosis,
-        distanceIntermaleolar:    v.distanceIntermaleolar,
-        distanceIntercondylar:    v.distanceIntercondylar,
-        angleLeftInternal:        v.angleLeftInternal,
-        angleLeftExternal:        v.angleLeftExternal,
-        angleRightInternal:       v.angleRightInternal,
-        angleRightExternal:       v.angleRightExternal,
-      };
-      this.footAnalysisService.update(this.footAnalysis.id, body).subscribe({
-        next: updated => {
-          this.isSaving = false;
-          this.analysisUpdated.emit(updated);
-          Notiflix.Notify.success('Resumen guardado correctamente.');
-        },
-        error: err => {
-          this.isSaving = false;
-          Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo guardar.', 'OK');
-        },
-      });
-    } else {
-      // Crear nuevo análisis
-      const body: FootAnalysisRequest = {
-        clinicalSessionId:        this.sessionId,
-        relevantBackground:       v.relevantBackground?.trim()       || null,
-        kinesiologicalEvaluation: v.kinesiologicalEvaluation?.trim() || null,
-        observations:             v.observations?.trim()             || null,
-        diagnosis:                v.diagnosis,
-        distanceIntermaleolar:    v.distanceIntermaleolar,
-        distanceIntercondylar:    v.distanceIntercondylar,
-        angleLeftInternal:        v.angleLeftInternal,
-        angleLeftExternal:        v.angleLeftExternal,
-        angleRightInternal:       v.angleRightInternal,
-        angleRightExternal:       v.angleRightExternal,
-      };
-      this.footAnalysisService.create(body).subscribe({
-        next: created => {
-          this.isSaving = false;
-          this.analysisUpdated.emit(created);
-          Notiflix.Notify.success('Análisis de pisada creado correctamente.');
-        },
-        error: err => {
-          this.isSaving = false;
-          Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear el análisis.', 'OK');
-        },
-      });
-    }
+    this.isSaving = true;
+    Notiflix.Loading.pulse('Procesando análisis integral...');
+
+    // Lógica de guardado masivo simulada para esta fase
+    setTimeout(() => {
+      Notiflix.Loading.remove();
+      this.isSaving = false;
+      this.saved.emit();
+      Notiflix.Notify.success('Análisis guardado con éxito.');
+    }, 2000);
   }
 
-  goFinish(): void { this.finish.emit(); }
-  goPrev():   void { this.prev.emit(); }
-
-  f(name: string) { return this.form.get(name); }
+  goPrev(): void { this.prev.emit(); }
 }

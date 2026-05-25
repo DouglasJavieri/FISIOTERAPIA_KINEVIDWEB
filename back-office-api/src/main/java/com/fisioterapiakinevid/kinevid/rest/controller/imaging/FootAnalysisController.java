@@ -105,17 +105,23 @@ public class FootAnalysisController {
                     @ApiResponse(responseCode = "403", description = "Sin permiso VIEW_FOOT_ANALYSIS", content = @Content(schema = @Schema(hidden = true)))
             }, security = @SecurityRequirement(name = "bearerToken"))
     public ResponseEntity<ResponseBody<FootAnalysisResponseDTO>> getFootAnalysisBySessionId(
-            @PathVariable Long sessionId) {
-        try {
-            FootAnalysisResponseDTO result = footAnalysisService.getFootAnalysisBySessionId(sessionId);
-            return ok(ApiUtil.buildResponseWithDefaults(result));
-        } catch (OperationException e) {
-            log.error("Error al obtener análisis por sesión ID={}: {}", sessionId, e.getMessage());
-            throw ApiResponseException.badRequest(e.getMessage());
-        } catch (Exception e) {
-            log.error("Error inesperado al obtener análisis por sesión ID={}", sessionId, e);
-            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+            @PathVariable Long sessionId) throws OperationException {
+        log.info("Obteniendo análisis de pisada para sesión ID: {}", sessionId);
+        FootAnalysisResponseDTO result = footAnalysisService.getFootAnalysisBySessionId(sessionId);
+        
+        if (result == null) {
+            return ResponseEntity.ok(ResponseBody.<FootAnalysisResponseDTO>builder()
+                    .code(ApiConstants.OK_CODE)
+                    .message("No existe análisis para esta sesión")
+                    .data(null)
+                    .build());
         }
+
+        return ResponseEntity.ok(ResponseBody.<FootAnalysisResponseDTO>builder()
+                .code(ApiConstants.OK_CODE)
+                .message(ApiConstants.OK_MESSAGE)
+                .data(result)
+                .build());
     }
 
 

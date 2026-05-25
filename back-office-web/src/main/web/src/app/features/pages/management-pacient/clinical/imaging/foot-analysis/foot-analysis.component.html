@@ -19,50 +19,32 @@
     <mat-card-content *ngIf="!isLoading">
       <mat-stepper #stepper linear orientation="horizontal" class="imaging-stepper">
 
-        <!-- Sub-paso 1: Galería de fotos -->
-        <mat-step label="Fotos">
+        <!-- PASO 1: Captura de Imágenes -->
+        <mat-step label="Captura de Fotos">
           <knv-photo-gallery
             [footAnalysis]="footAnalysis"
             (next)="onPhotosCaptured($event)">
           </knv-photo-gallery>
         </mat-step>
 
-        <!-- Sub-paso 2: Canvas de trazos -->
-        <mat-step label="Trazos">
+        <!-- PASO 2: Trazos y Mediciones -->
+        <mat-step label="Análisis de Trazos">
           <knv-photo-canvas
             [footAnalysis]="footAnalysis"
             [tempPhotos]="tempPhotos"
             (prev)="prevStep()"
-            (next)="nextStep()">
+            (next)="onAnglesConfirmed($event)">
           </knv-photo-canvas>
         </mat-step>
 
-        <!-- Sub-paso 3: Análisis biomecánico -->
-        <mat-step label="Biomecánico">
-          <knv-biomechanical-form
-            [footAnalysis]="footAnalysis"
-            (prev)="prevStep()"
-            (next)="nextStep()">
-          </knv-biomechanical-form>
-        </mat-step>
-
-        <!-- Sub-paso 4: Valoración de Hernández Corvo -->
-        <mat-step label="Huella Plantar">
-          <knv-footprint-form
-            [footAnalysis]="footAnalysis"
-            (prev)="prevStep()"
-            (next)="nextStep()">
-          </knv-footprint-form>
-        </mat-step>
-
-        <!-- Sub-paso 5: Resumen y datos generales -->
-        <mat-step label="Resumen">
+        <!-- PASO 3: Evaluación Final y Guardado -->
+        <mat-step label="Evaluación e Informe">
           <knv-summary-form
-            [sessionId]="sessionId"
             [footAnalysis]="footAnalysis"
-            (analysisUpdated)="onAnalysisUpdated($event)"
+            [tempPhotos]="tempPhotos"
+            [capturedAngles]="finalAngles"
             (prev)="prevStep()"
-            (finish)="goBackToSession()">
+            (saved)="onAnalysisSaved()">
           </knv-summary-form>
         </mat-step>
 
