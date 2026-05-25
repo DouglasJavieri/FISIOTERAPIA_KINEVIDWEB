@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import {SidebarComponent} from "./components/sidebar/sidebar.component";
 import {NavbarComponent} from "./components/navbar/navbar.component";
+import {FootbarComponent} from "./components/footbar/footbar.component";
 import {MainLayoutComponent} from "./main-layout/main-layout.component";
 import {MatIconModule} from "@angular/material/icon";
 import {MatTooltipModule} from "@angular/material/tooltip";
@@ -12,6 +13,7 @@ import {MatTooltipModule} from "@angular/material/tooltip";
   declarations: [
     SidebarComponent,
     NavbarComponent,
+    FootbarComponent,
     MainLayoutComponent
   ],
   imports: [
@@ -23,6 +25,7 @@ import {MatTooltipModule} from "@angular/material/tooltip";
   exports: [
     SidebarComponent,
     NavbarComponent,
+    FootbarComponent,
     MainLayoutComponent
   ],
   providers: [],

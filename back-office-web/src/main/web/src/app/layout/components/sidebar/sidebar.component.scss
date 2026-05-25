@@ -30,8 +30,13 @@ $sidebar-collapsed: 72px;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 
-  // Borde derecho sutil
-  border-right: 1px solid #E0E6ED;
+  // Borde derecho grueso y teal con transición
+  border-right: 4px solid #1D8B99;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+
+  &:hover {
+    border-right-color: #28A7B5; // Cambio sutil al pasar el mouse
+  }
 
   box-shadow:
     4px 0 16px rgba(0, 0, 0, 0.03);
@@ -50,7 +55,7 @@ $sidebar-collapsed: 72px;
 
   .sidebar__logo-wrap {
     flex-shrink: 0;
-    width: 110px; /* Agrandado */
+    width: 180px; /* Agrandado */
     height: 110px; /* Agrandado */
     border-radius: 0; /* Sin bordes redondeados */
     overflow: hidden;

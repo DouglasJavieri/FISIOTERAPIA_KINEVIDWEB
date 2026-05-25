@@ -38,13 +38,14 @@ $kinevid-theme: mat.define-light-theme((
 
 html, body {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Deshabilita scroll global */
 }
 
 body {
-  margin: 0;
   font-family: 'Roboto', sans-serif;
   background: #f8fbff;
-  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 {

@@ -1,8 +1,12 @@
 .main-layout {
-  // Compensa el navbar fijo (navbar empieza donde termina el sidebar)
+  // Compensa el navbar fijo
   padding-top: 60px;
   padding-left: 250px;
-  height: calc(100vh - 60px);
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box; /* Asegura que padding no sume a la altura */
 
   overflow: hidden;
   background: #f8fbff;
@@ -14,8 +18,13 @@
 }
 
 .main-layout__content {
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
   padding: 20px;
   background: linear-gradient(180deg, #f8fbff 0%, #f0f5fc 100%);
+}
+
+knv-footbar {
+  flex-shrink: 0;
+  width: 100%;
 }
