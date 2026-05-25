@@ -17,7 +17,7 @@
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Nombres *</mat-label>
+                <mat-label>Nombres</mat-label>
                 <input matInput formControlName="firstName" placeholder="Ej: Juan" maxlength="80" autocomplete="off"/>
                 <mat-hint align="end">{{ f('firstName')?.value?.length ?? 0 }}/80</mat-hint>
                 <mat-error *ngIf="f('firstName')?.hasError('required')">El nombre es requerido.</mat-error>
@@ -28,7 +28,7 @@
 
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Apellido paterno *</mat-label>
+                <mat-label>Apellido paterno</mat-label>
                 <input matInput formControlName="paternalSurname" placeholder="Ej: García" maxlength="80" autocomplete="off"/>
                 <mat-hint align="end">{{ f('paternalSurname')?.value?.length ?? 0 }}/80</mat-hint>
                 <mat-error *ngIf="f('paternalSurname')?.hasError('required')">El apellido paterno es requerido.</mat-error>
@@ -50,7 +50,7 @@
           <div fxLayout="row wrap">
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>C.I. *</mat-label>
+                <mat-label>C.I.</mat-label>
                 <input matInput formControlName="ci" placeholder="Ej: 1234567" maxlength="20" autocomplete="off"/>
                 <mat-hint align="end">{{ f('ci')?.value?.length ?? 0 }}/20</mat-hint>
                 <mat-error *ngIf="f('ci')?.hasError('required')">El C.I. es requerido.</mat-error>
@@ -75,7 +75,7 @@
 
             <div fxFlex="33.33" fxFlex.lt-md="100" class="form-col">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Fecha de nacimiento *</mat-label>
+                <mat-label>Fecha de nacimiento</mat-label>
                 <input matInput [matDatepicker]="pickerBirth"
                        formControlName="birthDate"
                        placeholder="DD/MM/YYYY"

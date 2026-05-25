@@ -93,7 +93,7 @@ export class SessionFormComponent implements OnInit {
     this.step1 = new FormGroup({
       employeeId: new FormControl(null, [Validators.required]),
       sessionDate: new FormControl(null, [Validators.required]),
-      reasonForConsultation: new FormControl('', [Validators.maxLength(500), noWhitespaceValidator(),]),
+      reasonForConsultation: new FormControl('', [Validators.required, Validators.maxLength(500), noWhitespaceValidator(),]),
       relevantBackground: new FormControl('', [Validators.maxLength(1000), noOnlyWhitespaceValidator(),]),
       medicalServiceId: new FormControl(null, [Validators.required]),
       quantity: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(99)]),
@@ -186,11 +186,22 @@ export class SessionFormComponent implements OnInit {
   // ─── Paso 1: guardar datos básicos y crear servicios ──────────────────────────
 
   saveStep1(): void {
-    if (this.step1.invalid) {
+    // Validar solo los campos básicos de la sesión (excluyendo los del servicio actual)
+    if (this.f1('employeeId')?.invalid ||
+        this.f1('sessionDate')?.invalid ||
+        this.f1('reasonForConsultation')?.invalid) {
       this.step1.markAllAsTouched();
+      Notiflix.Notify.failure('Por favor, complete los datos básicos de la sesión.');
       return;
     }
+
+    if (this.appliedServices.length === 0) {
+      Notiflix.Report.warning('Servicios requeridos', 'Debe agregar al menos un servicio a la sesión antes de continuar.', 'OK');
+      return;
+    }
+
     if (this.isNew) {
+      // En una nueva sesión, createSession ya llama a stepper.next() al terminar
       this.createSession();
     } else {
       this.updateSessionStep1();
@@ -211,14 +222,9 @@ export class SessionFormComponent implements OnInit {
       next: (sessionData: ClinicalSessionResponse) => {
         Notiflix.Loading.remove(300);
 
-        // Validar respuesta
         if (!sessionData || !sessionData.id) {
           console.error('Respuesta inválida del servidor:', sessionData);
-          Notiflix.Report.failure(
-            'Error',
-            'El servidor retornó una respuesta inválida. Por favor, recargue la página.',
-            'OK'
-          );
+          Notiflix.Report.failure('Error', 'El servidor retornó una respuesta inválida.', 'OK');
           return;
         }
 
@@ -228,17 +234,17 @@ export class SessionFormComponent implements OnInit {
 
         console.log('✓ Sesión creada correctamente. ID:', this.sessionId);
 
-        // Agregar el servicio seleccionado
-        this.addService(() => this.stepper.next());
+        // Si hay un servicio seleccionado en los inputs, intentamos agregarlo
+        if (this.step1.get('medicalServiceId')?.value) {
+          this.addService(() => this.stepper.next());
+        } else {
+          this.stepper.next();
+        }
       },
       error: err => {
         Notiflix.Loading.remove(300);
         console.error('Error al crear sesión:', err);
-        Notiflix.Report.failure(
-          'Error',
-          err?.error?.message ?? 'No se pudo crear la sesión.',
-          'OK'
-        );
+        Notiflix.Report.failure('Error', err?.error?.message ?? 'No se pudo crear la sesión.', 'OK');
       },
     });
   }
@@ -422,10 +428,14 @@ export class SessionFormComponent implements OnInit {
   // y actualiza el flag para mostrar/ocultar el botón de análisis de pisada
 
   checkForPosturalAnalysisService(): void {
-    const hasPostural = this.appliedServices.some(
-      s => s.medicalServiceCategory === 'POSTURAL_ANALYSIS'
-    );
+    const hasPostural = this.appliedServices.some(s => {
+      const categoryMatch = s.medicalServiceCategory === 'POSTURAL_ANALYSIS';
+      const nameMatch = s.medicalServiceName &&
+                        s.medicalServiceName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes('analisis de pisada');
+      return categoryMatch || nameMatch;
+    });
     this.hasPosturalAnalysisService = hasPostural;
+    console.log('[DEBUG_LOG] ¿Tiene análisis postural?:', this.hasPosturalAnalysisService);
   }
 
   // Este método se ejecuta cuando el usuario selecciona un servicio en el dropdown

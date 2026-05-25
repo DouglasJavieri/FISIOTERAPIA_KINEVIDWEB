@@ -225,7 +225,7 @@
               <div fxLayout="row" fxLayoutAlign="end center" class="step-actions">
                 <button mat-stroked-button type="button" (click)="goBack()">Cancelar</button>
                 <button mat-flat-button color="primary" type="button"
-                        [disabled]="step1.get('employeeId')?.invalid || step1.get('sessionDate')?.invalid || step1.get('reasonForConsultation')?.invalid || appliedServices.length === 0 || isLoading"
+                        [disabled]="f1('employeeId')?.invalid || f1('sessionDate')?.invalid || f1('reasonForConsultation')?.invalid || isLoading"
                         (click)="saveStep1()">
                   Siguiente paso
                   <mat-icon>arrow_forward</mat-icon>
