@@ -16,6 +16,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule } from '@angular/material/dialog';
 
 // Shared
 import { SharedModule } from '../../../../../shared/shared.module';
@@ -30,6 +31,7 @@ import { PhotoCanvasComponent } from './photo-canvas/photo-canvas.component';
 import { BiomechanicalFormComponent } from './biomechanical-form/biomechanical-form.component';
 import { FootprintFormComponent } from './footprint-form/footprint-form.component';
 import { SummaryFormComponent } from './summary-form/summary-form.component';
+import { CameraDialogComponent } from './photo-gallery/camera-dialog/camera-dialog.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +41,7 @@ import { SummaryFormComponent } from './summary-form/summary-form.component';
     BiomechanicalFormComponent,
     FootprintFormComponent,
     SummaryFormComponent,
+    CameraDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -56,10 +59,12 @@ import { SummaryFormComponent } from './summary-form/summary-form.component';
     MatRadioModule,
     MatProgressBarModule,
     MatDividerModule,
+    MatDialogModule,
     SharedModule,
     PageLayoutModule,
     BreadcrumbsModule,
     ImagingRoutingModule,
   ],
+  entryComponents: [CameraDialogComponent]
 })
 export class ImagingModule {}

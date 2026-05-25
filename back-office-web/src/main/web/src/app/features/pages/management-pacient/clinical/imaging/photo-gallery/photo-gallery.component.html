@@ -1,39 +1,51 @@
 <div class="step-container">
 
   <h3 class="step-title">Paso 1 — Captura de Imágenes</h3>
-  <p class="step-subtitle">Sube hasta {{ MAX_PHOTOS }} fotos del análisis de pisada.</p>
+  <p class="step-subtitle">Captura o sube hasta {{ MAX_PHOTOS }} fotos para el análisis.</p>
 
-  <!-- Miniaturas -->
+  <!-- Cuadrícula de fotos previsualizadas -->
   <div class="photo-grid">
-    <div class="photo-slot"
-         *ngFor="let photo of photos"
-         [class.selected]="photo.isSelected">
-      <img [src]="photo.photoUrl" [alt]="'Foto ' + photo.photoOrder" />
+    <div class="photo-slot" *ngFor="let photo of tempPhotos; let i = index">
+      <img [src]="photo.safeUrl" [alt]="'Foto ' + (i+1)" />
       <div class="photo-overlay">
-        <span class="photo-order">#{{ photo.photoOrder }}</span>
-        <mat-icon *ngIf="photo.hasAnnotations" class="annotated-icon"
-                  matTooltip="Tiene anotaciones">draw</mat-icon>
-        <button mat-icon-button color="warn" (click)="deletePhoto(photo)"
-                matTooltip="Eliminar foto">
+        <span class="photo-order">#{{ i + 1 }}</span>
+        <button mat-icon-button color="warn" (click)="removeTempPhoto(i)" matTooltip="Eliminar foto">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
     </div>
 
-    <!-- Slot para subir nueva foto -->
-    <label class="photo-slot upload-slot" *ngIf="canUpload" matTooltip="Subir foto">
-      <mat-icon>add_a_photo</mat-icon>
-      <span>Subir foto</span>
-      <input type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
-    </label>
+    <!-- Botones para añadir fotos (si hay espacio) -->
+    <ng-container *ngIf="canUpload">
+      <div class="photo-slot add-actions">
+        <button mat-flat-button color="primary" class="action-btn" (click)="openCamera()">
+          <mat-icon>camera_alt</mat-icon>
+          <span>Abrir Cámara</span>
+        </button>
+
+        <button mat-flat-button color="accent" class="action-btn" (click)="fileInput.click()">
+          <mat-icon>file_upload</mat-icon>
+          <span>Subir Archivo</span>
+        </button>
+        <input type="file" #fileInput accept="image/*" hidden multiple (change)="onFileSelected($event)" />
+      </div>
+    </ng-container>
+
+    <!-- Slots vacíos (placeholder) -->
+    <div class="photo-slot empty-slot" *ngFor="let item of emptySlots">
+      <mat-icon>image</mat-icon>
+    </div>
   </div>
 
-  <p class="photo-count">{{ photos.length }} / {{ MAX_PHOTOS }} fotos subidas</p>
+  <div class="stats-footer">
+    <mat-progress-bar mode="determinate" [value]="(tempPhotos.length / MAX_PHOTOS) * 100"></mat-progress-bar>
+    <p class="photo-count">{{ tempPhotos.length }} de {{ MAX_PHOTOS }} fotos listas</p>
+  </div>
 
-  <!-- Acciones -->
+  <!-- Acciones del Stepper -->
   <div class="step-actions">
-    <button mat-raised-button color="primary" (click)="goNext()">
-      Siguiente <mat-icon>chevron_right</mat-icon>
+    <button mat-raised-button color="primary" (click)="goNext()" [disabled]="tempPhotos.length === 0">
+      Continuar a Trazos <mat-icon>chevron_right</mat-icon>
     </button>
   </div>
 

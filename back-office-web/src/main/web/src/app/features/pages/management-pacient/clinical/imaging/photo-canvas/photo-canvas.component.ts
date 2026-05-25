@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import * as Notiflix from 'notiflix';
 
 import { AnalysisPhotoService } from '../../../../../../core/services/imaging/analysis-photo.service';
@@ -17,32 +18,64 @@ import { AnalysisPhotoResponse, FootAnalysisResponse } from '../../../../../../c
 export class PhotoCanvasComponent implements OnChanges {
 
   @Input() footAnalysis: FootAnalysisResponse | null = null;
+  @Input() tempPhotos: { file: File, photoUrl: string }[] = [];
   @Output() prev = new EventEmitter<void>();
   @Output() next = new EventEmitter<void>();
 
-  photos: AnalysisPhotoResponse[] = [];
-  selectedPhoto: AnalysisPhotoResponse | null = null;
+  photos: any[] = [];
+  selectedPhoto: any | null = null;
 
-  constructor(private photoService: AnalysisPhotoService) {}
+  constructor(
+    private photoService: AnalysisPhotoService,
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['footAnalysis'] && this.footAnalysis) {
+    if (changes['tempPhotos']) {
+      this.loadFromTemp();
+    } else if (changes['footAnalysis'] && this.footAnalysis) {
       this.loadPhotos();
+    }
+  }
+
+  private loadFromTemp(): void {
+    this.photos = this.tempPhotos.map((tp, index) => ({
+      id: index, // ID temporal
+      photoUrl: this.sanitizer.bypassSecurityTrustUrl(tp.photoUrl),
+      photoOrder: index + 1,
+      isSelected: true,
+      hasAnnotations: false,
+      annotationsJson: null
+    }));
+    if (this.photos.length > 0) {
+      this.selectedPhoto = this.photos[0];
+    } else {
+      this.selectedPhoto = null;
     }
   }
 
   private loadPhotos(): void {
     this.photoService.getByAnalysisId(this.footAnalysis!.id).subscribe({
       next: photos => {
-        this.photos = photos;
-        if (photos.length > 0) this.selectedPhoto = photos[0];
+        this.photos = photos.map(p => ({
+          ...p,
+          photoUrl: this.sanitizer.bypassSecurityTrustUrl(p.photoUrl)
+        }));
+        if (this.photos.length > 0) this.selectedPhoto = this.photos[0];
       },
       error: () => {},
     });
   }
 
-  selectPhoto(photo: AnalysisPhotoResponse): void {
+  selectPhoto(photo: any): void {
     this.selectedPhoto = photo;
+  }
+
+  saveAnnotations(json: string): void {
+    if (!this.selectedPhoto) return;
+    this.selectedPhoto.hasAnnotations = true;
+    this.selectedPhoto.annotationsJson = json;
+    Notiflix.Notify.success('Trazos guardados temporalmente.');
   }
 
   toggleSelection(photo: AnalysisPhotoResponse): void {
@@ -54,19 +87,6 @@ export class PhotoCanvasComponent implements OnChanges {
         Notiflix.Notify.success(updated.isSelected ? 'Foto marcada para reporte.' : 'Foto desmarcada del reporte.');
       },
       error: err => Notiflix.Report.failure('Error', err?.error?.message ?? 'Error al actualizar selección.', 'OK'),
-    });
-  }
-
-  saveAnnotations(annotationsJson: string): void {
-    if (!this.selectedPhoto) return;
-    this.photoService.updateAnnotations(this.selectedPhoto.id, { annotationsJson }).subscribe({
-      next: updated => {
-        const idx = this.photos.findIndex(p => p.id === this.selectedPhoto!.id);
-        if (idx !== -1) this.photos[idx] = updated;
-        this.selectedPhoto = updated;
-        Notiflix.Notify.success('Anotaciones guardadas.');
-      },
-      error: err => Notiflix.Report.failure('Error', err?.error?.message ?? 'Error al guardar anotaciones.', 'OK'),
     });
   }
 

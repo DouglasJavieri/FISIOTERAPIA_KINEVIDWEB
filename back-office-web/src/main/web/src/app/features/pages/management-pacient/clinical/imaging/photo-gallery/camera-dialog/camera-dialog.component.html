@@ -1,0 +1,28 @@
+<div class="camera-dialog-container">
+  <div class="dialog-header">
+    <h3>Capturar Fotos de Análisis</h3>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="video-wrapper">
+    <video #video autoplay playsinline></video>
+    <canvas #canvas hidden></canvas>
+
+    <div class="camera-overlay" *ngIf="isCountingDown">
+      <span class="countdown">{{ counter }}</span>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button color="warn" (click)="close()">
+      <mat-icon>cancel</mat-icon> Cancelar
+    </button>
+    <button mat-fab color="primary" (click)="takeSnapshot()" class="capture-btn" matTooltip="Capturar Foto">
+      <mat-icon>camera</mat-icon>
+    </button>
+    <div class="spacer"></div>
+    <span class="photo-stats">Fotos capturadas: <strong>{{ capturedCount }}</strong></span>
+  </div>
+</div>

@@ -25,6 +25,7 @@ export class FootAnalysisComponent implements OnInit {
   episodeId!: number;
   sessionId!: number;
   footAnalysis: FootAnalysisResponse | null = null;
+  tempPhotos: { file: File, photoUrl: string }[] = []; // Almacén temporal de fotos
   isLoading = true;
 
   constructor(
@@ -37,6 +38,13 @@ export class FootAnalysisComponent implements OnInit {
     this.episodeId = Number(this.route.snapshot.paramMap.get('episodeId'));
     this.sessionId = Number(this.route.snapshot.paramMap.get('sessionId'));
     this.loadOrCreateAnalysis();
+  }
+
+  /** Captura las fotos enviadas por el sub-paso 1 */
+  onPhotosCaptured(photos: { file: File, photoUrl: string }[]): void {
+    // Clonamos el array para forzar la detección de cambios en componentes hijos
+    this.tempPhotos = [...photos];
+    this.nextStep();
   }
 
   private loadOrCreateAnalysis(): void {
