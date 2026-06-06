@@ -1,24 +1,17 @@
 // Custom Theming for Angular Material
 @use '@angular/material' as mat;
+@import 'styles/variables.scss';
 
 /* MATERIAL CORE */
 @include mat.core();
 
 /* KINEVID COLOR PALETTE */
 
-// Nuevos colores personalizados
-$color-primary:      #28A7B5;      // Teal primario
-$color-bg-light:     #CDF8FF;      // Fondo claro alternativa 1
-$color-bg-light-alt: #8FF2FF;      // Fondo claro alternativa 2
-$color-neutral:      #64748B;      // Neutral
-$color-btn-dark:     #0B1C30;      // Botones oscuros
-$color-surface:      #EAF1FF;      // Superficie clara (sidebar/navbar)
+/* THEME */
 
 $kinevid-primary: mat.define-palette(mat.$light-blue-palette, 400, 200, 700);
 $kinevid-accent: mat.define-palette(mat.$cyan-palette, 300);
 $kinevid-warn: mat.define-palette(mat.$red-palette);
-
-/* THEME */
 
 $kinevid-theme: mat.define-light-theme((
         color: (

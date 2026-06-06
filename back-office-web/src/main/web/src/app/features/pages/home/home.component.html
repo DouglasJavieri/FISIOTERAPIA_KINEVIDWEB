@@ -1,8 +1,40 @@
-<div style="padding: 16px;">
-  <mat-card>
-    <mat-card-title>Bienvenido</mat-card-title>
-    <mat-card-content>
-      <p>Esta es la página de inicio (home). Usa el menú para navegar.</p>
-    </mat-card-content>
-  </mat-card>
+<div class="home-container">
+  <div class="welcome-section">
+    <mat-card class="welcome-card">
+      <mat-card-header>
+        <mat-card-title>Clínica de Fisioterapia KineVid</mat-card-title>
+        <mat-card-subtitle>Profesionales a tu servicio</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Estamos comprometidos con tu recuperación integral. Utiliza el panel lateral para gestionar tus pacientes, sesiones y análisis clínicos.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="carousel-wrapper">
+    <!-- Diapositivas -->
+    <div class="carousel-slide" *ngFor="let img of images; let i = index" [class.active]="i === currentIndex">
+      <img [src]="img" alt="KineVid Imagen {{ i + 1 }}">
+      <div class="carousel-caption">
+        <h2>Bienvenido a KineVid</h2>
+        <p>Tu bienestar es nuestra prioridad</p>
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <button class="carousel-control prev" (click)="prev()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button class="carousel-control next" (click)="next()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <!-- Indicadores -->
+    <div class="carousel-indicators">
+      <span *ngFor="let img of images; let i = index"
+            [class.active]="i === currentIndex"
+            (click)="goTo(i)">
+      </span>
+    </div>
+  </div>
 </div>

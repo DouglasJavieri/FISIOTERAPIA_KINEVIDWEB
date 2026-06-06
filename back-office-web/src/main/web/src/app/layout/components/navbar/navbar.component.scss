@@ -1,16 +1,4 @@
-// ── Paleta navbar (colores teal claros) ───────────────────────────
-$nav-bg-from:    #EAF1FF;   // Azul muy claro
-$nav-bg-mid:     #DFE8F6;   // Azul claro medio
-$nav-bg-to:      #D4DFF0;   // Azul claro
-
-$nav-border:     rgba(40, 167, 181, 0.3);
-$nav-glow:       rgba(40, 167, 181, 0.15);
-
-$nav-text:       #0B1C30;   // Texto oscuro principal
-$nav-muted:      #4a7c8a;   // Teal medio
-$nav-hover-bg:   rgba(40, 167, 181, 0.08);
-$nav-accent:     #28A7B5;   // Teal acento
-$nav-accent-dim: rgba(40, 167, 181, 0.2);
+@import '../../../../../src/styles/variables.scss';
 
 // ── Contenedor principal ───────────────────────────────────────────
 .navbar {
