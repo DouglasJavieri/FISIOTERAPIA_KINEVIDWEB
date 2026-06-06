@@ -72,10 +72,10 @@ $nav-accent-dim: rgba(40, 167, 181, 0.2);
   gap: 10px;
 }
 
-.navbar__brand-icon {
-  font-size: 22px;
-  color: $nav-accent;
-  animation: iconPulse 3s ease-in-out infinite;
+.navbar__brand-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 @keyframes iconPulse {
@@ -191,11 +191,11 @@ $nav-accent-dim: rgba(40, 167, 181, 0.2);
   right: 0;
   top: calc(100% + 10px);
   width: 280px;
-  background: linear-gradient(160deg, #f3e5f5 0%, #e1bee7 100%);
+  background: #ffffff;
   border: 1px solid rgba(40, 167, 181, 0.30);
   border-radius: 14px;
   box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.60),
+    0 10px 25px rgba(0, 0, 0, 0.15),
     0 0 20px rgba(40, 167, 181, 0.08);
   overflow: hidden;
   animation: dropdownIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -237,13 +237,13 @@ $nav-accent-dim: rgba(40, 167, 181, 0.2);
   border: none;
   cursor: pointer;
   font-size: 14px;
-  color: rgba(245, 208, 232, 0.80);
+  color: #333333;
   transition: background 0.18s ease, color 0.18s ease;
 
   &:hover {
-    background: rgba(40, 167, 181, 0.10);
-    color: $nav-text;
-    .material-icons { color: $nav-accent; }
+    background: $nav-accent;
+    color: #ffffff;
+    .material-icons { color: #ffffff; }
   }
 
   .material-icons {
@@ -260,12 +260,12 @@ $nav-accent-dim: rgba(40, 167, 181, 0.2);
 }
 
 .navbar__dropdown-item--danger {
-  color: $nav-muted;
+  color: #333333;
   .material-icons { color: $nav-muted; }
 
   &:hover {
-    background: rgba(255, 100, 80, 0.10);
-    color: #ff5252;
-    .material-icons { color: #ff5252; }
+    background: $nav-accent;
+    color: #ffffff;
+    .material-icons { color: #ffffff; }
   }
 }

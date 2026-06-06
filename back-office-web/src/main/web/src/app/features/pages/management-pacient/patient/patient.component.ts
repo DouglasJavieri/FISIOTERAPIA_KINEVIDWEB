@@ -118,6 +118,7 @@ export class PatientComponent implements OnInit {
         item.maternalSurname ? ' ' + item.maternalSurname : ''
       }`,
       genderLabel: genderOptions.find(g => g.value === item.gender)?.label ?? item.gender,
+      statusLabel: patientStatusFilterOptions.find(s => s.value === item.status)?.label ?? item.status,
       phone: item.phone ?? '—',
     }));
 
