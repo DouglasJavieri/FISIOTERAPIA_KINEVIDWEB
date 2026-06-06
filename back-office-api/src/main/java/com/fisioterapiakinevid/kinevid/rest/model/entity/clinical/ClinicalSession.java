@@ -83,5 +83,9 @@ public class ClinicalSession extends AuditableEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "session_status", length = 30, nullable = false)
     private SessionStatus sessionStatus;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
+    private java.util.Set<SessionService> services = new java.util.LinkedHashSet<>();
 }
 

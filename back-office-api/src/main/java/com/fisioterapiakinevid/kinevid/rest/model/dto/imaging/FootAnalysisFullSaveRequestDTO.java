@@ -52,5 +52,4 @@ public class FootAnalysisFullSaveRequestDTO {
 
     // --- Huella Plantar (FootprintAnalysis) ---
     private String footprintType;
-    private String footprintNotes;
 }

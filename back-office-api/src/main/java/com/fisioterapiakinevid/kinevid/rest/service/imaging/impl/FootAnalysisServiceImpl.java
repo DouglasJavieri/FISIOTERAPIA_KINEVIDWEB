@@ -104,7 +104,6 @@ public class FootAnalysisServiceImpl implements FootAnalysisService {
                 footprint.setFootAnalysis(footAnalysis);
                 footprint.setDeleted(false);
                 footprint.setFootprintType(parseFootprintType(request.getFootprintType()));
-                footprint.setNotes(trimOrNull(request.getFootprintNotes()));
                 footprintRepository.save(footprint);
             }
 

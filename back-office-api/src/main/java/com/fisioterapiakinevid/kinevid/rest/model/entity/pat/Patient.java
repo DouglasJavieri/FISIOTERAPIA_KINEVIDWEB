@@ -89,6 +89,11 @@ public class Patient extends AuditableEntity implements Serializable {
     @Column(name = "patient_status", length = 30, nullable = false)
     private PatientStatus status;
 
+    public int getAge() {
+        if (birthDate == null) return 0;
+        return java.time.Period.between(birthDate, java.time.LocalDate.now()).getYears();
+    }
+
     public String getFullName() {
         StringBuilder sb = new StringBuilder();
         if (firstName != null) sb.append(firstName);

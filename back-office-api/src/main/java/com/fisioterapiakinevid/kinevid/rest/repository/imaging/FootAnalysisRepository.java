@@ -27,6 +27,8 @@ public interface FootAnalysisRepository extends JpaRepository<FootAnalysis, Long
            "JOIN FETCH cs.episode e " +
            "JOIN FETCH e.patient " +
            "JOIN FETCH cs.employee " +
+           "LEFT JOIN FETCH cs.services s " +
+           "LEFT JOIN FETCH s.medicalService " +
            "LEFT JOIN FETCH fa.biomechanicalAnalysis " +
            "LEFT JOIN FETCH fa.footprintAnalysis " +
            "LEFT JOIN FETCH fa.photos " +

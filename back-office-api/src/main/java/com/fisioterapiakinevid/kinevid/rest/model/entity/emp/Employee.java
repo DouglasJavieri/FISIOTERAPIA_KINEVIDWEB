@@ -80,6 +80,20 @@ public class Employee extends AuditableEntity implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
     private User user;
+
+    public String getFullName() {
+        StringBuilder sb = new StringBuilder();
+        if (firstName != null) sb.append(firstName);
+        if (paternalSurname != null) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(paternalSurname);
+        }
+        if (maternalSurname != null) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(maternalSurname);
+        }
+        return sb.toString();
+    }
 }
 
 

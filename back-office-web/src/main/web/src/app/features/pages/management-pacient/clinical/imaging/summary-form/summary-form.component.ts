@@ -105,8 +105,7 @@ export class SummaryFormComponent implements OnChanges, OnInit {
       if (this.footAnalysis.footprintAnalysis && this.footAnalysis.footprintAnalysis.length > 0) {
         const fp = this.footAnalysis.footprintAnalysis[0]; // Es genérica, tomamos la primera
         this.form.patchValue({
-          footprintType: fp.footprintType,
-          footprintNotes: fp.notes
+          footprintType: fp.footprintType
         });
       }
     }
@@ -151,8 +150,7 @@ export class SummaryFormComponent implements OnChanges, OnInit {
       rightGait:                 new FormControl('NORMAL'),
 
       // Huella Plantar
-      footprintType:            new FormControl(null, [Validators.required]),
-      footprintNotes:           new FormControl('')
+      footprintType:            new FormControl(null, [Validators.required])
     });
   }
 
@@ -202,8 +200,7 @@ export class SummaryFormComponent implements OnChanges, OnInit {
       rightGait:                formVal.rightGait,
 
       // Huella Plantar
-      footprintType: formVal.footprintType,
-      footprintNotes: formVal.footprintNotes
+      footprintType: formVal.footprintType
     };
 
     this.footAnalysisService.saveFull(request).subscribe({

@@ -6,6 +6,24 @@
 
   <form [formGroup]="form" class="summary-form">
 
+    <!-- 0. Antecedentes y Evaluación -->
+    <mat-card class="section-card">
+      <div class="card-header-styled">
+        <span class="header-text">Antecedentes y Evaluación</span>
+      </div>
+      <mat-card-content fxLayout="column" fxLayoutGap="16px">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Antecedentes Relevantes</mat-label>
+          <textarea matInput formControlName="relevantBackground" rows="3"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Evaluación Kinesiológica</mat-label>
+          <textarea matInput formControlName="kinesiologicalEvaluation" rows="3"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
     <!-- 1. Análisis Biomecánico -->
     <mat-card class="section-card">
       <div class="card-header-styled">
@@ -16,9 +34,7 @@
         <!-- LADO IZQUIERDO -->
         <div class="foot-section">
           <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
-            <mat-icon color="primary">west</mat-icon>
-            <h4 class="foot-title" style="margin: 0;">PIE IZQUIERDO</h4>
-            <span class="side-badge">LEFT</span>
+            <h4 style="margin: 0; font-weight: bold">PIE IZQUIERDO</h4>
           </div>
 
           <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px" style="margin-top: 16px;">
@@ -58,9 +74,7 @@
         <!-- LADO DERECHO -->
         <div class="foot-section">
           <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
-            <mat-icon color="primary">east</mat-icon>
-            <h4 class="foot-title" style="margin: 0;">PIE DERECHO</h4>
-            <span class="side-badge">RIGHT</span>
+            <h4 style="margin: 0; font-weight: bold">PIE DERECHO</h4>
           </div>
 
           <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px" style="margin-top: 16px;">
@@ -120,22 +134,14 @@
         <p class="section-instruction">Valoración de Hernández Corvo (Índice de Staheli):</p>
 
         <mat-radio-group formControlName="footprintType" class="footprint-grid-v2">
-          <mat-radio-button value="INDEX_NORMAL">Índice Normal</mat-radio-button>
-          <mat-radio-button value="INDEX_FLAT_FOOT">Índice Pie Plano</mat-radio-button>
-          <mat-radio-button value="INDEX_CAVUS_FOOT">Índice Pie Cavo</mat-radio-button>
-          <mat-radio-button value="FLAT_FOOT">Pie Plano</mat-radio-button>
-          <mat-radio-button value="FLAT_NORMAL">Pie Plano-Normal</mat-radio-button>
-          <mat-radio-button value="NORMAL">Pie Normal</mat-radio-button>
-          <mat-radio-button value="NORMAL_CAVUS">Pie Normal-Cavo</mat-radio-button>
-          <mat-radio-button value="CAVUS_FOOT">Pie Cavo</mat-radio-button>
-          <mat-radio-button value="STRONG_CAVUS">Pie Cavo Fuerte</mat-radio-button>
-          <mat-radio-button value="EXTREME_CAVUS">Pie Cavo Extremo</mat-radio-button>
+          <mat-radio-button value="FLAT_FOOT">0 - 34% Pie Plano</mat-radio-button>
+          <mat-radio-button value="FLAT_NORMAL">35 - 39% Pie Plano-Normal</mat-radio-button>
+          <mat-radio-button value="NORMAL">40 - 54% Pie Normal</mat-radio-button>
+          <mat-radio-button value="NORMAL_CAVUS">55 - 59% Pie Normal-Cavo</mat-radio-button>
+          <mat-radio-button value="CAVUS_FOOT">60 - 74% Pie Cavo</mat-radio-button>
+          <mat-radio-button value="STRONG_CAVUS">75 - 84% Pie Cavo Fuerte</mat-radio-button>
+          <mat-radio-button value="EXTREME_CAVUS">85 - 100% Pie Cavo Extremo</mat-radio-button>
         </mat-radio-group>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Notas adicionales de la huella</mat-label>
-          <textarea matInput formControlName="footprintNotes" rows="2"></textarea>
-        </mat-form-field>
       </mat-card-content>
     </mat-card>
 
@@ -214,18 +220,16 @@
     </button>
 
     <div fxLayout="row" fxLayoutGap="12px">
-      <button mat-stroked-button color="accent" class="big-btn"
+      <button mat-stroked-button color="accent"
               [disabled]="!footAnalysis?.id || isSaving"
               (click)="downloadReport()">
-        <mat-icon>picture_as_pdf</mat-icon>
-        DESCARGAR REPORTE
+        Descargar Reporte
       </button>
 
-      <button mat-raised-button color="primary" class="big-btn"
+      <button mat-raised-button color="primary"
               [disabled]="form.invalid || isSaving"
               (click)="saveAll()">
-        <mat-icon>cloud_upload</mat-icon>
-        GUARDAR ANÁLISIS COMPLETO
+        Guardar Análisis
       </button>
     </div>
   </div>
