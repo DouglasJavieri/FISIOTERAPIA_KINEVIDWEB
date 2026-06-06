@@ -10,6 +10,7 @@ import { RoleRequest }              from '../../../../../core/models/roles/role.
 import { PermissionService }        from '../../../../../core/services/permission/permission.service';
 import { RolePermissionService }    from '../../../../../core/services/role-permission/role-permission.service';
 import { PermissionPageResponse }   from '../../../../../core/models/permission/permission.interface';
+import { translatePermission }       from '../../../../../shared/utils/permission-i18n.util';
 import { noWhitespaceValidator }    from '../../../../../shared/utils/validators.util';
 
 @Component({
@@ -55,7 +56,10 @@ export class AddRoleComponent implements OnInit {
     this.permissionsLoading = true;
     this.permissionService.getAllForSelect().subscribe({
       next: (list) => {
-        this.permissionList = list;
+        this.permissionList = list.map(p => ({
+          ...p,
+          name: translatePermission(p.name)
+        }));
         this.permissionsLoading = false;
       },
       error: () => {

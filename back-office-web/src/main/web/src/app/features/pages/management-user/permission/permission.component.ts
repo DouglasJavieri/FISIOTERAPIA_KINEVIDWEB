@@ -20,6 +20,7 @@ import {
   permissionStatusOptions,
   permissionTableColumns,
 } from './permission.util';
+import { translatePermission }         from '../../../../shared/utils/permission-i18n.util';
 import { PermissionPageResponse }        from '../../../../core/models/permission/permission.interface';
 import { AddPermissionComponent }        from './add-permission/add-permission.component';
 import { UpdatePermissionComponent }     from './update-permission/update-permission.component';
@@ -107,6 +108,7 @@ export class PermissionComponent implements OnInit {
   itemPermissionFormatterFn = (content: PermissionPageResponse[]): PermissionPageResponse[] =>
     content.map(item => ({
       ...item,
+      name: translatePermission(item.name),
       statusLabel: item.status === 'ACTIVO' ? 'ACTIVO' : 'INACTIVO',
     }));
 

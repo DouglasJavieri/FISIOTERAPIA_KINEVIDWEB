@@ -10,6 +10,7 @@ import { RolePageResponse, RoleRequest } from '../../../../../core/models/roles/
 import { PermissionService }        from '../../../../../core/services/permission/permission.service';
 import { RolePermissionService }    from '../../../../../core/services/role-permission/role-permission.service';
 import { PermissionPageResponse }   from '../../../../../core/models/permission/permission.interface';
+import { translatePermission }       from '../../../../../shared/utils/permission-i18n.util';
 import { noWhitespaceValidator }    from '../../../../../shared/utils/validators.util';
 
 export interface UpdateRoleDialogData {
@@ -73,7 +74,10 @@ export class UpdateRoleComponent implements OnInit {
       rolePermissions: this.rolePermissionService.getPermissionsByRoleId(roleId),
     }).subscribe({
       next: ({ allPermissions, rolePermissions }) => {
-        this.permissionList       = allPermissions;
+        this.permissionList       = allPermissions.map(p => ({
+          ...p,
+          name: translatePermission(p.name)
+        }));
         this.currentPermissionIds = rolePermissions.map(p => p.id);
         this.form.get('permissions')?.setValue(this.currentPermissionIds);
         this.permissionsLoading = false;
