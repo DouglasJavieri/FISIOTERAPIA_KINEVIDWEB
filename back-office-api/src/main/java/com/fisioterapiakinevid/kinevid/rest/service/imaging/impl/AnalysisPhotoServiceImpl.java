@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Implementación del servicio de fotos del análisis de pisada.
@@ -57,20 +58,55 @@ public class AnalysisPhotoServiceImpl implements AnalysisPhotoService {
             // Validar rango de orden (1-6)
             validatePhotoOrder(photoOrder);
 
-            // Validar límite de fotos
-            long currentCount = photoRepository.countByFootAnalysisIdAndDeletedFalse(footAnalysisId);
-            if (currentCount >= MAX_PHOTOS_PER_ANALYSIS) {
-                throw new OperationException(
-                        "El análisis ya tiene el máximo de " + MAX_PHOTOS_PER_ANALYSIS + " fotos permitidas.");
-            }
-
             // Validar que el número de orden no está ocupado
-            if (photoRepository.existsByFootAnalysisIdAndPhotoOrderAndDeletedFalse(footAnalysisId, photoOrder)) {
-                throw new OperationException(
-                        "Ya existe una foto en la posición " + photoOrder + " para este análisis. " +
-                        "Elimine la foto existente antes de subir una nueva en esa posición.");
+            Optional<AnalysisPhoto> existingPhoto = photoRepository.findAllByFootAnalysisId(footAnalysisId).stream()
+                    .filter(p -> p.getPhotoOrder().equals(photoOrder))
+                    .findFirst();
+
+            if (existingPhoto.isEmpty()) {
+                // Si no está en las activas, buscar incluso en las borradas lógicamente para reutilizar el registro
+                List<AnalysisPhoto> allPhotos = photoRepository.findAll(); // O crear un método más eficiente
+                existingPhoto = allPhotos.stream()
+                        .filter(p -> p.getFootAnalysis().getId().equals(footAnalysisId) && p.getPhotoOrder().equals(photoOrder))
+                        .findFirst();
             }
 
+            // Validar límite de fotos (solo si no es actualización)
+            if (existingPhoto.isEmpty()) {
+                long currentCount = photoRepository.countByFootAnalysisIdAndDeletedFalse(footAnalysisId);
+                if (currentCount >= MAX_PHOTOS_PER_ANALYSIS) {
+                    throw new OperationException(
+                            "El análisis ya tiene el máximo de " + MAX_PHOTOS_PER_ANALYSIS + " fotos permitidas.");
+                }
+            }
+
+            if (existingPhoto.isPresent()) {
+                AnalysisPhoto photoToUpdate = existingPhoto.get();
+                log.info("Actualizando foto existente en posición {} para análisis ID={}", photoOrder, footAnalysisId);
+                
+                // Eliminar foto anterior de Cloudinary (si existe)
+                if (photoToUpdate.getStorageFileId() != null) {
+                    try {
+                        storageService.delete(photoToUpdate.getStorageFileId());
+                    } catch (Exception e) {
+                        log.warn("No se pudo eliminar foto antigua de Cloudinary: {}", photoToUpdate.getStorageFileId());
+                    }
+                }
+                
+                // Subir nueva imagen
+                String folderPath = buildFolderPath(footAnalysis);
+                StorageResult storageResult = storageService.upload(file, folderPath);
+                
+                // Actualizar registro
+                photoToUpdate.setPhotoUrl(storageResult.getUrl());
+                photoToUpdate.setStorageFileId(storageResult.getFileId());
+                photoToUpdate.setDeleted(false);
+                
+                photoRepository.save(photoToUpdate);
+                return mapToResponseDto(photoToUpdate);
+            }
+
+            // Si no existe, proceder con la creación normal
             // Subir imagen al proveedor de almacenamiento
             String folderPath = buildFolderPath(footAnalysis);
             StorageResult storageResult = storageService.upload(file, folderPath);
@@ -82,7 +118,7 @@ public class AnalysisPhotoServiceImpl implements AnalysisPhotoService {
                     .photoUrl(storageResult.getUrl())
                     .storageFileId(storageResult.getFileId())
                     .annotationsJson(null)
-                    .isSelected(false)
+                    .isSelected(true) // Seleccionar por defecto al subir
                     .build();
 
             photoRepository.save(photo);

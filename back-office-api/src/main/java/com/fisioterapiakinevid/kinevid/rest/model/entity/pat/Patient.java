@@ -88,6 +88,20 @@ public class Patient extends AuditableEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "patient_status", length = 30, nullable = false)
     private PatientStatus status;
+
+    public String getFullName() {
+        StringBuilder sb = new StringBuilder();
+        if (firstName != null) sb.append(firstName);
+        if (paternalSurname != null) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(paternalSurname);
+        }
+        if (maternalSurname != null) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(maternalSurname);
+        }
+        return sb.toString();
+    }
 }
 
 

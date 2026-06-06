@@ -27,6 +27,9 @@ public interface FootAnalysisRepository extends JpaRepository<FootAnalysis, Long
            "JOIN FETCH cs.episode e " +
            "JOIN FETCH e.patient " +
            "JOIN FETCH cs.employee " +
+           "LEFT JOIN FETCH fa.biomechanicalAnalysis " +
+           "LEFT JOIN FETCH fa.footprintAnalysis " +
+           "LEFT JOIN FETCH fa.photos " +
            "WHERE fa.id = :id AND fa.deleted = false")
     Optional<FootAnalysis> findByIdWithRelations(@Param("id") Long id);
 

@@ -49,4 +49,15 @@ export class FootAnalysisService {
     return this.http.delete<ApiResponse<boolean>>(url)
       .pipe(map(resp => mapResponseApi(url, resp)));
   }
+
+  saveFull(body: any): Observable<FootAnalysisResponse> {
+    const url = this.base + '/save-full';
+    return this.http.post<ApiResponse<FootAnalysisResponse>>(url, body)
+      .pipe(map(resp => mapResponseApi(url, resp)));
+  }
+
+  downloadReport(id: number): Observable<Blob> {
+    const url = this.base + `/${id}/report/download`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
 }

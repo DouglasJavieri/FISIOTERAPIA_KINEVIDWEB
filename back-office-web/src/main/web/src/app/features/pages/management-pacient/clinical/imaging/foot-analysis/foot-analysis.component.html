@@ -40,6 +40,7 @@
         <!-- PASO 3: Evaluación Final y Guardado -->
         <mat-step label="Evaluación e Informe">
           <knv-summary-form
+            [sessionId]="sessionId"
             [footAnalysis]="footAnalysis"
             [tempPhotos]="tempPhotos"
             [capturedAngles]="finalAngles"

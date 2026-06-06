@@ -3,12 +3,17 @@ package com.fisioterapiakinevid.kinevid.rest.controller.imaging;
 import com.fisioterapiakinevid.kinevid.rest.constants.ApiConstants;
 import com.fisioterapiakinevid.kinevid.rest.exception.ApiResponseException;
 import com.fisioterapiakinevid.kinevid.rest.exception.OperationException;
+import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisFullSaveRequestDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisRequestDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisResponseDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisUpdateRequestDTO;
 import com.fisioterapiakinevid.kinevid.rest.response.ResponseBody;
 import com.fisioterapiakinevid.kinevid.rest.service.imaging.FootAnalysisService;
+import com.fisioterapiakinevid.kinevid.rest.service.reporting.ReportService;
 import com.fisioterapiakinevid.kinevid.rest.util.ApiUtil;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,6 +44,58 @@ import static org.springframework.http.ResponseEntity.ok;
 public class FootAnalysisController {
 
     private final FootAnalysisService footAnalysisService;
+    private final ReportService reportService;
+
+
+    @GetMapping("/{id}/report/download")
+    @PreAuthorize("hasAuthority('VIEW_FOOT_ANALYSIS')")
+    @Operation(summary = "Descargar reporte PDF del análisis",
+            description = "Genera un reporte PDF bajo demanda con los datos actuales del análisis e imágenes. Requiere permiso VIEW_FOOT_ANALYSIS.",
+            tags = {"foot-analysis"},
+            security = @SecurityRequirement(name = "bearerToken"))
+    public ResponseEntity<Resource> downloadReport(@PathVariable Long id) {
+        try {
+            byte[] pdfBytes = reportService.generateFootAnalysisReport(id);
+            ByteArrayResource resource = new ByteArrayResource(pdfBytes);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Reporte_Analisis_Pisada_" + id + ".pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .contentLength(pdfBytes.length)
+                    .body(resource);
+        } catch (OperationException e) {
+            log.error("Error al generar reporte para descarga ID={}: {}", id, e.getMessage());
+            throw ApiResponseException.badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado al descargar reporte ID={}", id, e);
+            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("/save-full")
+    @PreAuthorize("hasAuthority('UPDATE_FOOT_ANALYSIS')")
+    @Operation(summary = "Guardado integral del análisis de pisada",
+            description = "Realiza un guardado completo (Upsert) de datos generales, biomecánica y huella. Requiere permiso UPDATE_FOOT_ANALYSIS.",
+            tags = {"foot-analysis"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Análisis guardado exitosamente"),
+                    @ApiResponse(responseCode = "400", description = "Error en los datos o sesión no OPEN")
+            }, security = @SecurityRequirement(name = "bearerToken"))
+    public ResponseEntity<ResponseBody<FootAnalysisResponseDTO>> saveFullFootAnalysis(
+            @Valid @RequestBody FootAnalysisFullSaveRequestDTO request) {
+        log.info("Recibida solicitud de guardado integral para sesión ID: {}", request.getClinicalSessionId());
+        try {
+            FootAnalysisResponseDTO result = footAnalysisService.saveFullFootAnalysis(request);
+            return ok(ApiUtil.buildSuccessResponse(result, "Análisis integral guardado exitosamente."));
+        } catch (OperationException e) {
+            log.error("Error en guardado integral: {}", e.getMessage());
+            throw ApiResponseException.badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado en guardado integral", e);
+            throw ApiResponseException.serverError(ApiConstants.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
     @PostMapping("/create")

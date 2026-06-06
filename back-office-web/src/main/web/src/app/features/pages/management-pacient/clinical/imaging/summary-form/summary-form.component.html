@@ -6,46 +6,107 @@
 
   <form [formGroup]="form" class="summary-form">
 
-    <!-- 1. Análisis Biomecánico Simplificado -->
+    <!-- 1. Análisis Biomecánico -->
     <mat-card class="section-card">
       <div class="card-header-styled">
         <span class="header-text">Análisis Biomecánico</span>
       </div>
-      <mat-card-content fxLayout="column" fxLayoutGap="16px">
+      <mat-card-content fxLayout="column" fxLayoutGap="24px">
 
-        <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
-          <mat-form-field appearance="outline" fxFlex>
-            <mat-label>Desgaste de Calzado</mat-label>
-            <textarea matInput formControlName="shoeWear" rows="2" placeholder="Observaciones del desgaste..."></textarea>
-          </mat-form-field>
+        <!-- LADO IZQUIERDO -->
+        <div class="foot-section">
+          <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
+            <mat-icon color="primary">west</mat-icon>
+            <h4 class="foot-title" style="margin: 0;">PIE IZQUIERDO</h4>
+            <span class="side-badge">LEFT</span>
+          </div>
 
-          <mat-form-field appearance="outline" fxFlex>
-            <mat-label>Palpación Tibial</mat-label>
-            <textarea matInput formControlName="tibiaPalpation" rows="2" placeholder="Hallazgos en palpación..."></textarea>
-          </mat-form-field>
+          <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px" style="margin-top: 16px;">
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Regla Maleolo Tibial</mat-label>
+              <mat-select formControlName="leftTibialMalleolarRule">
+                <mat-option value="NORMAL">Normal</mat-option>
+                <mat-option value="VARUS">Varo</mat-option>
+                <mat-option value="VALGUS">Valgo</mat-option>
+                <mat-option value="OTHER">Otro</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Tipo de Marcha</mat-label>
+              <mat-select formControlName="leftGait">
+                <mat-option value="NORMAL">Normal</mat-option>
+                <mat-option value="PRONATOR">Pronador</mat-option>
+                <mat-option value="SUPINATOR">Supinador</mat-option>
+                <mat-option value="MIXED">Mixto</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Desgaste de Calzado (Izquierdo)</mat-label>
+              <textarea matInput formControlName="leftShoeWear" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Palpación Tibial (Izquierdo)</mat-label>
+              <textarea matInput formControlName="leftTibiaPalpation" rows="2"></textarea>
+            </mat-form-field>
+          </div>
         </div>
 
+        <mat-divider></mat-divider>
+
+        <!-- LADO DERECHO -->
+        <div class="foot-section">
+          <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="12px">
+            <mat-icon color="primary">east</mat-icon>
+            <h4 class="foot-title" style="margin: 0;">PIE DERECHO</h4>
+            <span class="side-badge">RIGHT</span>
+          </div>
+
+          <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px" style="margin-top: 16px;">
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Regla Maleolo Tibial</mat-label>
+              <mat-select formControlName="rightTibialMalleolarRule">
+                <mat-option value="NORMAL">Normal</mat-option>
+                <mat-option value="VARUS">Varo</mat-option>
+                <mat-option value="VALGUS">Valgo</mat-option>
+                <mat-option value="OTHER">Otro</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Tipo de Marcha</mat-label>
+              <mat-select formControlName="rightGait">
+                <mat-option value="NORMAL">Normal</mat-option>
+                <mat-option value="PRONATOR">Pronador</mat-option>
+                <mat-option value="SUPINATOR">Supinador</mat-option>
+                <mat-option value="MIXED">Mixto</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Desgaste de Calzado (Derecho)</mat-label>
+              <textarea matInput formControlName="rightShoeWear" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex>
+              <mat-label>Palpación Tibial (Derecho)</mat-label>
+              <textarea matInput formControlName="rightTibiaPalpation" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Mediciones Clínicas -->
         <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
           <mat-form-field appearance="outline" fxFlex>
-            <mat-label>Tipo de Marcha</mat-label>
-            <mat-select formControlName="gait">
-              <mat-option value="NORMAL">Normal</mat-option>
-              <mat-option value="PRONATOR">Pronador</mat-option>
-              <mat-option value="SUPINATOR">Supinador</mat-option>
-              <mat-option value="MIXED">Mixto</mat-option>
-            </mat-select>
+            <mat-label>Dist. Intermaleolar (cm)</mat-label>
+            <input matInput type="number" formControlName="distanceIntermaleolar" step="0.01">
           </mat-form-field>
-
-          <div fxFlex fxLayout="row" fxLayoutGap="10px" fxLayout.xs="column">
-             <mat-form-field appearance="outline" fxFlex>
-                <mat-label>Dist. Intermaleolar (cm)</mat-label>
-                <input matInput type="number" formControlName="distanceIntermaleolar" step="0.01">
-             </mat-form-field>
-             <mat-form-field appearance="outline" fxFlex>
-                <mat-label>Dist. Intercondílea (cm)</mat-label>
-                <input matInput type="number" formControlName="distanceIntercondylar" step="0.01">
-             </mat-form-field>
-          </div>
+          <mat-form-field appearance="outline" fxFlex>
+            <mat-label>Dist. Intercondílea (cm)</mat-label>
+            <input matInput type="number" formControlName="distanceIntercondylar" step="0.01">
+          </mat-form-field>
         </div>
       </mat-card-content>
     </mat-card>
@@ -59,16 +120,16 @@
         <p class="section-instruction">Valoración de Hernández Corvo (Índice de Staheli):</p>
 
         <mat-radio-group formControlName="footprintType" class="footprint-grid-v2">
-          <mat-radio-button value="ÍNDICE_NORMAL">Índice Normal</mat-radio-button>
-          <mat-radio-button value="ÍNDICE_PIE_PLANO">Índice Pie Plano</mat-radio-button>
-          <mat-radio-button value="ÍNDICE_PIE_CAVO">Índice Pie Cavo</mat-radio-button>
-          <mat-radio-button value="PIE_PLANO">Pie Plano</mat-radio-button>
-          <mat-radio-button value="PIE_PLANO_NORMAL">Pie Plano-Normal</mat-radio-button>
-          <mat-radio-button value="PIE_NORMAL">Pie Normal</mat-radio-button>
-          <mat-radio-button value="PIE_NORMAL_CAVO">Pie Normal-Cavo</mat-radio-button>
-          <mat-radio-button value="PIE_CAVO">Pie Cavo</mat-radio-button>
-          <mat-radio-button value="PIE_CAVO_FUERTE">Pie Cavo Fuerte</mat-radio-button>
-          <mat-radio-button value="PIE_CAVO_EXTREMO">Pie Cavo Extremo</mat-radio-button>
+          <mat-radio-button value="INDEX_NORMAL">Índice Normal</mat-radio-button>
+          <mat-radio-button value="INDEX_FLAT_FOOT">Índice Pie Plano</mat-radio-button>
+          <mat-radio-button value="INDEX_CAVUS_FOOT">Índice Pie Cavo</mat-radio-button>
+          <mat-radio-button value="FLAT_FOOT">Pie Plano</mat-radio-button>
+          <mat-radio-button value="FLAT_NORMAL">Pie Plano-Normal</mat-radio-button>
+          <mat-radio-button value="NORMAL">Pie Normal</mat-radio-button>
+          <mat-radio-button value="NORMAL_CAVUS">Pie Normal-Cavo</mat-radio-button>
+          <mat-radio-button value="CAVUS_FOOT">Pie Cavo</mat-radio-button>
+          <mat-radio-button value="STRONG_CAVUS">Pie Cavo Fuerte</mat-radio-button>
+          <mat-radio-button value="EXTREME_CAVUS">Pie Cavo Extremo</mat-radio-button>
         </mat-radio-group>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -153,6 +214,13 @@
     </button>
 
     <div fxLayout="row" fxLayoutGap="12px">
+      <button mat-stroked-button color="accent" class="big-btn"
+              [disabled]="!footAnalysis?.id || isSaving"
+              (click)="downloadReport()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        DESCARGAR REPORTE
+      </button>
+
       <button mat-raised-button color="primary" class="big-btn"
               [disabled]="form.invalid || isSaving"
               (click)="saveAll()">

@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * DTO de respuesta para FootAnalysis.
@@ -53,4 +54,9 @@ public class FootAnalysisResponseDTO {
 
     // — Estado de la sesión (para control de edición en frontend) —
     private String sessionStatus;
+
+    // — Relaciones cargadas (para el guardado integral) —
+    private List<BiomechanicalAnalysisResponseDto> biomechanicalAnalysis;
+    private List<FootprintAnalysisResponseDto> footprintAnalysis;
+    private List<AnalysisPhotoResponseDto> photos;
 }

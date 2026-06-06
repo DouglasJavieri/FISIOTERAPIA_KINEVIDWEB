@@ -1,6 +1,7 @@
 package com.fisioterapiakinevid.kinevid.rest.service.imaging;
 
 import com.fisioterapiakinevid.kinevid.rest.exception.OperationException;
+import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisFullSaveRequestDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisRequestDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisResponseDTO;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.imaging.FootAnalysisUpdateRequestDTO;
@@ -22,4 +23,9 @@ public interface FootAnalysisService {
     FootAnalysisResponseDTO updateFootAnalysis(Long id, FootAnalysisUpdateRequestDTO request) throws OperationException;
 
     void deleteFootAnalysis(Long id) throws OperationException;
+
+    /**
+     * Guarda de forma integral todo el análisis de pisada (Datos + Biomecánica + Huella).
+     */
+    FootAnalysisResponseDTO saveFullFootAnalysis(FootAnalysisFullSaveRequestDTO request) throws OperationException;
 }

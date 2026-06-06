@@ -93,6 +93,11 @@ export interface FootAnalysisResponse {
   angleLeftExternal: number | null;
   angleRightInternal: number | null;
   angleRightExternal: number | null;
+
+  // Relaciones cargadas
+  biomechanicalAnalysis?: BiomechanicalAnalysisResponse[];
+  footprintAnalysis?: FootprintAnalysisResponse[];
+  photos?: AnalysisPhotoResponse[];
 }
 
 export interface FootAnalysisRequest {

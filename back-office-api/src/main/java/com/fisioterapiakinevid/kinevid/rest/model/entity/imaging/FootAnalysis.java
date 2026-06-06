@@ -80,4 +80,16 @@ public class FootAnalysis extends AuditableEntity implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "clinical_session_id", nullable = false)
     private ClinicalSession clinicalSession;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "footAnalysis", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.Set<BiomechanicalAnalysis> biomechanicalAnalysis = new java.util.LinkedHashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "footAnalysis", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.Set<FootprintAnalysis> footprintAnalysis = new java.util.LinkedHashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "footAnalysis", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.Set<AnalysisPhoto> photos = new java.util.LinkedHashSet<>();
 }
