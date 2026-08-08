@@ -1,19 +1,27 @@
+
 @use 'sass:math';
+
 :host {
   display: block;
   margin-bottom: 28px;
 }
+
 .breadcrumbs-card {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 60%, #ce93d8 100%);
+  background: linear-gradient(
+      135deg,
+      #e8f6fc 0%,
+      #c5e9f7 60%,
+      #9ed7ef 100%
+  );
   border-radius: 12px;
   padding: 18px 24px;
-  border-left: 4px solid #9c27b0;
+  border-left: 4px solid #4bb0e4;
   box-shadow:
-    0 2px 8px  rgba(156, 39, 176, 0.15),
-    0 1px 3px  rgba(0, 0, 0, 0.08);
+    0 2px 8px rgba(75, 176, 228, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -32,8 +40,8 @@
 
   &:hover {
     box-shadow:
-      0 5px 16px rgba(156, 39, 176, 0.25),
-      0 2px 6px  rgba(0, 0, 0, 0.10);
+      0 5px 16px rgba(75, 176, 228, 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.10);
   }
 }
 
@@ -41,7 +49,7 @@
   margin: 0;
   font-size: 22px;
   font-weight: 700;
-  color: #4a148c;
+  color: #1479ad;
   letter-spacing: 0.3px;
   line-height: 1.3;
 }
@@ -54,7 +62,7 @@
 }
 
 .bc-link {
-  color: #6a1b9a;
+  color: #2189bd;
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
@@ -62,20 +70,20 @@
   transition: color 0.2s ease, opacity 0.2s ease;
 
   &:hover {
-    color: #4a148c;
+    color: #126b99;
     opacity: 0.8;
     text-decoration: none;
   }
 }
 
 .bc-text {
-  color: #6a1b9a;
+  color: #2189bd;
   font-size: 13px;
   font-weight: 500;
 }
 
 .bc-separator {
-  color: #9c27b0;
+  color: #4bb0e4;
   font-size: 16px;
   width: 16px;
   height: 16px;
@@ -85,10 +93,11 @@
 }
 
 .bc-current {
-  color: #4a148c;
+  color: #1479ad;
   font-size: 13px;
   font-weight: 700;
 }
+
 .bc-image {
   display: none;
 
