@@ -83,11 +83,7 @@
             <artifactId>cloudinary-http45</artifactId>
             <version>1.39.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
 
         <!-- iText 7 PDF Generation -->
         <dependency>
