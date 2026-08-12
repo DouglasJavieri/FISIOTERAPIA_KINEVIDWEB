@@ -5,6 +5,7 @@ export const userActionsCode = {
   updateAction:       'updateAction',
   changeStatusAction: 'changeStatusAction',
   deleteAction:       'deleteAction',
+  report: 'report'
 };
 
 export const userStatusOptions = [

@@ -1,6 +1,7 @@
 package com.fisioterapiakinevid.kinevid.rest.repository.u;
 
 import com.fisioterapiakinevid.kinevid.rest.model.dto.u.EmailResponseDto;
+import com.fisioterapiakinevid.kinevid.rest.model.dto.u.UserResponseDto;
 import com.fisioterapiakinevid.kinevid.rest.model.dto.u.UsernameResponseDto;
 import com.fisioterapiakinevid.kinevid.rest.model.entity.auth.User;
 import org.springframework.data.domain.Page;
@@ -96,5 +97,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "AND rp.deleted = false")
     List<String> findPermissionNamesByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT NEW com.fisioterapiakinevid.kinevid.rest.model.dto.u.UserResponseDto(u) " +
+            "FROM User u " +
+            "WHERE u.deleted = false")
+    List<UserResponseDto> listUserReport();
 }
 

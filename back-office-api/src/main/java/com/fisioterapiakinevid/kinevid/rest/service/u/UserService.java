@@ -9,6 +9,7 @@ import com.fisioterapiakinevid.kinevid.rest.model.enums.auth.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,6 @@ public interface UserService {
     UserResponseDto updateUser(Long id, UserUpdateRequestDTO user) throws OperationException;
     UserResponseDto changeUserStatus(Long id, UserStatus status) throws OperationException;
     void deleteUser(Long id) throws OperationException;
-
+    List<UserResponseDto> getListUserReport() throws OperationException;
 }
 

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -241,6 +242,17 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             log.error("Error inesperado al eliminar usuario con ID {}", id, e);
             throw new OperationException("OcurriÃ³ un error inesperado al eliminar usuario");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> getListUserReport() throws OperationException {
+        try {
+            return userRepository.listUserReport();
+        } catch (Exception e) {
+            log.error("Error al obtener la lista de usuarios para el reporte", e);
+            throw new OperationException("Error al obtener la lista de usuarios para el reporte", e);
         }
     }
 }

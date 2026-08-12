@@ -8,12 +8,8 @@
   <knv-page-layout-content>
     <knv-list name="Usuarios" [withFilter]="false">
       <div class="actions">
-        <button
-          *ngIf="actions['createAction']"
-          mat-menu-item
-          (click)="createUser()">
-          <mat-icon color="primary" class="mr5">add_circle</mat-icon>
-          Agregar Usuario
+        <button class="mc4-column-filter" type="button" mat-icon-button [matMenuTriggerFor]="optionMenuVacancyRequest">
+          <mat-icon>apps</mat-icon>
         </button>
       </div>
       <div fxLayout="row wrap">
@@ -33,4 +29,20 @@
     </knv-list>
   </knv-page-layout-content>
 </knv-page-layout>
+<mat-menu #optionMenuVacancyRequest="matMenu" yPosition="below" xPosition="after">
+  <button
+    *ngIf="actions['createAction']"
+    mat-menu-item
+    (click)="createUser()">
+    <mat-icon color="primary" class="mr5">add_circle</mat-icon>
+    Agregar Usuario
+  </button>
+  <button
+    *ngIf="actions['createAction']"
+    mat-menu-item
+    (click)="report()">
+    <mat-icon color="primary" class="mr5">picture_as_pdf</mat-icon>
+    Exportar PDF
+  </button>
+</mat-menu>
 

@@ -92,6 +92,7 @@ public class DataLoader implements CommandLineRunner {
         String[][] permissionsData = {
                 {"CREATE_USER", "Crear usuario"},
                 {"VIEW_USER", "Ver usuario"},
+                {"REPORT_USER", "Reporte usuario"},
                 {"UPDATE_USER", "Actualizar usuario"},
                 {"DELETE_USER", "Eliminar usuario"},
                 {"LIST_USER", "Listar usuarios"},

@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject } from 'rxjs';
 import * as Notiflix from 'notiflix';
-
+import {saveAs} from "file-saver";
 import { AuthService }   from '../../../../core/services/auth.service';
 import { UserService }   from '../../../../core/services/user/user.service';
 import { AppPermission } from '../../../../core/models/auth.model';
@@ -24,6 +24,8 @@ import { UserPageResponse }      from '../../../../core/models/user/user.interfa
 import { AddUserComponent }      from './add-user/add-user.component';
 import { UpdateUserComponent }   from './update-user/update-user.component';
 import { buildRightDialogConfig } from '../../../../shared/utils/dialog.util';
+import {ReportService} from "../../../../core/services/report/report.service";
+import {fileUtil} from "../../../../core/services/util/file.util";
 
 @Component({
   selector: 'knv-user',
@@ -40,11 +42,14 @@ export class UserComponent implements OnInit {
   actions: { [key: string]: boolean } = {};
   form!: FormGroup;
   statusOptions = userStatusOptions;
+  document: any;
+
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private matDialog: MatDialog,
+    private reportService: ReportService,
   ) {}
 
   ngOnInit(): void {
@@ -111,6 +116,30 @@ export class UserComponent implements OnInit {
     if (actionCode === userActionsCode.changeStatusAction) this.changeUserStatus(item);
     if (actionCode === userActionsCode.deleteAction)       this.deleteUser(item);
   };
+
+  report() {
+    let titleReport: string = `Reporte usuario`;
+
+
+    this.reportService.reportSheetPayrollPdf().subscribe({
+      next: (response) => {
+        Notiflix.Loading.remove();
+        if (response) {
+          this.document = response;
+          const arrayBytes: Uint8Array = fileUtil.codificarArrayBytes(this.document.body);
+          const blob = new Blob([arrayBytes.buffer], { type: this.document.body.tipoMime });
+          saveAs(blob, `${titleReport}.pdf`);
+
+        }
+      },
+      error: (err) => {
+        Notiflix.Loading.remove();
+        console.error('Error al generar el PDF:', err);
+      }
+    });
+
+
+  }
 
   createUser(): void {
     const ref = this.matDialog.open(AddUserComponent, buildRightDialogConfig(null));
